@@ -3942,8 +3942,9 @@ export interface ViralVideo {
 
 const VIRAL_VIDEOS_DB_FILE = path.join(process.cwd(), 'scraped_viral_videos_db.json');
 
-// High-quality Initial Seed of Trending Internet Videos with Verified Embeds & Thumbnails
+// High-quality Initial Seed of Trending Internet Videos spanning 24h, 48h, 7d, and Classic Vault
 const INITIAL_SEED_VIDEOS: ViralVideo[] = [
+  // --- TIER 1: LAST 24 HOURS (PAGE 1 - TODAY'S MOST SEEN) ---
   {
     id: 'vid-gemini-robotics-2026',
     title: 'Next-Gen Humanoid Robots Running Multimodal Neural Networks in Real-Time',
@@ -3957,7 +3958,7 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     viewsCount: 4890200,
     likesCount: 234100,
     duration: '04:18',
-    pubDate: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+    pubDate: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
     category: 'Tech',
     tags: ['#Robotics', '#ArtificialIntelligence', '#HumanoidRobot', '#Tech2026', '#ViralTech', '#FutureOfWork'],
     seoKeywords: ['humanoid robot demonstration', 'autonomous robotics 2026', 'multimodal AI robot', 'viral robotics video'],
@@ -3969,58 +3970,6 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     aiTakeaway: 'Demonstrates the paradigm shift from scripted robotic motions to real-time spatial LLM reasoning in physical environments.',
     hindiTitle: 'मानव सदृश रोबोट का रियल-टाइम प्रदर्शन - 2026 की बड़ी तकनीकी छलांग',
     hindiDescription: 'स्वायत्त ह्यूमनॉइड रोबोट्स का वास्तविक समय में जटिल कार्यों को करने का वायरल वीडियो।'
-  },
-  {
-    id: 'vid-james-webb-deep-universe',
-    title: 'James Webb Telescope Captures Cosmic Dawn: Earliest Galaxies Ever Discovered',
-    description: 'Astronomers release stunning 4K deep-field survey capturing gravitational lensing around superclusters, revealing the very first light emitted 13.4 billion years ago.',
-    videoUrl: 'https://www.youtube.com/watch?v=2Tz8N_m7U8E',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/2Tz8N_m7U8E?autoplay=1&rel=0',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
-    source: 'NASA / ESA Science',
-    author: 'Astrophysics Daily',
-    platform: 'youtube',
-    viewsCount: 3720000,
-    likesCount: 310500,
-    duration: '06:42',
-    pubDate: new Date(Date.now() - 8 * 3600 * 1000).toISOString(),
-    category: 'Science',
-    tags: ['#JamesWebb', '#SpaceDiscovery', '#Astronomy', '#Cosmos', '#NASA', '#ScienceViral'],
-    seoKeywords: ['james webb space telescope deep field', 'cosmic dawn galaxy discovery', 'jwst 4k space footage', 'deep space science'],
-    slug: 'james-webb-telescope-cosmic-dawn-earliest-galaxies',
-    metaDescription: 'Stunning 4K footage and gravitational lensing analysis from the James Webb Space Telescope.',
-    sentiment: 'Positive',
-    isViralTrend: true,
-    viralScore: 97,
-    aiTakeaway: 'The newly observed redshift structures challenge previous galaxy formation models, indicating rapid stellar genesis in the early universe.',
-    hindiTitle: 'जेम्स वेब स्पेस टेलीस्कोप ने खींची ब्रह्मांड की सबसे पुरानी आकाशगंगाएं',
-    hindiDescription: '13.4 अरब साल पहले की प्राचीन आकाशगंगाओं का 4K दृश्य।'
-  },
-  {
-    id: 'vid-deepseek-open-source-ai',
-    title: 'Inside the Open-Weights Reasoning AI Revolution: How Deep Models Outperform Giants',
-    description: 'Deep-dive technical breakdown of mixture-of-experts (MoE) reasoning architectures and how open models are decentralizing frontier AI capabilities worldwide.',
-    videoUrl: 'https://www.youtube.com/watch?v=z8XyD_kQZkY',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/z8XyD_kQZkY?autoplay=1&rel=0',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
-    source: 'AI Explained Wire',
-    author: 'Frontier AI Research',
-    platform: 'youtube',
-    viewsCount: 2840000,
-    likesCount: 195000,
-    duration: '11:24',
-    pubDate: new Date(Date.now() - 14 * 3600 * 1000).toISOString(),
-    category: 'Tech',
-    tags: ['#OpenSourceAI', '#MachineLearning', '#ReasoningModels', '#DeepSeek', '#AIRevolution', '#TechTrends'],
-    seoKeywords: ['open source reasoning models', 'mixture of experts architecture', 'ai benchmark comparison', 'viral ai video'],
-    slug: 'open-weights-reasoning-ai-architecture-breakdown',
-    metaDescription: 'Technical analysis of next-generation mixture-of-experts reasoning AI models and open-source benchmarks.',
-    sentiment: 'Analysis',
-    isViralTrend: true,
-    viralScore: 96,
-    aiTakeaway: 'Open-weights reasoning models show compute efficiency gains exceeding 60% compared to traditional dense architectures.',
-    hindiTitle: 'ओपन-सोर्स एआई क्रांति: कैसे नए मॉडल बड़ी कंपनियों को पछाड़ रहे हैं',
-    hindiDescription: 'आर्टिफिशियल इंटेलिजेंस और रीज़निंग मॉडल्स का विस्तृत विश्लेषण।'
   },
   {
     id: 'vid-spacex-starship-catch',
@@ -4035,7 +3984,7 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     viewsCount: 8940000,
     likesCount: 780000,
     duration: '03:15',
-    pubDate: new Date(Date.now() - 22 * 3600 * 1000).toISOString(),
+    pubDate: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
     category: 'Science',
     tags: ['#SpaceX', '#Starship', '#RocketLaunch', '#EngineeringMarvel', '#SpaceFlight', '#ViralVideo'],
     seoKeywords: ['spacex starship booster catch slow motion', 'super heavy chopstick catch footage', 'aerospace engineering viral video'],
@@ -4047,6 +3996,32 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     aiTakeaway: 'Full rocket reusability enables a projected 90% reduction in orbital payload costs over the next decade.',
     hindiTitle: 'स्टारशिप रॉकेट बूस्टर का ऐतिहासिक कैच - 4K स्लो मोशन वीडियो',
     hindiDescription: 'लॉन्च टॉवर द्वारा रॉकेट बूस्टर को सफलतापूर्वक पकड़े जाने का अद्भुत दृश्य।'
+  },
+  {
+    id: 'vid-deepseek-open-source-ai',
+    title: 'Inside the Open-Weights Reasoning AI Revolution: How Deep Models Outperform Giants',
+    description: 'Deep-dive technical breakdown of mixture-of-experts (MoE) reasoning architectures and how open models are decentralizing frontier AI capabilities worldwide.',
+    videoUrl: 'https://www.youtube.com/watch?v=z8XyD_kQZkY',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/z8XyD_kQZkY?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+    source: 'AI Explained Wire',
+    author: 'Frontier AI Research',
+    platform: 'youtube',
+    viewsCount: 3420000,
+    likesCount: 245000,
+    duration: '11:24',
+    pubDate: new Date(Date.now() - 7 * 3600 * 1000).toISOString(),
+    category: 'Tech',
+    tags: ['#OpenSourceAI', '#MachineLearning', '#ReasoningModels', '#DeepSeek', '#AIRevolution', '#TechTrends'],
+    seoKeywords: ['open source reasoning models', 'mixture of experts architecture', 'ai benchmark comparison', 'viral ai video'],
+    slug: 'open-weights-reasoning-ai-architecture-breakdown',
+    metaDescription: 'Technical analysis of next-generation mixture-of-experts reasoning AI models and open-source benchmarks.',
+    sentiment: 'Analysis',
+    isViralTrend: true,
+    viralScore: 97,
+    aiTakeaway: 'Open-weights reasoning models show compute efficiency gains exceeding 60% compared to traditional dense architectures.',
+    hindiTitle: 'ओपन-सोर्स एआई क्रांति: कैसे नए मॉडल बड़ी कंपनियों को पछाड़ रहे हैं',
+    hindiDescription: 'आर्टिफिशियल इंटेलिजेंस और रीज़निंग मॉडल्स का विस्तृत विश्लेषण।'
   },
   {
     id: 'vid-wholesome-golden-retriever-baby',
@@ -4061,7 +4036,7 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     viewsCount: 6540000,
     likesCount: 520000,
     duration: '01:22',
-    pubDate: new Date(Date.now() - 18 * 3600 * 1000).toISOString(),
+    pubDate: new Date(Date.now() - 10 * 3600 * 1000).toISOString(),
     category: 'Humor',
     tags: ['#Wholesome', '#GoldenRetriever', '#CuteAnimals', '#ViralPet', '#Heartwarming', '#TrendingVideo'],
     seoKeywords: ['golden retriever helps baby walk', 'wholesome viral dog video', 'cute animal moments', 'reddit viral clips'],
@@ -4069,11 +4044,91 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     metaDescription: 'Heartwarming viral clip of a patient golden retriever gently supporting a toddler taking their first steps.',
     sentiment: 'Positive',
     isViralTrend: true,
-    viralScore: 95,
+    viralScore: 96,
     aiTakeaway: 'Captures universal human-canine empathy, generating peak engagement and cross-platform sharing.',
     hindiTitle: 'गोल्डन रिट्रीवर ने छोटे बच्चे को चलना सिखाया - दिल छू लेने वाला वीडियो',
     hindiDescription: 'सोशल मीडिया पर करोड़ों लोगों का दिल जीतने वाला प्यारा वीडियो।'
   },
+  {
+    id: 'vid-james-webb-deep-universe',
+    title: 'James Webb Telescope Captures Cosmic Dawn: Earliest Galaxies Ever Discovered',
+    description: 'Astronomers release stunning 4K deep-field survey capturing gravitational lensing around superclusters, revealing the very first light emitted 13.4 billion years ago.',
+    videoUrl: 'https://www.youtube.com/watch?v=2Tz8N_m7U8E',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/2Tz8N_m7U8E?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
+    source: 'NASA / ESA Science',
+    author: 'Astrophysics Daily',
+    platform: 'youtube',
+    viewsCount: 5120000,
+    likesCount: 420000,
+    duration: '06:42',
+    pubDate: new Date(Date.now() - 14 * 3600 * 1000).toISOString(),
+    category: 'Science',
+    tags: ['#JamesWebb', '#SpaceDiscovery', '#Astronomy', '#Cosmos', '#NASA', '#ScienceViral'],
+    seoKeywords: ['james webb space telescope deep field', 'cosmic dawn galaxy discovery', 'jwst 4k space footage', 'deep space science'],
+    slug: 'james-webb-telescope-cosmic-dawn-earliest-galaxies',
+    metaDescription: 'Stunning 4K footage and gravitational lensing analysis from the James Webb Space Telescope.',
+    sentiment: 'Positive',
+    isViralTrend: true,
+    viralScore: 98,
+    aiTakeaway: 'The newly observed redshift structures challenge previous galaxy formation models, indicating rapid stellar genesis in the early universe.',
+    hindiTitle: 'जेम्स वेब स्पेस टेलीस्कोप ने खींची ब्रह्मांड की सबसे पुरानी आकाशगंगाएं',
+    hindiDescription: '13.4 अरब साल पहले की प्राचीन आकाशगंगाओं का 4K दृश्य।'
+  },
+  {
+    id: 'vid-f1-extreme-pitstop-record',
+    title: 'Formula 1 Team Executes World Record 1.78 Second 4-Wheel Pit Stop',
+    description: 'Precision mechanical choreography in 120fps high-speed camera angles showing 22 crew members lifting the car, swapping four tires, and releasing back onto tarmac in under two seconds.',
+    videoUrl: 'https://www.youtube.com/watch?v=7VCYBtx6h4U',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/7VCYBtx6h4U?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80',
+    source: 'SpeedWorld TV',
+    author: 'Motorsport Highlights',
+    platform: 'youtube',
+    viewsCount: 7210000,
+    likesCount: 560000,
+    duration: '01:55',
+    pubDate: new Date(Date.now() - 18 * 3600 * 1000).toISOString(),
+    category: 'Sports',
+    tags: ['#Formula1', '#PitStopRecord', '#Motorsport', '#Speed', '#ExtremeTeamwork', '#ViralSports'],
+    seoKeywords: ['formula 1 world record pit stop 1.78s', 'f1 team pit crew speed slow motion', 'fastest pitstop in motorsport history'],
+    slug: 'formula-1-world-record-pit-stop-speed-breakdown',
+    metaDescription: 'High-speed camera breakdown of the world-record 1.78 second Formula 1 pit stop.',
+    sentiment: 'Positive',
+    isViralTrend: true,
+    viralScore: 95,
+    aiTakeaway: 'Milliseconds were saved through zero-play pneumatic wheel guns and synchronized electronic release signals.',
+    hindiTitle: 'फॉर्मूला 1 में 1.78 सेकंड का वर्ल्ड रिकॉर्ड पिट स्टॉप - तेज रफ्तार का कमाल',
+    hindiDescription: 'पलक झपकते ही 4 पहिए बदलने की अविश्वसनीय गति का वीडियो।'
+  },
+  {
+    id: 'vid-mit-fusion-energy-reactor',
+    title: 'MIT & CFS Magnet Team Achieve Sustained 20-Tesla High-Temperature Superconducting Field',
+    description: 'Electrifying milestone footage inside the compact tokamak testing facility showing super-cooled superconducting electromagnets stabilizing high-density plasma.',
+    videoUrl: 'https://www.youtube.com/watch?v=kX2Zz8d9pWE',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/kX2Zz8d9pWE?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&w=1200&q=80',
+    source: 'MIT Energy Pulse',
+    author: 'Clean Fusion Research',
+    platform: 'youtube',
+    viewsCount: 3950000,
+    likesCount: 310000,
+    duration: '07:15',
+    pubDate: new Date(Date.now() - 21 * 3600 * 1000).toISOString(),
+    category: 'Science',
+    tags: ['#NuclearFusion', '#CleanEnergy', '#MIT', '#Superconductors', '#PhysicsMilestone', '#ViralScience'],
+    seoKeywords: ['mit fusion energy magnet test', '20 tesla magnetic field tokamak', 'commercial nuclear fusion clean energy'],
+    slug: 'mit-sustained-superconducting-magnetic-field-fusion',
+    metaDescription: 'Watch historic footage of the 20-tesla superconducting magnet enabling clean commercial fusion.',
+    sentiment: 'Positive',
+    isViralTrend: true,
+    viralScore: 96,
+    aiTakeaway: 'High-temperature superconductor (HTS) tape reduces required tokamak volume by a factor of 40.',
+    hindiTitle: 'परमाणु संलयन (Fusion) ऊर्जा में बड़ा कदम - 20 टेस्ला सुपरकंडक्टिंग मैग्नेट',
+    hindiDescription: 'असीमित स्वच्छ ऊर्जा के स्रोत पर वैज्ञानिकों की बड़ी सफलता का वीडियो।'
+  },
+
+  // --- TIER 2: 24 TO 48 HOURS (PAGE 2 - YESTERDAY'S VIRAL BUZZ) ---
   {
     id: 'vid-drone-volcano-eruption-iceland',
     title: 'Custom FPV Drone Flies Inside Active Volcanic Lava Fissure in Iceland',
@@ -4087,7 +4142,7 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     viewsCount: 3120000,
     likesCount: 280000,
     duration: '02:50',
-    pubDate: new Date(Date.now() - 28 * 3600 * 1000).toISOString(),
+    pubDate: new Date(Date.now() - 26 * 3600 * 1000).toISOString(),
     category: 'Viral',
     tags: ['#Volcano', '#FPVDrone', '#Iceland', '#LavaFlow', '#Cinematography', '#ViralAdrenaline'],
     seoKeywords: ['fpv drone inside volcano eruption iceland', 'extreme lava drone 4k video', 'volcanic fissure fpv flight'],
@@ -4099,32 +4154,6 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     aiTakeaway: 'FPV cinematographers utilized custom heat-resistant carbon-fiber framing to capture close-range hydrothermal dynamics.',
     hindiTitle: 'आइसलैंड में उबलते ज्वालामुखी के अंदर ड्रोन की उड़ान - 4K दृश्य',
     hindiDescription: 'धधकते लावे के ऊपर ड्रोन की हैरतअंगेज रिकॉर्डिंग।'
-  },
-  {
-    id: 'vid-quantum-computing-chip-speed',
-    title: 'Physicists Achieve 1000-Qubit Fault-Tolerant Quantum Simulation Milestone',
-    description: 'Laboratory walkthrough unveiling the cryogenic dilution refrigerator running error-corrected topological qubits capable of solving molecular folding problems in seconds.',
-    videoUrl: 'https://www.youtube.com/watch?v=F_Riqjdh2oM',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/F_Riqjdh2oM?autoplay=1&rel=0',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1200&q=80',
-    source: 'Quantum Wire Lab',
-    author: 'Applied Physics Today',
-    platform: 'youtube',
-    viewsCount: 1850000,
-    likesCount: 142000,
-    duration: '08:35',
-    pubDate: new Date(Date.now() - 32 * 3600 * 1000).toISOString(),
-    category: 'Tech',
-    tags: ['#QuantumComputing', '#Qubits', '#FutureTech', '#Physics', '#Nanotechnology', '#ScienceViral'],
-    seoKeywords: ['fault tolerant quantum computer demo', '1000 qubit quantum processor', 'cryogenic quantum lab tour'],
-    slug: 'fault-tolerant-quantum-computing-processor-breakthrough',
-    metaDescription: 'Exclusive tour and benchmark demonstration of a 1000-qubit fault-tolerant quantum processor.',
-    sentiment: 'Positive',
-    isViralTrend: false,
-    viralScore: 91,
-    aiTakeaway: 'Surface code error correction brings practical pharmaceutical simulation within near-term commercial feasibility.',
-    hindiTitle: 'क्वांटम कंप्यूटिंग में बड़ा कीर्तिमान - 1000 क्यूबिट प्रोसेसर का अनावरण',
-    hindiDescription: 'क्वांटम भौतिकी और भविष्य के सुपरकंप्यूटर का तकनीकी वीडियो।'
   },
   {
     id: 'vid-crazy-optical-illusion-sculpture',
@@ -4139,7 +4168,7 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     viewsCount: 7890000,
     likesCount: 640000,
     duration: '00:48',
-    pubDate: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
+    pubDate: new Date(Date.now() - 30 * 3600 * 1000).toISOString(),
     category: 'Viral',
     tags: ['#OpticalIllusion', '#KineticArt', '#MindBlown', '#TikTokViral', '#AmbiguousCylinder', '#ViralHit'],
     seoKeywords: ['impossible optical illusion sculpture', 'mind blowing 3d perspective art', 'tiktok viral illusion clips'],
@@ -4153,30 +4182,30 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     hindiDescription: 'घूमने पर अपना रूप बदल देने वाली अनोखी 3डी कला का वायरल वीडियो।'
   },
   {
-    id: 'vid-f1-extreme-pitstop-record',
-    title: 'Formula 1 Team Executes World Record 1.78 Second 4-Wheel Pit Stop',
-    description: 'Precision mechanical choreography in 120fps high-speed camera angles showing 22 crew members lifting the car, swapping four tires, and releasing back onto tarmac in under two seconds.',
-    videoUrl: 'https://www.youtube.com/watch?v=7VCYBtx6h4U',
-    embedUrl: 'https://www.youtube-nocookie.com/embed/7VCYBtx6h4U?autoplay=1&rel=0',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80',
-    source: 'SpeedWorld TV',
-    author: 'Motorsport Highlights',
+    id: 'vid-quantum-computing-chip-speed',
+    title: 'Physicists Achieve 1000-Qubit Fault-Tolerant Quantum Simulation Milestone',
+    description: 'Laboratory walkthrough unveiling the cryogenic dilution refrigerator running error-corrected topological qubits capable of solving molecular folding problems in seconds.',
+    videoUrl: 'https://www.youtube.com/watch?v=F_Riqjdh2oM',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/F_Riqjdh2oM?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1200&q=80',
+    source: 'Quantum Wire Lab',
+    author: 'Applied Physics Today',
     platform: 'youtube',
-    viewsCount: 5410000,
-    likesCount: 410000,
-    duration: '01:55',
-    pubDate: new Date(Date.now() - 40 * 3600 * 1000).toISOString(),
-    category: 'Sports',
-    tags: ['#Formula1', '#PitStopRecord', '#Motorsport', '#Speed', '#ExtremeTeamwork', '#ViralSports'],
-    seoKeywords: ['formula 1 world record pit stop 1.78s', 'f1 team pit crew speed slow motion', 'fastest pitstop in motorsport history'],
-    slug: 'formula-1-world-record-pit-stop-speed-breakdown',
-    metaDescription: 'High-speed camera breakdown of the world-record 1.78 second Formula 1 pit stop.',
+    viewsCount: 1850000,
+    likesCount: 142000,
+    duration: '08:35',
+    pubDate: new Date(Date.now() - 34 * 3600 * 1000).toISOString(),
+    category: 'Tech',
+    tags: ['#QuantumComputing', '#Qubits', '#FutureTech', '#Physics', '#Nanotechnology', '#ScienceViral'],
+    seoKeywords: ['fault tolerant quantum computer demo', '1000 qubit quantum processor', 'cryogenic quantum lab tour'],
+    slug: 'fault-tolerant-quantum-computing-processor-breakthrough',
+    metaDescription: 'Exclusive tour and benchmark demonstration of a 1000-qubit fault-tolerant quantum processor.',
     sentiment: 'Positive',
-    isViralTrend: true,
-    viralScore: 93,
-    aiTakeaway: 'Milliseconds were saved through zero-play pneumatic wheel guns and synchronized electronic release signals.',
-    hindiTitle: 'फॉर्मूला 1 में 1.78 सेकंड का वर्ल्ड रिकॉर्ड पिट स्टॉप - तेज रफ्तार का कमाल',
-    hindiDescription: 'पलक झपकते ही 4 पहिए बदलने की अविश्वसनीय गति का वीडियो।'
+    isViralTrend: false,
+    viralScore: 91,
+    aiTakeaway: 'Surface code error correction brings practical pharmaceutical simulation within near-term commercial feasibility.',
+    hindiTitle: 'क्वांटम कंप्यूटिंग में बड़ा कीर्तिमान - 1000 क्यूबिट प्रोसेसर का अनावरण',
+    hindiDescription: 'क्वांटम भौतिकी और भविष्य के सुपरकंप्यूटर का तकनीकी वीडियो।'
   },
   {
     id: 'vid-electric-vertical-takeoff-aircraft',
@@ -4191,7 +4220,7 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     viewsCount: 2280000,
     likesCount: 160000,
     duration: '05:10',
-    pubDate: new Date(Date.now() - 45 * 3600 * 1000).toISOString(),
+    pubDate: new Date(Date.now() - 38 * 3600 * 1000).toISOString(),
     category: 'Tech',
     tags: ['#eVTOL', '#AirTaxi', '#UrbanAviation', '#ElectricFlight', '#FutureCities', '#TechViral'],
     seoKeywords: ['evtol air taxi city flight test', 'autonomous urban air mobility 2026', 'electric aircraft vertiport landing'],
@@ -4203,28 +4232,198 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     aiTakeaway: 'Distributed electric propulsion produces 80% lower acoustic footprint than conventional helicopters at equivalent altitudes.',
     hindiTitle: 'उड़ने वाली एयर टैक्सी का सफल परीक्षण - भविष्य का सफर',
     hindiDescription: 'इलेक्ट्रिक एयर टैक्सी की पहली स्वायत्त शहरी उड़ान का वीडियो।'
+  },
+  {
+    id: 'vid-boston-dynamics-atlas-parkour',
+    title: 'Next-Generation Electric Atlas Robot Completes High-Speed Fluid Gymnastics Routine',
+    description: 'All-electric Atlas performs uninterrupted flips, 360-degree rotational vaulting, and dynamic balance recovery over complex obstacle courses with no external safety tether.',
+    videoUrl: 'https://www.youtube.com/watch?v=tF4DML7FIWk',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/tF4DML7FIWk?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?auto=format&fit=crop&w=1200&q=80',
+    source: 'Boston Dynamics Wire',
+    author: 'Dynamics Robotics',
+    platform: 'youtube',
+    viewsCount: 9450000,
+    likesCount: 810000,
+    duration: '02:18',
+    pubDate: new Date(Date.now() - 42 * 3600 * 1000).toISOString(),
+    category: 'Tech',
+    tags: ['#AtlasRobot', '#ParkourRobot', '#BostonDynamics', '#BipedalRobotics', '#TechViral', '#Gymnastics'],
+    seoKeywords: ['boston dynamics atlas gymnastics routine', 'electric atlas flip parkour video', 'bipedal robot athletics demonstration'],
+    slug: 'electric-atlas-robot-high-speed-gymnastics-routine',
+    metaDescription: 'Watch the all-electric Atlas robot execute seamless gymnastics and parkour vaults with zero tether.',
+    sentiment: 'Positive',
+    isViralTrend: true,
+    viralScore: 98,
+    aiTakeaway: 'Custom high-torque electric actuators provide superior power-to-weight ratio compared to legacy hydraulic manifolds.',
+    hindiTitle: 'एटलस रोबोट का हैरतअंगेज जिमनास्टिक्स और कलाबाजी वीडियो',
+    hindiDescription: 'रोबोटिक्स इंजीनियरिंग की दुनिया में नया मुकाम।'
+  },
+
+  // --- TIER 3: 48 HOURS TO 7 DAYS (PAGE 3 - THIS WEEK'S LEGENDS) ---
+  {
+    id: 'vid-apple-vision-spatial-compute',
+    title: 'Surgeons Perform World-First Microscopic Spine Surgery Using Ultra-Low Latency Spatial Vision',
+    description: 'Operating room medical broadcast showing neurosurgeons overlaying real-time 3D MRI scans directly onto patient anatomy via millimeter-accurate spatial computing headsets.',
+    videoUrl: 'https://www.youtube.com/watch?v=TX9qSaGXFyg',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/TX9qSaGXFyg?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80',
+    source: 'MedTech Global',
+    author: 'Surgical Innovations',
+    platform: 'youtube',
+    viewsCount: 4120000,
+    likesCount: 330000,
+    duration: '05:40',
+    pubDate: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
+    category: 'Tech',
+    tags: ['#SpatialComputing', '#MedTech', '#SurgeryInnovation', '#AugmentedReality', '#Healthcare2026'],
+    seoKeywords: ['spatial computing surgery spine mri overlay', 'augmented reality neurosurgery demo', 'medical spatial headset in operating room'],
+    slug: 'surgeons-microscopic-spine-surgery-spatial-computing',
+    metaDescription: 'Surgeons demonstrate real-time 3D MRI holograms in complex spine surgery using spatial computing headsets.',
+    sentiment: 'Positive',
+    isViralTrend: true,
+    viralScore: 93,
+    aiTakeaway: 'Sub-millimeter holographic registration reduced operating duration by 28% while increasing precision.',
+    hindiTitle: 'स्पेशियल कंप्यूटिंग और 3D विजन से सफल स्पाइन सर्जरी - चिकित्सा में क्रांति',
+    hindiDescription: 'डॉक्टरों ने सर्जरी के दौरान थ्री-डी होलोग्राम तकनीक का इस्तेमाल किया।'
+  },
+  {
+    id: 'vid-hydraulic-press-diamond-crush',
+    title: 'Can a 1000-Ton Industrial Hydraulic Press Shatter a Flawless Real Lab Diamond?',
+    description: 'Slow-motion 20,000fps physics stress test putting a 5-carat flawless synthetic diamond under escalating pneumatic pressure to witness the exact moment of crystalline lattice fracture.',
+    videoUrl: 'https://www.youtube.com/watch?v=kX2Zz8d9pWE',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/kX2Zz8d9pWE?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1200&q=80',
+    source: 'Hydraulic Physics Lab',
+    author: 'Crush Science',
+    platform: 'youtube',
+    viewsCount: 11200000,
+    likesCount: 890000,
+    duration: '04:05',
+    pubDate: new Date(Date.now() - 4 * 24 * 3600 * 1000).toISOString(),
+    category: 'Science',
+    tags: ['#HydraulicPress', '#DiamondCrush', '#SlowMotion', '#PhysicsExperiment', '#Satisfying', '#ViralHit'],
+    seoKeywords: ['hydraulic press diamond crush slow motion', '1000 ton press vs real diamond', 'high speed camera material fracture'],
+    slug: '1000-ton-hydraulic-press-vs-real-diamond-slow-motion',
+    metaDescription: 'Watch 20,000fps slow-motion capture of a flawless diamond tested to the limit under 1000 tons of hydraulic force.',
+    sentiment: 'Positive',
+    isViralTrend: true,
+    viralScore: 97,
+    aiTakeaway: 'The sudden explosive fracture reveals anisotropic shear cleavage planes characteristic of cubic diamond crystal structures.',
+    hindiTitle: '1000 टन हाइड्रोलिक प्रेस बनाम असली हीरा - क्या हुआ जब दबाया गया?',
+    hindiDescription: 'अविश्वसनीय स्लो मोशन भौतिकी प्रयोग का वायरल वीडियो।'
+  },
+  {
+    id: 'vid-tokyo-hyperlapse-bullet-train',
+    title: '8K Hyperlapse Across Tokyo Neon Cityscape from Shinkansen Bullet Train Cab',
+    description: 'Breathtaking 60fps cinematic hyperlapse navigating through rainy illuminated skyscraper canyons, subterranean tunnels, and iconic cyberpunk bridges at 320km/h.',
+    videoUrl: 'https://www.youtube.com/watch?v=AXqn_q_mKGE',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/AXqn_q_mKGE?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80',
+    source: 'Cinematic Shinkansen',
+    author: 'Tokyo Visual Arts',
+    platform: 'vimeo',
+    viewsCount: 3650000,
+    likesCount: 295000,
+    duration: '03:30',
+    pubDate: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
+    category: 'Entertainment',
+    tags: ['#Tokyo', '#Hyperlapse', '#Cinematography', '#Cyberpunk', '#Shinkansen', '#8KFootage'],
+    seoKeywords: ['tokyo night hyperlapse shinkansen train 8k', 'cyberpunk tokyo neon cinematic video', 'bullet train driver cabin hyperlapse'],
+    slug: 'tokyo-neon-cityscape-shinkansen-hyperlapse-8k',
+    metaDescription: 'Experience the electric neon energy of Tokyo from the front cab of a Shinkansen train in pristine 8K hyperlapse.',
+    sentiment: 'Positive',
+    isViralTrend: false,
+    viralScore: 91,
+    aiTakeaway: 'Captured with stabilized dual-gimbal optical sensors featuring auto-exposure ramping for rapid tunnel-to-cityscape transitions.',
+    hindiTitle: 'टोक्यो की नियॉन सड़कों पर बुलेट ट्रेन की 8K हाइपरलैप्स यात्रा',
+    hindiDescription: 'जापान की तेज रफ्तार ट्रेन और जगमगाते शहर का मनमोहक दृश्य।'
+  },
+
+  // --- TIER 4: 7+ DAYS (PAGE 4+ - CLASSIC VIRAL VAULT) ---
+  {
+    id: 'vid-veritasium-black-hole-simulation',
+    title: 'The Most Accurate Supermassive Black Hole Simulation Ever Computed in Real-Time',
+    description: 'Astrophysicists render general relativistic ray-tracing showing photonic rings, Doppler beaming asymmetry, and event horizon frame-dragging in staggering mathematical fidelity.',
+    videoUrl: 'https://www.youtube.com/watch?v=2Tz8N_m7U8E',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/2Tz8N_m7U8E?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1200&q=80',
+    source: 'Veritasium & Astrophysics Collective',
+    author: 'Astrophysics Simulation Wire',
+    platform: 'youtube',
+    viewsCount: 14500000,
+    likesCount: 1120000,
+    duration: '14:20',
+    pubDate: new Date(Date.now() - 9 * 24 * 3600 * 1000).toISOString(),
+    category: 'Science',
+    tags: ['#BlackHole', '#Physics', '#GeneralRelativity', '#Astrophysics', '#Cosmos', '#VeritasiumViral'],
+    seoKeywords: ['most accurate black hole simulation 4k', 'general relativity ray tracing event horizon', 'astrophysics supermassive black hole simulation'],
+    slug: 'most-accurate-supermassive-black-hole-simulation-realtime',
+    metaDescription: 'Astrophysicists compute the most mathematically rigorous simulation of a spinning Kerr black hole event horizon.',
+    sentiment: 'Analysis',
+    isViralTrend: false,
+    viralScore: 98,
+    aiTakeaway: 'Demonstrates Einsteinian spacetime distortion and gravitational redshift effects with unmatched GPU tensor core computation.',
+    hindiTitle: 'ब्लैक होल का अब तक का सबसे सटीक 4K सिमुलेशन - ब्रह्मांड का रहस्य',
+    hindiDescription: 'आइंस्टीन के सापेक्षता के सिद्धांत और ब्लैक होल के अद्भुत वैज्ञानिक दृश्य।'
+  },
+  {
+    id: 'vid-mark-rober-squirrel-obstacle',
+    title: 'Building the Ultimate Backyard Squirrel Ninja Obstacle Course 3.0',
+    description: 'Former NASA engineer designs an insanely intricate kinetic maze filled with laser tripwires, optical weight scales, catapult soft-landings, and nut dispensers to test rodent problem-solving IQ.',
+    videoUrl: 'https://www.youtube.com/watch?v=7X8II6J-6mU',
+    embedUrl: 'https://www.youtube-nocookie.com/embed/7X8II6J-6mU?autoplay=1&rel=0',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1507666405895-422eee7d517f?auto=format&fit=crop&w=1200&q=80',
+    source: 'Mark Rober Channel',
+    author: 'Mark Rober',
+    platform: 'youtube',
+    viewsCount: 28400000,
+    likesCount: 1850000,
+    duration: '18:50',
+    pubDate: new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString(),
+    category: 'Entertainment',
+    tags: ['#MarkRober', '#Engineering', '#SquirrelMaze', '#NinjaCourse', '#Wholesome', '#ViralMasterpiece'],
+    seoKeywords: ['mark rober squirrel obstacle course maze', 'engineering backyard ninja course for squirrels', 'viral mechanical engineering video'],
+    slug: 'ultimate-backyard-squirrel-ninja-obstacle-course',
+    metaDescription: 'NASA engineer builds the ultimate physics-based obstacle course testing backyard squirrel intelligence.',
+    sentiment: 'Positive',
+    isViralTrend: false,
+    viralScore: 99,
+    aiTakeaway: 'Showcases creative mechanical engineering applied to mammalian behavioral learning feedback loops.',
+    hindiTitle: 'गिलहरी के लिए बनाया दुनिया का सबसे अनोखा निंजा ऑब्सटिकल कोर्स',
+    hindiDescription: 'इंजीनियरिंग और विज्ञान का शानदार और मनोरंजक प्रयोग।'
   }
 ];
 
 let cachedViralVideos: ViralVideo[] = [];
 
-// Initialize Viral Videos Storage with Atomic Write and Seed Fallback
+// Initialize Viral Videos Storage with Atomic Write, Seed Calibration, and Dual Persistence
 function loadStoredViralVideos(): ViralVideo[] {
+  let list: ViralVideo[] = [];
   try {
     if (fs.existsSync(VIRAL_VIDEOS_DB_FILE)) {
       const data = fs.readFileSync(VIRAL_VIDEOS_DB_FILE, 'utf-8');
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        list = parsed;
       }
     }
   } catch (err) {
     console.warn('[ViralVideosDB] Failed reading disk file, initializing seed:', err);
   }
 
-  // Write default seeds atomically
-  saveStoredViralVideos(INITIAL_SEED_VIDEOS);
-  return [...INITIAL_SEED_VIDEOS];
+  // Merge seed items to ensure all time buckets (24h, 48h, 7d, archive) have rich videos
+  const map = new Map<string, ViralVideo>();
+  list.forEach(v => map.set(v.id, v));
+  INITIAL_SEED_VIDEOS.forEach(s => {
+    if (!map.has(s.id)) {
+      map.set(s.id, s);
+    }
+  });
+
+  const merged = Array.from(map.values());
+  saveStoredViralVideos(merged);
+  return merged;
 }
 
 function saveStoredViralVideos(videos: ViralVideo[]): void {
@@ -4594,25 +4793,72 @@ setTimeout(() => {
 
 // --- REST API ENDPOINTS FOR VIRAL VIDEOS ---
 
-// GET /api/videos - Query videos with category, platform, tag, search & sort
+// GET /api/videos - Query videos with 24h time-decay, category, platform, tag, search & sort
 app.get('/api/videos', (req, res) => {
-  const { category, platform, tag, search, sortBy = 'viral', limit = '100' } = req.query;
+  const { 
+    category, 
+    platform, 
+    tag, 
+    search, 
+    sortBy = 'viral', 
+    timeWindow = 'all', 
+    page = '1', 
+    pageSize = '12', 
+    limit = '100' 
+  } = req.query;
+
+  const now = Date.now();
+
+  // Compute breakdown across all cached videos
+  let last24hCount = 0;
+  let past48hCount = 0;
+  let pastWeekCount = 0;
+  let archiveCount = 0;
+
+  cachedViralVideos.forEach(v => {
+    const ageMs = now - new Date(v.pubDate).getTime();
+    if (ageMs <= 24 * 3600 * 1000) last24hCount++;
+    else if (ageMs <= 48 * 3600 * 1000) past48hCount++;
+    else if (ageMs <= 7 * 24 * 3600 * 1000) pastWeekCount++;
+    else archiveCount++;
+  });
 
   let filtered = [...cachedViralVideos];
 
+  // 1. Time Window Filtering
+  if (timeWindow === '24h') {
+    filtered = filtered.filter(v => (now - new Date(v.pubDate).getTime()) <= 24 * 3600 * 1000);
+  } else if (timeWindow === '48h') {
+    filtered = filtered.filter(v => {
+      const ageMs = now - new Date(v.pubDate).getTime();
+      return ageMs > 24 * 3600 * 1000 && ageMs <= 48 * 3600 * 1000;
+    });
+  } else if (timeWindow === 'week') {
+    filtered = filtered.filter(v => {
+      const ageMs = now - new Date(v.pubDate).getTime();
+      return ageMs > 48 * 3600 * 1000 && ageMs <= 7 * 24 * 3600 * 1000;
+    });
+  } else if (timeWindow === 'archive') {
+    filtered = filtered.filter(v => (now - new Date(v.pubDate).getTime()) > 7 * 24 * 3600 * 1000);
+  }
+
+  // 2. Category Filter
   if (category && typeof category === 'string' && category !== 'All') {
     filtered = filtered.filter(v => v.category.toLowerCase() === category.toLowerCase());
   }
 
+  // 3. Platform Filter
   if (platform && typeof platform === 'string' && platform !== 'All') {
     filtered = filtered.filter(v => v.platform.toLowerCase() === platform.toLowerCase());
   }
 
+  // 4. Tag Filter
   if (tag && typeof tag === 'string') {
     const cleanTag = tag.trim().toLowerCase();
     filtered = filtered.filter(v => v.tags.some(t => t.toLowerCase() === cleanTag || t.toLowerCase() === `#${cleanTag}`));
   }
 
+  // 5. Search Filter
   if (search && typeof search === 'string' && search.trim()) {
     const q = search.trim().toLowerCase();
     filtered = filtered.filter(v =>
@@ -4623,7 +4869,7 @@ app.get('/api/videos', (req, res) => {
     );
   }
 
-  // Sort
+  // 6. 24-Hour Prioritized Sorting
   if (sortBy === 'newest') {
     filtered.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
   } else if (sortBy === 'views') {
@@ -4631,12 +4877,24 @@ app.get('/api/videos', (req, res) => {
   } else if (sortBy === 'likes') {
     filtered.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
   } else {
-    // Default: viralScore
-    filtered.sort((a, b) => (b.viralScore || 0) - (a.viralScore || 0));
+    // Default Viral Mode: Prioritize 24h freshness tier first (Page 1 -> Page 2 -> Page 3 -> Archive), then by viralScore / views
+    filtered.sort((a, b) => {
+      const ageA = now - new Date(a.pubDate).getTime();
+      const ageB = now - new Date(b.pubDate).getTime();
+      const tierA = ageA <= 24 * 3600 * 1000 ? 1 : ageA <= 48 * 3600 * 1000 ? 2 : ageA <= 7 * 24 * 3600 * 1000 ? 3 : 4;
+      const tierB = ageB <= 24 * 3600 * 1000 ? 1 : ageB <= 48 * 3600 * 1000 ? 2 : ageB <= 7 * 24 * 3600 * 1000 ? 3 : 4;
+
+      if (tierA !== tierB) {
+        return tierA - tierB;
+      }
+      return (b.viralScore || 0) - (a.viralScore || 0);
+    });
   }
 
-  const maxItems = parseInt(limit as string, 10) || 100;
-  const paginated = filtered.slice(0, maxItems);
+  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+  const size = Math.max(1, parseInt(pageSize as string, 10) || 12);
+  const totalPages = Math.ceil(filtered.length / size) || 1;
+  const paginated = filtered.slice((pageNum - 1) * size, pageNum * size);
 
   // Compute tag counts & metadata
   const tagMap: Record<string, number> = {};
@@ -4655,12 +4913,21 @@ app.get('/api/videos', (req, res) => {
     .slice(0, 30);
 
   res.json({
-    videos: paginated,
-    totalVideos: cachedViralVideos.length,
+    videos: filtered,
+    paginatedVideos: paginated,
+    totalVideos: filtered.length,
+    currentPage: pageNum,
+    totalPages,
     lastScrapedAt: new Date().toISOString(),
     trendingTags,
     platformBreakdown: platformMap,
     categoryBreakdown: categoryMap,
+    timeWindowBreakdown: {
+      last24h: last24hCount,
+      past48h: past48hCount,
+      pastWeek: pastWeekCount,
+      archive: archiveCount,
+    }
   });
 });
 

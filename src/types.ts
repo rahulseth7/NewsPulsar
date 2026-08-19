@@ -248,6 +248,8 @@ export interface ViralVideo {
   hindiDescription?: string;
 }
 
+export type VideoTimeWindow = '24h' | '48h' | 'week' | 'archive' | 'all';
+
 export interface ViralVideoResponse {
   videos: ViralVideo[];
   totalVideos: number;
@@ -255,6 +257,14 @@ export interface ViralVideoResponse {
   trendingTags: { tag: string; count: number }[];
   platformBreakdown: Record<string, number>;
   categoryBreakdown: Record<string, number>;
+  timeWindowBreakdown?: {
+    last24h: number;   // Page 1: 0-24h
+    past48h: number;   // Page 2: 24-48h
+    pastWeek: number;  // Page 3: 48h-7d
+    archive: number;   // Page 4+: 7d+
+  };
+  currentPage?: number;
+  totalPages?: number;
 }
 
 export type PageView = 'home' | 'about' | 'advertise' | 'contact' | 'privacy' | 'dashboard' | 'database' | 'videos';

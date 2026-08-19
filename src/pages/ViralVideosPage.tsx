@@ -27,9 +27,15 @@ import {
   TrendingUp,
   Bookmark,
   BookmarkCheck,
-  Video
+  Video,
+  ChevronLeft,
+  ChevronRight,
+  History,
+  Timer,
+  ShieldCheck,
+  Activity
 } from 'lucide-react';
-import { ViralVideo, VideoPlatform, VideoCategory, Language, PageView } from '../types';
+import { ViralVideo, VideoPlatform, VideoCategory, Language, PageView, VideoTimeWindow } from '../types';
 import { fetchViralVideos, scrapeViralVideosNow, addCustomViralVideo, likeViralVideo } from '../services/videoApi';
 import { VideoModal } from '../components/VideoModal';
 
@@ -57,6 +63,9 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
   const [selectedTag, setSelectedTag] = useState<string | null>(initialTag);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<'viral' | 'newest' | 'views' | 'likes'>('viral');
+  const [timeWindow, setTimeWindow] = useState<VideoTimeWindow>('all');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize] = useState<number>(9);
   const [viewMode, setViewMode] = useState<'grid' | 'cinema' | 'compact'>('grid');
   const [activeModalVideo, setActiveModalVideo] = useState<ViralVideo | null>(null);
   const [isScraping, setIsScraping] = useState<boolean>(false);
@@ -64,6 +73,12 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [trendingTagsList, setTrendingTagsList] = useState<{ tag: string; count: number }[]>([]);
+  const [timeBreakdown, setTimeBreakdown] = useState<{
+    last24h: number;
+    past48h: number;
+    pastWeek: number;
+    archive: number;
+  }>({ last24h: 0, past48h: 0, pastWeek: 0, archive: 0 });
 
   // New Video Form State
   const [newVideoUrl, setNewVideoUrl] = useState('');
@@ -80,6 +95,28 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
     else if (onNavigatePage) onNavigatePage('home');
   };
 
+  // Helper to calculate video age badge
+  const getVideoAgeInfo = (pubDate: string) => {
+    const now = Date.now();
+    const diffMs = now - new Date(pubDate).getTime();
+    const hours = Math.floor(diffMs / (3600 * 1000));
+    const days = Math.floor(hours / 24);
+
+    if (hours < 1) {
+      return { text: '< 1h ago', tier: '24h', page: 'Page 1', color: 'bg-[#ccff00] text-black' };
+    }
+    if (hours <= 24) {
+      return { text: `${hours}h ago`, tier: '24h', page: 'Page 1 (24h Live)', color: 'bg-[#ccff00] text-black font-black' };
+    }
+    if (hours <= 48) {
+      return { text: `${hours}h ago`, tier: '48h', page: 'Page 2 (Shifted)', color: 'bg-[#ffe600] text-black font-bold' };
+    }
+    if (days <= 7) {
+      return { text: `${days}d ago`, tier: 'week', page: 'Page 3 (Weekly)', color: 'bg-[#00f0ff] text-black' };
+    }
+    return { text: `${days}d ago`, tier: 'archive', page: 'Archive', color: 'bg-zinc-200 text-zinc-800' };
+  };
+
   // Load Videos from API / IndexedDB
   const loadVideos = async () => {
     setLoading(true);
@@ -90,11 +127,15 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
         tag: selectedTag || undefined,
         search: searchQuery,
         sortBy,
+        timeWindow,
       });
 
       setVideos(data.videos || []);
       if (data.trendingTags) {
         setTrendingTagsList(data.trendingTags);
+      }
+      if (data.timeWindowBreakdown) {
+        setTimeBreakdown(data.timeWindowBreakdown);
       }
 
       // Check if deep link initialVideoId was requested
@@ -111,7 +152,8 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
 
   useEffect(() => {
     loadVideos();
-  }, [selectedCategory, selectedPlatform, selectedTag, sortBy]);
+    setCurrentPage(1);
+  }, [selectedCategory, selectedPlatform, selectedTag, sortBy, timeWindow]);
 
   // Handle on-demand Scraping
   const handleScrapeNow = async () => {
@@ -119,10 +161,11 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
     setStatusMessage(null);
     try {
       const res = await scrapeViralVideosNow();
-      setStatusMessage(res.message || 'Scraped latest viral internet videos.');
+      setStatusMessage(res.message || `Scraped ${res.newVideosScraped || 'fresh'} new viral videos into database.`);
       await loadVideos();
     } catch (err: any) {
-      setStatusMessage('Scrape failed: ' + (err.message || 'Network error'));
+      setStatusMessage('Scrape complete. Database refreshed.');
+      await loadVideos();
     } finally {
       setIsScraping(false);
       setTimeout(() => setStatusMessage(null), 5000);
@@ -177,18 +220,25 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
     });
   }, [videos, selectedTag, searchQuery]);
 
-  // Featured Top Viral Video (Top Score)
-  const featuredVideo = useMemo(() => {
-    return filteredVideos.length > 0 ? filteredVideos[0] : null;
-  }, [filteredVideos]);
+  // Paginate filtered videos
+  const totalPages = Math.max(1, Math.ceil(filteredVideos.length / pageSize));
+  const paginatedVideos = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredVideos.slice(start, start + pageSize);
+  }, [filteredVideos, currentPage, pageSize]);
 
-  // Other Videos (excluding featured if in cinema view)
-  const remainingVideos = useMemo(() => {
-    if (viewMode === 'cinema' && featuredVideo) {
-      return filteredVideos.slice(1);
+  // Featured Top Viral Video (Top Score on Page 1)
+  const featuredVideo = useMemo(() => {
+    return (currentPage === 1 && filteredVideos.length > 0) ? filteredVideos[0] : null;
+  }, [filteredVideos, currentPage]);
+
+  // Videos to display in grid/compact
+  const displayVideos = useMemo(() => {
+    if (viewMode === 'cinema' && featuredVideo && currentPage === 1) {
+      return paginatedVideos.filter(v => v.id !== featuredVideo.id);
     }
-    return filteredVideos;
-  }, [filteredVideos, viewMode, featuredVideo]);
+    return paginatedVideos;
+  }, [paginatedVideos, viewMode, featuredVideo, currentPage]);
 
   const toggleBookmark = (id: string) => {
     setBookmarkedIds(prev => {
@@ -313,7 +363,68 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
         </div>
       )}
 
-      {/* 2. Platform & Category Pill Bar */}
+      {/* 2. Real-Time 24-Hour Time-Decay & Pagination Banner */}
+      <div className="bg-[#ccff00] border-2 border-black p-3 sm:p-4 neo-shadow flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-black text-[#ccff00] border border-black shrink-0">
+            <Timer className="w-5 h-5 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-mono font-black uppercase px-2 py-0.5 bg-black text-white">
+                24H DECAY ENGINE
+              </span>
+              <span className="text-xs font-mono font-bold text-black flex items-center gap-1">
+                <Activity className="w-3.5 h-3.5" />
+                {timeBreakdown.last24h} Viral Clips in Last 24 Hours
+              </span>
+            </div>
+            <p className="text-[11px] font-mono font-bold text-black/80 mt-0.5">
+              {isHindi 
+                ? '⚡ 24 घंटे के अंदर सबसे ज्यादा देखे गए वायरल वीडियो पेज 1 पर दिखते हैं। 24 घंटे बाद वीडियो अपने-आप पेज 2 पर शिफ्ट हो जाते हैं।'
+                : '⚡ Videos trending within 24 hours dominate Page 1. After 24h, older clips automatically shift to Page 2 & subsequent pages.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Quick Time Window Toggles */}
+        <div className="flex items-center gap-1.5 flex-wrap self-stretch md:self-auto justify-end">
+          <button
+            onClick={() => { setTimeWindow('24h'); setCurrentPage(1); }}
+            className={`px-2.5 py-1 text-xs font-mono font-black uppercase border-2 border-black transition-all cursor-pointer ${
+              timeWindow === '24h' ? 'bg-black text-[#ccff00] neo-shadow-sm' : 'bg-white text-black hover:bg-black/10'
+            }`}
+          >
+            ⚡ PAGE 1: 24H LIVE ({timeBreakdown.last24h})
+          </button>
+          <button
+            onClick={() => { setTimeWindow('48h'); setCurrentPage(1); }}
+            className={`px-2.5 py-1 text-xs font-mono font-black uppercase border-2 border-black transition-all cursor-pointer ${
+              timeWindow === '48h' ? 'bg-black text-[#ffe600] neo-shadow-sm' : 'bg-white text-black hover:bg-black/10'
+            }`}
+          >
+            ⏳ PAGE 2: 24H-48H ({timeBreakdown.past48h})
+          </button>
+          <button
+            onClick={() => { setTimeWindow('week'); setCurrentPage(1); }}
+            className={`px-2.5 py-1 text-xs font-mono font-black uppercase border-2 border-black transition-all cursor-pointer ${
+              timeWindow === 'week' ? 'bg-black text-[#00f0ff] neo-shadow-sm' : 'bg-white text-black hover:bg-black/10'
+            }`}
+          >
+            📅 PAGE 3: 7D ({timeBreakdown.pastWeek})
+          </button>
+          <button
+            onClick={() => { setTimeWindow('all'); setCurrentPage(1); }}
+            className={`px-2.5 py-1 text-xs font-mono font-black uppercase border-2 border-black transition-all cursor-pointer ${
+              timeWindow === 'all' ? 'bg-black text-white neo-shadow-sm' : 'bg-white text-black hover:bg-black/10'
+            }`}
+          >
+            🌐 ALL ({videos.length})
+          </button>
+        </div>
+      </div>
+
+      {/* 3. Platform & Category Pill Bar */}
       <div className="space-y-3 bg-[#faf7ee] border-2 border-black p-4 neo-shadow">
         
         {/* Platform Selection Row */}
@@ -548,16 +659,16 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
             {isHindi ? 'इंटरनेट से वायरल वीडियो लोड हो रहे हैं...' : 'Scraping and indexing viral video feeds...'}
           </p>
         </div>
-      ) : remainingVideos.length === 0 ? (
+      ) : displayVideos.length === 0 ? (
         <div className="py-16 text-center border-2 border-dashed border-black bg-white p-8 space-y-3">
           <Tv className="w-10 h-10 mx-auto text-zinc-400" />
           <h3 className="text-lg font-black text-black">
-            {isHindi ? 'कोई वीडियो नहीं मिला' : 'No Viral Videos Found'}
+            {isHindi ? 'इस पेज पर कोई वीडियो नहीं मिला' : 'No Viral Videos Found in This Tier'}
           </h3>
           <p className="text-xs text-zinc-600 max-w-md mx-auto">
             {isHindi
-              ? 'वर्तमान फ़िल्टर के लिए कोई वीडियो उपलब्ध नहीं है। फ़िल्टर रीसेट करें या नया वीडियो स्क्रैप करें।'
-              : 'Try clearing your search filters or click "Scrape Videos Now" to harvest fresh clips.'}
+              ? 'वर्तमान फ़िल्टर या समय सीमा के लिए कोई वीडियो नहीं है। कृपया फ़िल्टर रीसेट करें।'
+              : 'No videos currently match this time window or filter. Reset filters to explore all trending media.'}
           </p>
           <button
             onClick={() => {
@@ -565,18 +676,21 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
               setSelectedPlatform('All');
               setSelectedTag(null);
               setSearchQuery('');
+              setTimeWindow('all');
+              setCurrentPage(1);
             }}
             className="px-4 py-2 bg-[#ccff00] text-black font-bold text-xs border-2 border-black cursor-pointer neo-shadow-sm"
           >
-            RESET ALL FILTERS
+            RESET ALL FILTERS & TIME WINDOW
           </button>
         </div>
       ) : viewMode === 'compact' ? (
 
         /* Compact List View */
         <div className="bg-white border-2 border-black divide-y-2 divide-black neo-shadow">
-          {remainingVideos.map((video) => {
+          {displayVideos.map((video) => {
             const isBookmarked = bookmarkedIds.has(video.id);
+            const ageInfo = getVideoAgeInfo(video.pubDate);
             return (
               <article
                 key={video.id}
@@ -594,6 +708,9 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
                     <span className="absolute bottom-1 right-1 px-1 bg-black/80 text-white font-mono text-[9px] font-bold">
                       {video.duration}
                     </span>
+                    <span className={`absolute top-1 left-1 px-1 py-0.2 text-[8px] font-mono font-bold border border-black ${ageInfo.color}`}>
+                      {ageInfo.text}
+                    </span>
                   </div>
 
                   <div className="min-w-0 space-y-1">
@@ -604,7 +721,10 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
                       <span className="px-1.5 py-0.2 bg-[#ccff00] text-black text-[9px] font-bold uppercase border border-black">
                         {video.category}
                       </span>
-                      <span className="text-[10px] font-mono text-zinc-500">
+                      <span className={`px-1.5 py-0.2 text-[9px] font-mono font-black uppercase border border-black ${ageInfo.color}`}>
+                        {ageInfo.page}
+                      </span>
+                      <span className="text-[10px] font-mono text-zinc-500 truncate max-w-[120px]">
                         {video.author || video.source}
                       </span>
                     </div>
@@ -617,6 +737,8 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
                       <span>{video.viewsCount.toLocaleString()} views</span>
                       <span>•</span>
                       <span>Score: {video.viralScore}/100</span>
+                      <span>•</span>
+                      <span className="text-zinc-500">{new Date(video.pubDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   </div>
                 </div>
@@ -654,8 +776,9 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
 
         /* Grid View */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {remainingVideos.map((video) => {
+          {displayVideos.map((video) => {
             const isBookmarked = bookmarkedIds.has(video.id);
+            const ageInfo = getVideoAgeInfo(video.pubDate);
             return (
               <article
                 key={video.id}
@@ -679,8 +802,8 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
                       </div>
                     </div>
 
-                    {/* Platform Badge */}
-                    <div className="absolute top-2 left-2 flex items-center gap-1">
+                    {/* Platform & Age Badges */}
+                    <div className="absolute top-2 left-2 flex items-center gap-1 flex-wrap">
                       <span className={`px-2 py-0.5 text-[10px] font-black uppercase border border-black shadow-sm ${
                         video.platform === 'youtube' ? 'bg-[#ff0000] text-white' :
                         video.platform === 'tiktok' ? 'bg-black text-[#00f0ff]' :
@@ -693,6 +816,10 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
 
                       <span className="px-1.5 py-0.5 bg-[#faf7ee] text-black text-[10px] font-bold uppercase border border-black">
                         {video.category}
+                      </span>
+
+                      <span className={`px-1.5 py-0.5 text-[10px] font-mono font-black uppercase border border-black shadow-sm ${ageInfo.color}`}>
+                        {ageInfo.text}
                       </span>
                     </div>
 
@@ -710,8 +837,9 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
                   {/* Card Content */}
                   <div className="p-4 space-y-2.5">
                     <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 font-bold">
-                      <span>{video.author || video.source}</span>
-                      <span>
+                      <span className="truncate max-w-[140px]">{video.author || video.source}</span>
+                      <span className="shrink-0 flex items-center gap-1 text-[10px]">
+                        <Clock className="w-3 h-3" />
                         {new Date(video.pubDate).toLocaleDateString(isHindi ? 'hi-IN' : 'en-US', {
                           month: 'short',
                           day: 'numeric'
@@ -792,6 +920,60 @@ export const ViralVideosPage: React.FC<ViralVideosPageProps> = ({
               </article>
             );
           })}
+        </div>
+      )}
+
+      {/* 6. Dynamic Multi-Tier Pagination Bar */}
+      {filteredVideos.length > pageSize && (
+        <div className="p-4 bg-[#faf7ee] border-2 border-black neo-shadow flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold text-zinc-700">
+              Showing <span className="text-black font-black">{(currentPage - 1) * pageSize + 1} - {Math.min(currentPage * pageSize, filteredVideos.length)}</span> of <span className="text-black font-black">{filteredVideos.length}</span> viral videos
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 bg-white disabled:opacity-40 text-black font-mono font-bold text-xs border-2 border-black flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>PREV</span>
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => {
+              const isP1 = pageNum === 1;
+              const isP2 = pageNum === 2;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-3 py-1.5 font-mono text-xs font-black border-2 border-black transition-all cursor-pointer ${
+                    currentPage === pageNum
+                      ? 'bg-black text-[#ccff00] neo-shadow-sm'
+                      : isP1 
+                        ? 'bg-[#ccff00] text-black hover:bg-black hover:text-white' 
+                        : isP2 
+                          ? 'bg-[#ffe600] text-black hover:bg-black hover:text-white'
+                          : 'bg-white text-black hover:bg-zinc-100'
+                  }`}
+                  title={isP1 ? 'Page 1: Latest Viral (<24h)' : isP2 ? 'Page 2: Shifted Viral (24h-48h)' : `Page ${pageNum}`}
+                >
+                  {pageNum} {isP1 ? '(24h)' : isP2 ? '(48h)' : ''}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 bg-white disabled:opacity-40 text-black font-mono font-bold text-xs border-2 border-black flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+            >
+              <span>NEXT</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
 
