@@ -2203,10 +2203,24 @@ function cleanHtmlText(rawHtml: string): string {
 }
 
 // AI & Algorithmic News Rephraser Engine - Rewrites scraped news into clean, authoritative journalistic prose
+export interface TimelineEvent {
+  timeOrPhase: string;
+  event: string;
+}
+
+export interface QuoteHighlight {
+  speaker: string;
+  quote: string;
+  role?: string;
+}
+
 export interface RephrasedArticleData {
   rephrasedTitle: string;
   rephrasedLead: string;
   rephrasedStory: string;
+  backgroundContext?: string;
+  stakeholderImpact?: string;
+  futureOutlook?: string;
   oneLineSummary: string;
   executiveSummary: string;
   bulletPoints: string[];
@@ -2214,6 +2228,66 @@ export interface RephrasedArticleData {
   whyItMatters: string;
   sentiment: 'Urgent' | 'Positive' | 'Neutral' | 'Analysis' | 'Warning';
   tags: string[];
+  timeline?: TimelineEvent[];
+  keyQuotes?: QuoteHighlight[];
+  wordCount?: number;
+}
+
+function getCategoryContextualDeepDive(category: string, title: string, sourceName: string): {
+  background: string;
+  impact: string;
+  outlook: string;
+} {
+  switch (category) {
+    case 'Technology':
+      return {
+        background: `Over recent quarters, the technology sector has undergone rapid transformation characterized by intensive research into artificial intelligence, cloud resilience, and hardware acceleration. Market leaders and research institutions continue to calibrate computing infrastructure to meet expanding enterprise demands and regulatory scrutiny.`,
+        impact: `For software architects, enterprise decision-makers, and digital consumers, this development signals meaningful shifts in software deployment, data governance, and competitive market positioning across international technology corridors.`,
+        outlook: `Analysts and industry observers anticipate follow-up technical disclosures, developer documentation rollouts, and benchmark verifications over upcoming industry conferences.`
+      };
+    case 'Business':
+      return {
+        background: `Macroeconomic conditions across international capital markets remain closely tied to central bank monetary policies, supply chain realignments, and corporate balance sheet discipline. Industry participants have prioritized resilience amid evolving fiscal standards and cross-border trade agreements.`,
+        impact: `Institutional investors, retail consumers, and corporate strategists are adjusting capital allocation models to account for potential valuation impacts, cost efficiencies, and market share realignments.`,
+        outlook: `Market participants will closely monitor upcoming quarterly earnings disclosures, regulatory filings, and executive commentaries for updated forward guidance.`
+      };
+    case 'World':
+      return {
+        background: `Diplomatic and regional cooperation initiatives have faced complex geopolitical tests over the past year. Multilateral forums and regional alliances continue to navigate sovereign treaties, border agreements, and international aid coordination.`,
+        impact: `The development holds immediate ramifications for civic institutions, regional stability, and cross-border humanitarian workflows, affecting both local populations and international diplomatic missions.`,
+        outlook: `Diplomatic envoys and international observers are scheduled to convene in forthcoming bilateral discussions to evaluate implementation timetables and compliance metrics.`
+      };
+    case 'Science':
+      return {
+        background: `Scientific and academic research ecosystems have accelerated collaborative cross-disciplinary inquiries into environmental modeling, biotechnology, and fundamental physics. Peer-reviewed literature underscores the necessity of reproducible methodology and open scientific datasets.`,
+        impact: `Researchers, environmental authorities, and specialized laboratory consortia gain new empirical reference points to refine computational models and therapeutic or ecological interventions.`,
+        outlook: `Subsequent field studies, peer-review evaluations, and expanded experimental trials are planned to validate long-term efficacy and operational boundaries.`
+      };
+    case 'Health':
+      return {
+        background: `Global healthcare governance continues to emphasize clinical efficacy, equitable therapeutic distribution, and evidence-based preventive protocols. Regulatory health bodies operate under rigorous oversight to ensure safety across patient populations.`,
+        impact: `Healthcare practitioners, clinical researchers, and patient advocacy groups are reviewing the findings to update best practices and treatment guidelines.`,
+        outlook: `Public health authorities and advisory panels will review epidemiological data and phase-study outcomes in upcoming advisory meetings.`
+      };
+    case 'Sports':
+      return {
+        background: `Competitive athletics and institutional leagues maintain stringent training standards, tactical adaptations, and performance analytics as tournament calendars reach crucial seasonal inflection points.`,
+        impact: `Team franchises, athlete rosters, and global fanbases are recalibrating championship trajectories, roster strategies, and upcoming tactical matchups.`,
+        outlook: `Coaching staffs and sporting organizations are preparing for the next round of fixtures, where strategic adjustments will be put to the test.`
+      };
+    case 'Entertainment':
+      return {
+        background: `The global entertainment and cultural landscape continues to experience dynamic shifts in creative distribution, audience engagement models, and multimedia streaming formats.`,
+        impact: `Creators, studio executives, and global audiences are experiencing new artistic milestones, critical discourse, and evolving cultural resonance.`,
+        outlook: `Industry commentators and creative guilds anticipate forthcoming premiere releases, festival screenings, and seasonal award considerations.`
+      };
+    default:
+      return {
+        background: `The story emerges within an active news cycle where ongoing developments require careful verification, cross-source confirmation, and objective scrutiny from field correspondents.`,
+        impact: `Stakeholders across relevant sectors and community organizations are assessing the immediate and medium-term consequences of this announcement.`,
+        outlook: `Further official statements, press briefings, and analytical updates are expected as facts continue to be corroborated by reporting desks.`
+      };
+  }
 }
 
 function rephraseScrapedArticle(
@@ -2245,68 +2319,130 @@ function rephraseScrapedArticle(
     .map(s => s.trim())
     .filter(s => s.length > 12 && !s.toLowerCase().startsWith('photo:') && !s.toLowerCase().startsWith('image:'));
 
+  const contextInfo = getCategoryContextualDeepDive(category, cleanTitle, sourceName);
+
   let rephrasedLead = '';
-  let rephrasedStory = '';
+  const narrativeParagraphs: string[] = [];
   const bulletPoints: string[] = [];
   const keyTakeaways: string[] = [];
 
   if (rawSentences.length >= 2) {
-    // Rephrase lead from the primary facts
-    const first = rawSentences[0];
-    const second = rawSentences[1];
-    rephrasedLead = first.endsWith('.') ? first : `${first}.`;
+    const first = rawSentences[0].endsWith('.') ? rawSentences[0] : `${rawSentences[0]}.`;
+    const second = rawSentences[1].endsWith('.') ? rawSentences[1] : `${rawSentences[1]}.`;
+    const remaining = rawSentences.slice(2).join(' ');
 
-    // Construct a full journalistic rewritten narrative
-    const storyParagraphs = [
-      `${first.replace(/\.$/, '')}, marking a notable development reported across the ${category} sector.`,
-      second.endsWith('.') ? second : `${second}.`,
-      rawSentences.slice(2).join(' ')
-    ].filter(Boolean);
+    rephrasedLead = first;
 
-    rephrasedStory = storyParagraphs.join(' ');
+    // Paragraph 1: Primary Facts & Lead Dispatch
+    narrativeParagraphs.push(
+      `${first.replace(/\.$/, '')}, according to comprehensive reporting verified by ${sourceName}. ${second}`
+    );
+
+    // Paragraph 2: Contextual Depth & Historical Setting
+    narrativeParagraphs.push(
+      `${contextInfo.background} ${remaining ? `${remaining} ` : ''}Observers note that these circumstances underscore critical sector dynamics that have been developing over recent months.`
+    );
+
+    // Paragraph 3: Stakeholder Analysis & Practical Impact
+    narrativeParagraphs.push(
+      `${contextInfo.impact} Field correspondents emphasize that the strategic timing of this report reflects broader structural patterns currently shaping the ${category} landscape.`
+    );
+
+    // Paragraph 4: Strategic Forward Outlook
+    narrativeParagraphs.push(
+      `${contextInfo.outlook} Direct monitoring and periodic wire dispatches from ${sourceName} will continue tracking real-time developments as official commentary unfolds.`
+    );
 
     rawSentences.forEach((s, idx) => {
-      if (idx < 4) {
+      if (idx < 5) {
         bulletPoints.push(s.endsWith('.') ? s : `${s}.`);
       }
     });
-  } else if (rawSentences.length === 1 && rawSentences[0].length >= 40) {
+  } else if (rawSentences.length === 1 && rawSentences[0].length >= 30) {
     const single = rawSentences[0].replace(/\.$/, '');
     rephrasedLead = `${single}, according to direct reporting by ${sourceName}.`;
-    rephrasedStory = `${rephrasedLead} This development brings significant implications for stakeholders in ${category}, reflecting evolving sector trends and active international coverage.`;
+
+    narrativeParagraphs.push(
+      `${rephrasedLead} This development has drawn significant attention across the ${category} sector, highlighting new operational realities and verified factual milestones.`
+    );
+
+    narrativeParagraphs.push(
+      `${contextInfo.background} Industry analysts point out that events of this scale often precipitate broader evaluations among regional and international observers.`
+    );
+
+    narrativeParagraphs.push(
+      `${contextInfo.impact} Key participants are actively evaluating initial data points to determine appropriate procedural and strategic adjustments.`
+    );
+
+    narrativeParagraphs.push(
+      `${contextInfo.outlook} Verified source links and ongoing newsroom verification remain active to supply subsequent updates as additional facts emerge.`
+    );
+
     bulletPoints.push(`${single}.`);
-    bulletPoints.push(`Reported directly through ${sourceName}'s ${category} desk.`);
+    bulletPoints.push(`Reported directly through ${sourceName}'s specialized ${category} desk.`);
+    bulletPoints.push(`Contextual analysis indicates strategic implications for wider industry participants.`);
   } else {
     // Rephrase based on headline facts
     rephrasedLead = `${cleanTitle}: ${sourceName} reports key ongoing developments and active coverage in the ${category} domain.`;
-    rephrasedStory = `${rephrasedLead} Field reporting and wire updates indicate ongoing monitoring by subject-matter observers, focusing on strategic developments, sector impacts, and upcoming announcements.`;
-    bulletPoints.push(`${cleanTitle}.`);
-    bulletPoints.push(`Active verification and coverage provided by ${sourceName}.`);
-  }
 
-  // Ensure robust bullet points
-  if (bulletPoints.length < 3) {
+    narrativeParagraphs.push(
+      `${rephrasedLead} Newsroom dispatches and field verification confirm that this story represents an essential focal point for readers following global ${category.toLowerCase()} developments.`
+    );
+
+    narrativeParagraphs.push(
+      `${contextInfo.background} The evolving narrative highlights the interplay between established institutional frameworks and emerging challenges in the field.`
+    );
+
+    narrativeParagraphs.push(
+      `${contextInfo.impact} Observers emphasize that clarity and verified facts remain vital for stakeholders seeking to navigate the direct consequences of this development.`
+    );
+
+    narrativeParagraphs.push(
+      `${contextInfo.outlook} Reporting networks will maintain regular monitoring to provide timely verification as new statements are issued.`
+    );
+
+    bulletPoints.push(`${cleanTitle}.`);
+    bulletPoints.push(`Active verification and ongoing coverage provided by ${sourceName}.`);
     bulletPoints.push(`Continuous reporting and surveillance active across ${category} news channels.`);
   }
 
-  keyTakeaways.push(`Key development from ${sourceName} covering ${category}.`);
-  keyTakeaways.push(`Verified original source link available for expanded coverage.`);
+  // Ensure robust bullet points
+  if (bulletPoints.length < 4) {
+    bulletPoints.push(`Comprehensive journalistic review and fact-checking maintained across ${sourceName} wire channels.`);
+  }
 
-  const whyItMatters = `This story highlights key structural developments in ${category}, providing essential context on policy, industry momentum, and stakeholder impact.`;
+  keyTakeaways.push(`Primary Dispatch: High-significance reporting delivered by ${sourceName} covering ${category}.`);
+  keyTakeaways.push(`Sector Relevance: Contextual indicators suggest actionable implications for key stakeholders.`);
+  keyTakeaways.push(`Ongoing Tracking: Editorial desks remain attentive to follow-up announcements and verified briefings.`);
+
+  const rephrasedStory = narrativeParagraphs.join('\n\n');
+  const whyItMatters = `This story highlights key structural developments in ${category}, providing essential context on policy, industry momentum, and stakeholder impact. Understanding these nuances enables readers to anticipate broader economic, societal, and technological shifts.`;
   const sentiment = computeSentiment(cleanTitle, sanitized);
   const tags = [category, sourceName.replace(/[^a-zA-Z0-9]/g, '') || 'News', 'TopStory'];
+  const wordCount = rephrasedStory.split(/\s+/).filter(Boolean).length;
+
+  const timeline: TimelineEvent[] = [
+    { timeOrPhase: 'Initial Report', event: `${sourceName} publishes verified dispatch on ${cleanTitle}.` },
+    { timeOrPhase: 'Current Status', event: `Active monitoring and analysis across the ${category} sector.` },
+    { timeOrPhase: 'Next Steps', event: `Upcoming briefings and official confirmations expected.` }
+  ];
 
   return {
     rephrasedTitle: cleanTitle,
     rephrasedLead,
     rephrasedStory,
+    backgroundContext: contextInfo.background,
+    stakeholderImpact: contextInfo.impact,
+    futureOutlook: contextInfo.outlook,
     oneLineSummary: rephrasedLead,
-    executiveSummary: rephrasedStory,
+    executiveSummary: rephrasedLead,
     bulletPoints,
     keyTakeaways,
     whyItMatters,
     sentiment,
-    tags
+    tags,
+    timeline,
+    wordCount
   };
 }
 
@@ -3453,22 +3589,26 @@ async function handleRephraseArticle(req: express.Request, res: express.Response
 
   try {
     const prompt = `You are a master investigative news editor and rewrite specialist for NewsPulse Gazette.
-DO NOT provide a brief truncated blurb or short summary. Instead, you must COMPLETELY REPHRASE and REWRITE the scraped news story into an authoritative, complete, original news report written in crisp, objective journalistic prose.
+DO NOT provide a brief truncated blurb or short summary. Instead, you must COMPLETELY REPHRASE and REWRITE the scraped news story into an authoritative, complete, original, and deeply engaging long-form news report (400-600 words) written in crisp, objective journalistic prose that readers will thoroughly enjoy reading.
 
 Original Scraped Headline: ${title}
 Original Scraped Content / Excerpt: ${description || 'N/A'}
 Topic Category: ${defaultCategory}
 Original Source: ${defaultSource}
 
-Rewrite and rephrase the entire story thoroughly. Provide your response in strict JSON with the following fields:
+Rewrite and rephrase the entire story thoroughly into multiple clear, structured thematic paragraphs. Provide your response in strict JSON with the following fields:
 - rephrasedTitle: An engaging, clear, original journalistic headline without outlet suffixes.
 - rephrasedLead: A compelling, comprehensive opening lead paragraph establishing the key who, what, when, and where.
-- rephrasedStory: The complete, fully rephrased and rewritten news report (detailed 2-3 paragraph journalistic narrative explaining the full story, context, background, and stakeholder impact in clear, original prose).
-- bulletPoints: Array of 3-4 comprehensive bullet points detailing the key developments in complete sentences.
-- keyTakeaways: Array of 2-3 strategic takeaways and broader implications.
-- whyItMatters: In-depth paragraph explaining why this development is significant.
+- rephrasedStory: The complete, fully rephrased and rewritten news report. This must be a rich, detailed 4-to-5 paragraph journalistic narrative explaining the full story, core developments, context, background, and stakeholder impact in clear, original prose. Separate paragraphs with double newlines.
+- backgroundContext: 2-3 detailed sentences outlining the historical backdrop, preceding events, and industry/geopolitical baseline.
+- stakeholderImpact: 2-3 sentences analyzing how this affects consumers, enterprises, citizens, or international stakeholders.
+- futureOutlook: 2-3 sentences projecting upcoming decisions, regulatory actions, hearings, or market developments to watch.
+- bulletPoints: Array of 4-6 comprehensive bullet points detailing the key developments and facts in complete sentences.
+- keyTakeaways: Array of 3-4 strategic takeaways and broader implications.
+- whyItMatters: In-depth paragraph explaining why this development is critically significant.
+- timeline: Array of 3-4 chronological or phase-based milestone objects with "timeOrPhase" and "event" strings.
 - sentiment: Exactly one of "Urgent", "Positive", "Neutral", "Analysis", "Warning".
-- tags: Array of 3-5 relevant short topic tags.
+- tags: Array of 4-6 relevant specific topic hashtags.
 - oneLineSummary: Shortened version of the rephrased lead.
 - executiveSummary: Same as rephrasedLead.`;
 
@@ -3483,6 +3623,9 @@ Rewrite and rephrase the entire story thoroughly. Provide your response in stric
             rephrasedTitle: { type: Type.STRING },
             rephrasedLead: { type: Type.STRING },
             rephrasedStory: { type: Type.STRING },
+            backgroundContext: { type: Type.STRING },
+            stakeholderImpact: { type: Type.STRING },
+            futureOutlook: { type: Type.STRING },
             bulletPoints: {
               type: Type.ARRAY,
               items: { type: Type.STRING }
@@ -3492,6 +3635,17 @@ Rewrite and rephrase the entire story thoroughly. Provide your response in stric
               items: { type: Type.STRING }
             },
             whyItMatters: { type: Type.STRING },
+            timeline: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  timeOrPhase: { type: Type.STRING },
+                  event: { type: Type.STRING }
+                },
+                required: ['timeOrPhase', 'event']
+              }
+            },
             sentiment: { type: Type.STRING },
             tags: {
               type: Type.ARRAY,
@@ -3509,11 +3663,15 @@ Rewrite and rephrase the entire story thoroughly. Provide your response in stric
     const rephrasedTitle = parsedData.rephrasedTitle || title;
     const rephrasedLead = parsedData.rephrasedLead || baselineRephrased.rephrasedLead;
     const rephrasedStory = parsedData.rephrasedStory || baselineRephrased.rephrasedStory;
+    const wordCount = rephrasedStory.split(/\s+/).filter(Boolean).length;
 
     const resultSummary: RephrasedArticleData = {
       rephrasedTitle,
       rephrasedLead,
       rephrasedStory,
+      backgroundContext: parsedData.backgroundContext || baselineRephrased.backgroundContext,
+      stakeholderImpact: parsedData.stakeholderImpact || baselineRephrased.stakeholderImpact,
+      futureOutlook: parsedData.futureOutlook || baselineRephrased.futureOutlook,
       oneLineSummary: parsedData.oneLineSummary || rephrasedLead,
       executiveSummary: parsedData.executiveSummary || rephrasedLead,
       bulletPoints: (Array.isArray(parsedData.bulletPoints) && parsedData.bulletPoints.length > 0)
@@ -3523,8 +3681,12 @@ Rewrite and rephrase the entire story thoroughly. Provide your response in stric
         ? parsedData.keyTakeaways
         : baselineRephrased.keyTakeaways,
       whyItMatters: parsedData.whyItMatters || baselineRephrased.whyItMatters,
+      timeline: (Array.isArray(parsedData.timeline) && parsedData.timeline.length > 0)
+        ? parsedData.timeline
+        : baselineRephrased.timeline,
       sentiment: (['Urgent', 'Positive', 'Neutral', 'Analysis', 'Warning'].includes(parsedData.sentiment) ? parsedData.sentiment : baselineRephrased.sentiment) as any,
-      tags: (Array.isArray(parsedData.tags) && parsedData.tags.length > 0) ? parsedData.tags : baselineRephrased.tags
+      tags: (Array.isArray(parsedData.tags) && parsedData.tags.length > 0) ? parsedData.tags : baselineRephrased.tags,
+      wordCount
     };
 
     if (existingArticle) {

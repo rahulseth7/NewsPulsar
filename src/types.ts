@@ -4,12 +4,45 @@ export type SentimentType = 'Urgent' | 'Positive' | 'Neutral' | 'Analysis' | 'Wa
 
 export type Language = 'en' | 'hi';
 
+export interface TimelineEvent {
+  timeOrPhase: string;
+  event: string;
+}
+
+export interface QuoteHighlight {
+  speaker: string;
+  quote: string;
+  role?: string;
+}
+
+export interface DetailedArticleStory {
+  rephrasedTitle?: string;
+  rephrasedLead?: string;
+  rephrasedStory?: string;
+  backgroundContext?: string;
+  stakeholderImpact?: string;
+  futureOutlook?: string;
+  oneLineSummary?: string;
+  executiveSummary?: string;
+  bulletPoints: string[];
+  keyTakeaways: string[];
+  whyItMatters: string;
+  sentiment: SentimentType;
+  tags: string[];
+  timeline?: TimelineEvent[];
+  keyQuotes?: QuoteHighlight[];
+  wordCount?: number;
+}
+
 export interface HindiArticleContent {
   title: string;
   description: string;
   contentSnippet?: string;
   rephrasedLead?: string;
   rephrasedStory?: string;
+  backgroundContext?: string;
+  stakeholderImpact?: string;
+  futureOutlook?: string;
   oneLineSummary?: string;
   executiveSummary?: string;
   bulletPoints?: string[];
@@ -38,18 +71,7 @@ export interface NewsArticle {
   slug: string;
   metaDescription: string;
   hindi?: HindiArticleContent;
-  aiSummary?: {
-    rephrasedTitle?: string;
-    rephrasedLead?: string;
-    rephrasedStory?: string;
-    oneLineSummary?: string;
-    executiveSummary?: string;
-    bulletPoints: string[];
-    keyTakeaways: string[];
-    whyItMatters: string;
-    sentiment: SentimentType;
-    tags: string[];
-  };
+  aiSummary?: DetailedArticleStory;
 }
 
 export interface NewsSourceInfo {
@@ -90,18 +112,7 @@ export interface AISummaryRequest {
 
 export interface AISummaryResponse {
   success: boolean;
-  summary: {
-    rephrasedTitle?: string;
-    rephrasedLead?: string;
-    rephrasedStory?: string;
-    oneLineSummary?: string;
-    executiveSummary?: string;
-    bulletPoints: string[];
-    keyTakeaways: string[];
-    whyItMatters: string;
-    sentiment: SentimentType;
-    tags: string[];
-  };
+  summary: DetailedArticleStory;
   error?: string;
 }
 

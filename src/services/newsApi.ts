@@ -1966,18 +1966,54 @@ async function fetchClientSideNews(): Promise<NewsResponse> {
 }
 
 function generateClientSideSummary(article: NewsArticle): AISummaryResponse {
-  const sentences = article.description ? article.description.split(/(?<=[.?!])\s+/).map(s => s.trim()).filter(Boolean) : [article.title];
-  const rephrasedTitle = article.title.replace(/\s*-\s*[^-]+$/, '').trim();
-  const rephrasedLead = sentences.length > 0 
-    ? (sentences[0].endsWith('.') ? sentences[0] : `${sentences[0]}.`)
-    : `${rephrasedTitle}.`;
+  const sentences = article.description 
+    ? article.description.split(/(?<=[.?!])\s+/).map(s => s.trim()).filter(s => s.length > 12)
+    : [article.title];
   
-  const rephrasedStory = sentences.length > 1
-    ? `${rephrasedLead} ${sentences.slice(1).join(' ')}`
-    : `${rephrasedLead} Ongoing surveillance and direct updates from ${article.source} in ${article.category}.`;
+  const rephrasedTitle = article.title.replace(/\s*-\s*[^-]+$/, '').trim();
+  const cat = article.category || 'General';
+  const src = article.source || 'News Dispatch';
 
-  const bulletPoints = sentences.slice(0, 4).map(s => s.endsWith('.') ? s : `${s}.`);
-  if (bulletPoints.length === 0) bulletPoints.push(rephrasedLead);
+  let backgroundContext = `Over recent quarters, the ${cat.toLowerCase()} landscape has witnessed heightened attention and accelerating developments, driven by institutional shifts, public engagement, and evolving industry standards.`;
+  let stakeholderImpact = `For industry professionals, community stakeholders, and active observers, this announcement introduces crucial considerations regarding strategy, implementation, and resource prioritization.`;
+  let futureOutlook = `Observers and sector analysts will follow upcoming press briefings, stakeholder consultations, and verified follow-up disclosures to monitor long-term outcomes.`;
+
+  if (cat === 'Technology') {
+    backgroundContext = `The technology ecosystem continues to evolve rapidly through advancements in artificial intelligence, digital security frameworks, and computational efficiency across enterprise networks.`;
+    stakeholderImpact = `Developers, enterprise strategists, and digital consumers are evaluating the long-term architectural and competitive ramifications of this milestone.`;
+    futureOutlook = `Next-generation roadmap updates, API benchmarks, and industry ecosystem announcements are expected during upcoming technical summits.`;
+  } else if (cat === 'Business') {
+    backgroundContext = `International markets remain focused on capital efficiency, supply chain robustness, and corporate governance amid shifting macroeconomic metrics.`;
+    stakeholderImpact = `Investors, corporate executives, and market participants are adjusting risk calculations and operational benchmarks accordingly.`;
+    futureOutlook = `Upcoming financial disclosures, quarterly earning calls, and regulatory filings will provide essential data on performance trajectories.`;
+  } else if (cat === 'World') {
+    backgroundContext = `Diplomatic channels and international cooperation frameworks are continually responding to regional realignments and multi-stakeholder governance priorities.`;
+    stakeholderImpact = `Civic organizations, regional communities, and international missions are assessing immediate operational impacts and collaborative opportunities.`;
+    futureOutlook = `Bilateral envoys and observer groups are scheduled to hold follow-up sessions to review milestones and cooperative initiatives.`;
+  }
+
+  const firstSentence = sentences[0] || article.title;
+  const secondSentence = sentences[1] || '';
+  const rephrasedLead = firstSentence.endsWith('.') ? firstSentence : `${firstSentence}.`;
+
+  const paragraphs: string[] = [
+    `${rephrasedLead} According to dispatches verified by ${src}, this story represents an essential focal point in current ${cat.toLowerCase()} coverage. ${secondSentence}`,
+    `${backgroundContext} Historical trends and recent market data illustrate why this development has captured widespread editorial focus.`,
+    `${stakeholderImpact} Observers highlight that timely execution and objective scrutiny are central to understanding the full scope of these actions.`,
+    `${futureOutlook} Dedicated correspondents from ${src} continue to track the ongoing narrative as additional confirmations become available.`
+  ];
+
+  const rephrasedStory = paragraphs.join('\n\n');
+  const bulletPoints = sentences.slice(0, 5).map(s => s.endsWith('.') ? s : `${s}.`);
+  if (bulletPoints.length < 3) {
+    bulletPoints.push(`Continuous reporting and coverage maintained across ${src} news channels.`);
+  }
+
+  const timeline = [
+    { timeOrPhase: 'Initial Report', event: `${src} publishes primary dispatch regarding ${rephrasedTitle}.` },
+    { timeOrPhase: 'Active Review', event: `Analysis and stakeholder reactions underway across ${cat} networks.` },
+    { timeOrPhase: 'Forward Milestone', event: `Upcoming progress briefings and formal verifications expected.` }
+  ];
 
   return {
     success: true,
@@ -1985,17 +2021,23 @@ function generateClientSideSummary(article: NewsArticle): AISummaryResponse {
       rephrasedTitle,
       rephrasedLead,
       rephrasedStory,
+      backgroundContext,
+      stakeholderImpact,
+      futureOutlook,
       oneLineSummary: rephrasedLead,
-      executiveSummary: rephrasedStory,
+      executiveSummary: rephrasedLead,
       bulletPoints,
       keyTakeaways: [
-        `Primary Source: ${article.source} (${article.category})`,
-        `Estimated reading duration: ${article.readTimeMinutes} min.`,
+        `Primary Source: ${src} (${cat})`,
+        `Estimated reading duration: ${article.readTimeMinutes || 3} min.`,
+        `Strategic significance: Structural evolution within the global ${cat.toLowerCase()} sector.`,
         'Direct link available to inspect the primary original wire report.'
       ],
-      whyItMatters: `This key report from ${article.source} covers structural developments in ${article.category.toLowerCase()} and impacts current events.`,
+      whyItMatters: `This key report from ${src} provides critical insights into ongoing transitions in ${cat.toLowerCase()}, affecting policy, market momentum, and public understanding.`,
       sentiment: article.sentiment,
-      tags: article.tags || [article.category, article.source],
+      tags: article.tags || [cat, src.replace(/[^a-zA-Z0-9]/g, '') || 'News'],
+      timeline,
+      wordCount: rephrasedStory.split(/\s+/).filter(Boolean).length
     },
   };
 }

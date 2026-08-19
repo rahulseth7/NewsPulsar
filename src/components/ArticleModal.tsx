@@ -19,17 +19,16 @@ import {
   Clock, 
   Radio, 
   Copy,
-  Mail,
-  Send,
-  Globe,
-  MessageSquare,
   ChevronLeft,
   ChevronRight,
   BookOpen,
   Type,
-  Minus,
-  Plus,
-  Languages
+  History,
+  TrendingUp,
+  Compass,
+  Layers,
+  FileText,
+  Calendar
 } from 'lucide-react';
 
 interface ArticleModalProps {
@@ -523,13 +522,8 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
 
               {/* Distraction-Free Article Body Text */}
               <div className={`space-y-6 ${sizeClasses}`}>
-                {summaryData?.rephrasedStory ? (
-                  summaryData.rephrasedStory.split(/(?<=[.?!])\s+(?=[A-Z])/).reduce((acc: string[], sent: string, idx: number) => {
-                    const groupIdx = Math.floor(idx / 3);
-                    if (!acc[groupIdx]) acc[groupIdx] = '';
-                    acc[groupIdx] += (acc[groupIdx] ? ' ' : '') + sent;
-                    return acc;
-                  }, []).map((paragraph, pIdx) => (
+                {displayStory ? (
+                  displayStory.split(/\n\n+/).map((paragraph, pIdx) => (
                     <p key={pIdx} className="leading-relaxed sm:leading-loose">
                       {paragraph}
                     </p>
@@ -541,14 +535,54 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                 )}
               </div>
 
+              {/* Context & Background Deep Dive */}
+              {(summaryData?.backgroundContext || article.hindi?.backgroundContext) && (
+                <div className="my-8 p-6 rounded-md border border-current/20 bg-current/5 space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider opacity-80 flex items-center gap-2">
+                    <History className="w-4 h-4" />
+                    <span>Background & Historical Context</span>
+                  </h3>
+                  <p className={`${sizeClasses} leading-relaxed opacity-90`}>
+                    {isHindi ? (article.hindi?.backgroundContext || summaryData?.backgroundContext) : summaryData?.backgroundContext}
+                  </p>
+                </div>
+              )}
+
+              {/* Stakeholder & Market Impact */}
+              {(summaryData?.stakeholderImpact || article.hindi?.stakeholderImpact) && (
+                <div className="my-8 p-6 rounded-md border border-current/20 bg-current/5 space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider opacity-80 flex items-center gap-2">
+                    <Layers className="w-4 h-4" />
+                    <span>Stakeholder & Sector Impact</span>
+                  </h3>
+                  <p className={`${sizeClasses} leading-relaxed opacity-90`}>
+                    {isHindi ? (article.hindi?.stakeholderImpact || summaryData?.stakeholderImpact) : summaryData?.stakeholderImpact}
+                  </p>
+                </div>
+              )}
+
+              {/* Strategic Future Outlook */}
+              {(summaryData?.futureOutlook || article.hindi?.futureOutlook) && (
+                <div className="my-8 p-6 rounded-md border border-current/20 bg-current/5 space-y-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider opacity-80 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Strategic Forward Outlook</span>
+                  </h3>
+                  <p className={`${sizeClasses} leading-relaxed opacity-90`}>
+                    {isHindi ? (article.hindi?.futureOutlook || summaryData?.futureOutlook) : summaryData?.futureOutlook}
+                  </p>
+                </div>
+              )}
+
               {/* Key Highlights / Bullet Points */}
-              {summaryData?.bulletPoints && summaryData.bulletPoints.length > 0 && (
+              {displayBulletPoints && displayBulletPoints.length > 0 && (
                 <div className="my-10 pt-6 border-t border-current/20 space-y-4">
-                  <h3 className="text-sm font-bold tracking-wider uppercase opacity-80">
-                    Key Developments
+                  <h3 className="text-sm font-bold tracking-wider uppercase opacity-80 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Key Developments</span>
                   </h3>
                   <ul className={`space-y-3 ${sizeClasses}`}>
-                    {summaryData.bulletPoints.map((pt, i) => (
+                    {displayBulletPoints.map((pt, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <span className="text-current opacity-60 mt-1">•</span>
                         <span>{pt}</span>
@@ -558,14 +592,52 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                 </div>
               )}
 
+              {/* Strategic Takeaways */}
+              {summaryData?.keyTakeaways && summaryData.keyTakeaways.length > 0 && (
+                <div className="my-8 p-6 rounded-md border border-current/20 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider opacity-80 flex items-center gap-2">
+                    <Compass className="w-4 h-4" />
+                    <span>Strategic Takeaways</span>
+                  </h4>
+                  <ul className={`space-y-2 ${sizeClasses}`}>
+                    {summaryData.keyTakeaways.map((takeaway, tIdx) => (
+                      <li key={tIdx} className="flex items-start gap-2.5 opacity-90">
+                        <span className="mt-1 text-xs">◆</span>
+                        <span>{takeaway}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Timeline Milestones */}
+              {summaryData?.timeline && summaryData.timeline.length > 0 && (
+                <div className="my-8 p-6 rounded-md border border-current/20 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider opacity-80 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>Key Milestones & Timeline</span>
+                  </h4>
+                  <div className="space-y-3 pt-2">
+                    {summaryData.timeline.map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3 text-sm sm:text-base">
+                        <span className="px-2 py-0.5 rounded-full border border-current/30 text-xs font-mono font-bold shrink-0 mt-0.5">
+                          {item.timeOrPhase}
+                        </span>
+                        <p className="opacity-90 leading-relaxed">{item.event}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Strategic Importance */}
-              {summaryData?.whyItMatters && (
+              {displayWhyItMatters && (
                 <div className="p-6 rounded-md border border-current/20 my-8 opacity-95">
                   <h4 className="text-xs font-bold uppercase tracking-wider opacity-70 mb-2">
                     Why It Matters
                   </h4>
                   <p className={`${sizeClasses} italic`}>
-                    {summaryData.whyItMatters}
+                    {displayWhyItMatters}
                   </p>
                 </div>
               )}
@@ -838,18 +910,21 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                   )}
 
                   {/* Comprehensive Full Rephrased Article Story */}
-                  {summaryData.rephrasedStory && (
+                  {displayStory && (
                     <div className="bg-white p-5 border-2 border-black space-y-3 neo-shadow-sm">
-                      <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo">
-                        COMPLETE REPHRASED DISPATCH
-                      </h4>
-                      <div className="text-zinc-900 text-base leading-relaxed font-body space-y-3">
-                        {summaryData.rephrasedStory.split(/(?<=[.?!])\s+(?=[A-Z])/).reduce((acc: string[], sent: string, idx: number) => {
-                          const groupIdx = Math.floor(idx / 3);
-                          if (!acc[groupIdx]) acc[groupIdx] = '';
-                          acc[groupIdx] += (acc[groupIdx] ? ' ' : '') + sent;
-                          return acc;
-                        }, []).map((paragraph, pIdx) => (
+                      <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
+                        <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-[#ff2a85]" />
+                          <span>AUTHORITATIVE JOURNALISTIC DISPATCH</span>
+                        </h4>
+                        {summaryData?.wordCount && (
+                          <span className="text-[11px] font-mono font-bold text-zinc-500">
+                            {summaryData.wordCount} words
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-zinc-900 text-base leading-relaxed font-body space-y-4 pt-1">
+                        {displayStory.split(/\n\n+/).map((paragraph, pIdx) => (
                           <p key={pIdx} className="leading-relaxed">
                             {paragraph}
                           </p>
@@ -858,14 +933,54 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                     </div>
                   )}
 
-                  {/* Bullet Points / Key Developments */}
-                  {summaryData.bulletPoints && summaryData.bulletPoints.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo">
-                        KEY DEVELOPMENTS
+                  {/* Context & Background Deep Dive */}
+                  {(summaryData?.backgroundContext || article.hindi?.backgroundContext) && (
+                    <div className="bg-[#f0fdf4] border-2 border-black p-4 space-y-2 neo-shadow-sm">
+                      <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo flex items-center gap-1.5">
+                        <History className="w-4 h-4 text-emerald-700" />
+                        <span>HISTORICAL &amp; SECTOR CONTEXT</span>
                       </h4>
-                      <ul className="space-y-2">
-                        {summaryData.bulletPoints.map((pt, i) => (
+                      <p className="text-zinc-800 text-sm leading-relaxed font-body">
+                        {isHindi ? (article.hindi?.backgroundContext || summaryData?.backgroundContext) : summaryData?.backgroundContext}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Stakeholder & Sector Impact */}
+                  {(summaryData?.stakeholderImpact || article.hindi?.stakeholderImpact) && (
+                    <div className="bg-[#eff6ff] border-2 border-black p-4 space-y-2 neo-shadow-sm">
+                      <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo flex items-center gap-1.5">
+                        <Layers className="w-4 h-4 text-blue-700" />
+                        <span>STAKEHOLDER &amp; MARKET IMPACT</span>
+                      </h4>
+                      <p className="text-zinc-800 text-sm leading-relaxed font-body">
+                        {isHindi ? (article.hindi?.stakeholderImpact || summaryData?.stakeholderImpact) : summaryData?.stakeholderImpact}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Strategic Forward Outlook */}
+                  {(summaryData?.futureOutlook || article.hindi?.futureOutlook) && (
+                    <div className="bg-[#faf5ff] border-2 border-black p-4 space-y-2 neo-shadow-sm">
+                      <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo flex items-center gap-1.5">
+                        <TrendingUp className="w-4 h-4 text-purple-700" />
+                        <span>STRATEGIC FORWARD OUTLOOK</span>
+                      </h4>
+                      <p className="text-zinc-800 text-sm leading-relaxed font-body">
+                        {isHindi ? (article.hindi?.futureOutlook || summaryData?.futureOutlook) : summaryData?.futureOutlook}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Bullet Points / Key Developments */}
+                  {displayBulletPoints && displayBulletPoints.length > 0 && (
+                    <div className="bg-white p-4 border-2 border-black space-y-2 neo-shadow-sm">
+                      <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-black" />
+                        <span>KEY DEVELOPMENTS &amp; FACTS</span>
+                      </h4>
+                      <ul className="space-y-2 pt-1">
+                        {displayBulletPoints.map((pt, i) => (
                           <li key={i} className="flex items-start gap-2.5 text-zinc-800 text-sm leading-relaxed font-body">
                             <span className="w-2 h-2 bg-[#ff2a85] border border-black mt-1.5 shrink-0" />
                             <span>{pt}</span>
@@ -875,20 +990,58 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                     </div>
                   )}
 
+                  {/* Strategic Key Takeaways */}
+                  {summaryData?.keyTakeaways && summaryData.keyTakeaways.length > 0 && (
+                    <div className="bg-white p-4 border-2 border-black space-y-2 neo-shadow-sm">
+                      <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo flex items-center gap-1.5">
+                        <Compass className="w-3.5 h-3.5 text-[#ff2a85]" />
+                        <span>STRATEGIC TAKEAWAYS</span>
+                      </h4>
+                      <ul className="space-y-1.5 pt-1">
+                        {summaryData.keyTakeaways.map((takeaway, tIdx) => (
+                          <li key={tIdx} className="flex items-start gap-2 text-zinc-800 text-sm leading-relaxed font-body">
+                            <span className="text-[#ff2a85] font-black shrink-0">◆</span>
+                            <span>{takeaway}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Timeline / Milestones */}
+                  {summaryData?.timeline && summaryData.timeline.length > 0 && (
+                    <div className="bg-white p-4 border-2 border-black space-y-3 neo-shadow-sm">
+                      <h4 className="text-xs font-black text-black uppercase tracking-wider font-neo flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-black" />
+                        <span>KEY PHASES &amp; TIMELINE</span>
+                      </h4>
+                      <div className="space-y-2.5 pt-1">
+                        {summaryData.timeline.map((item, idx) => (
+                          <div key={idx} className="flex items-start gap-2.5 text-sm font-body">
+                            <span className="px-2 py-0.5 bg-black text-[#ccff00] text-[11px] font-mono font-black shrink-0 border border-black">
+                              {item.timeOrPhase}
+                            </span>
+                            <p className="text-zinc-800 leading-relaxed">{item.event}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Why It Matters Callout */}
-                  {summaryData.whyItMatters && (
+                  {displayWhyItMatters && (
                     <div className="bg-[#00f0ff]/20 border-2 border-black p-4 neo-shadow-sm">
                       <h5 className="text-xs font-black text-black uppercase tracking-wide font-neo">STRATEGIC IMPORTANCE</h5>
-                      <p className="text-zinc-900 text-sm mt-1 leading-relaxed font-body">{summaryData.whyItMatters}</p>
+                      <p className="text-zinc-900 text-sm mt-1 leading-relaxed font-body">{displayWhyItMatters}</p>
                     </div>
                   )}
 
                   {/* Tags */}
-                  {summaryData.tags && summaryData.tags.length > 0 && (
+                  {displayTags && displayTags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1 font-mono font-bold">
-                      {summaryData.tags.map((tag, idx) => (
+                      {displayTags.map((tag, idx) => (
                         <span key={idx} className="px-2.5 py-0.5 text-xs bg-white text-black border border-black neo-shadow-sm">
-                          #{tag}
+                          #{tag.replace(/^#/, '')}
                         </span>
                       ))}
                     </div>
