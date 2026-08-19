@@ -1,5 +1,5 @@
 {
-  "name": "New Pulse",
+  "name": "News Pulsar",
   "description": "Live news and viral video aggregator featuring multi-source automated video scraping (Reddit JSON, YouTube RSS, Vimeo, TED), AI auto-tagging, Google Video XML sitemap SEO engine, and dual-layer zero-loss persistence.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

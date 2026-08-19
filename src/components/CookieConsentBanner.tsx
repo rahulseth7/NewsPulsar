@@ -52,7 +52,7 @@ export const CookieConsentBanner: React.FC<CookieConsentBannerProps> = ({ onOpen
               </span>
             </div>
             <p className="text-[11px] sm:text-xs text-zinc-700 leading-relaxed font-body font-medium">
-              NewsPulse and authorized partners (including <strong className="text-black font-black">Google AdSense</strong>) use cookies to keep the feed fresh, personalize content, and serve relevant ads. Check our{' '}
+              News Pulsar and authorized partners (including <strong className="text-black font-black">Google AdSense</strong>) use cookies to keep the feed fresh, personalize content, and serve relevant ads. Check our{' '}
               <button
                 onClick={() => onNavigatePage ? onNavigatePage('privacy') : onOpenPolicy('privacy')}
                 className="text-black font-neo font-black underline hover:text-[#ff2a85] cursor-pointer"

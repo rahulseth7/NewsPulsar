@@ -61,7 +61,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
   const faqs = [
     {
-      q: 'How frequently are news articles updated on New Pulse?',
+      q: 'How frequently are news articles updated on News Pulsar?',
       a: 'Our server-side ingestion engine executes continuous polling across 30+ international RSS and XML news wire feeds every 10 minutes. Live stories are immediately processed, deduplicated, and enriched with AI tags and summaries.'
     },
     {
@@ -77,8 +77,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
       a: 'We respect intellectual property rights. If you are a copyright owner or authorized representative requesting feed removal or snippet modification, select "DMCA & Copyright" in the form below with the relevant article URL and verification details.'
     },
     {
-      q: 'Is New Pulse compliant with Google AdSense and /ads.txt?',
-      a: 'Yes. New Pulse maintains full compliance with Google Publisher Policies, Better Ads Standards, and hosts an active /ads.txt file identifying publisher ID ca-pub-6411773855584982.'
+      q: 'Is News Pulsar compliant with Google AdSense and /ads.txt?',
+      a: 'Yes. News Pulsar maintains full compliance with Google Publisher Policies, Better Ads Standards, and hosts an active /ads.txt file identifying publisher ID ca-pub-6411773855584982.'
     }
   ];
 

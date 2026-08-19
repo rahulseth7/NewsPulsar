@@ -117,7 +117,7 @@ export const AdvertisePage: React.FC<AdvertisePageProps> = ({
 
             <p className="text-base sm:text-lg text-zinc-800 max-w-3xl leading-relaxed font-body">
               Reach tech leaders, financial analysts, and global news followers. 
-              New Pulse offers Google AdSense integration, verified <code>/ads.txt</code> publisher certification, 
+              News Pulsar offers Google AdSense integration, verified <code>/ads.txt</code> publisher certification, 
               and direct high-impact broadsheet display sponsorships.
             </p>
           </div>

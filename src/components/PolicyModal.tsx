@@ -61,7 +61,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
                   Official Compliance & Governance
                 </span>
                 <h2 id="policy-modal-title" className="text-base sm:text-xl font-black uppercase tracking-tight text-stone-950">
-                  New Pulse Legal & Policy Center
+                  News Pulsar Legal & Policy Center
                 </h2>
               </div>
             </div>
@@ -123,14 +123,14 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
                 <section className="space-y-2">
                   <h4 className="font-serif font-bold text-base text-stone-950 uppercase">1. Introduction & Scope</h4>
                   <p className="text-stone-800">
-                    Welcome to <strong>New Pulse</strong> ("we", "our", or "us"). We are committed to protecting the privacy of our readers and visitors. This Privacy Policy explains how information is collected, used, and safeguarded when you visit our real-time news aggregation portal.
+                    Welcome to <strong>News Pulsar</strong> ("we", "our", or "us"). We are committed to protecting the privacy of our readers and visitors. This Privacy Policy explains how information is collected, used, and safeguarded when you visit our real-time news aggregation portal.
                   </p>
                 </section>
 
                 <section className="space-y-2">
                   <h4 className="font-serif font-bold text-base text-stone-950 uppercase">2. Information We Collect</h4>
                   <p className="text-stone-800">
-                    When you access New Pulse, certain non-personally identifiable information may be automatically recorded by our servers and authorized third-party vendors:
+                    When you access News Pulsar, certain non-personally identifiable information may be automatically recorded by our servers and authorized third-party vendors:
                   </p>
                   <ul className="list-disc pl-5 space-y-1 text-stone-700">
                     <li><strong>Log Data & Diagnostics:</strong> IP address, browser type, operating system, referring URL, pages visited, and timestamp.</li>
@@ -148,7 +148,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
                     We use <strong>Google AdSense</strong> to monetize this website and display advertisements. In accordance with Google's policies:
                   </p>
                   <ul className="list-disc pl-5 space-y-1.5 text-stone-700 text-xs">
-                    <li>Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to New Pulse or other websites.</li>
+                    <li>Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to News Pulsar or other websites.</li>
                     <li>Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our sites and/or other sites on the Internet.</li>
                     <li>Users may opt out of personalized advertising by visiting{' '}
                       <a 
@@ -242,7 +242,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
                     Ad Placement & Editorial Separation Policy
                   </h4>
                   <p className="text-stone-800 leading-relaxed">
-                    New Pulse strictly adheres to the <strong>Google AdSense Program Policies</strong> and <strong>Better Ads Standards</strong>:
+                    News Pulsar strictly adheres to the <strong>Google AdSense Program Policies</strong> and <strong>Better Ads Standards</strong>:
                   </p>
                   <ul className="list-disc pl-5 space-y-1.5 text-stone-700">
                     <li><strong>Clear Ad Demarcation:</strong> All advertisement units are explicitly labeled with "ADVERTISEMENT" or "SPONSORED" to avoid confusion with journalistic content.</li>
@@ -280,7 +280,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
                   Terms of Service
                 </h3>
                 <p className="text-xs text-stone-600 font-sans mt-1">
-                  Conditions governing use of the New Pulse automated news aggregator.
+                  Conditions governing use of the News Pulsar automated news aggregator.
                 </p>
               </div>
 
@@ -288,7 +288,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
                 <section className="space-y-2">
                   <h4 className="font-serif font-bold text-base text-stone-950 uppercase">1. News Aggregation & Attribution</h4>
                   <p className="text-stone-800 leading-relaxed">
-                    New Pulse aggregates headlines, excerpts, and publicly available RSS syndication feeds from esteemed publishers (BBC, TechCrunch, Hacker News, NPR, NASA, Reuters, etc.). All original reporting remains the exclusive intellectual property of the respective source publishers. We provide direct canonical links to every original story.
+                    News Pulsar aggregates headlines, excerpts, and publicly available RSS syndication feeds from esteemed publishers (BBC, TechCrunch, Hacker News, NPR, NASA, Reuters, etc.). All original reporting remains the exclusive intellectual property of the respective source publishers. We provide direct canonical links to every original story.
                   </p>
                 </section>
 
@@ -302,7 +302,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
                 <section className="space-y-2">
                   <h4 className="font-serif font-bold text-base text-stone-950 uppercase">3. Disclaimer of Warranties</h4>
                   <p className="text-stone-800 leading-relaxed">
-                    News content is provided "as is" and "as available". While our scraping engine updates continuously every 10 minutes, New Pulse makes no express warranties regarding the absolute completeness or real-time accuracy of third-party syndicated reports.
+                    News content is provided "as is" and "as available". While our scraping engine updates continuously every 10 minutes, News Pulsar makes no express warranties regarding the absolute completeness or real-time accuracy of third-party syndicated reports.
                   </p>
                 </section>
               </div>
@@ -314,7 +314,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
             <div className="space-y-6">
               <div className="border-b border-stone-300 pb-3">
                 <h3 className="text-2xl font-black uppercase tracking-tight text-stone-950">
-                  About New Pulse & Editorial Mission
+                  About News Pulsar & Editorial Mission
                 </h3>
                 <p className="text-xs text-stone-600 font-sans mt-1">
                   The automated journalistic intelligence engine for global news readers.
@@ -323,7 +323,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
 
               <div className="space-y-4 text-sm font-sans">
                 <p className="text-stone-800 leading-relaxed">
-                  <strong>New Pulse</strong> is a modern news aggregation platform combining classical broadsheet editorial design with automated real-time web scraping and Gemini AI intelligence synthesis.
+                  <strong>News Pulsar</strong> is a modern news aggregation platform combining classical broadsheet editorial design with automated real-time web scraping and Gemini AI intelligence synthesis.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
@@ -344,7 +344,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
                 <section className="space-y-2">
                   <h4 className="font-serif font-bold text-base text-stone-950 uppercase">Publisher & Contact Information</h4>
                   <p className="text-stone-800">
-                    <strong>Site Operator:</strong> New Pulse Media & Editorial Team<br />
+                    <strong>Site Operator:</strong> News Pulsar Media & Editorial Team<br />
                     <strong>Editorial Contact:</strong> <a href="mailto:fciuttarakhand@gmail.com" className="text-stone-950 underline font-bold">fciuttarakhand@gmail.com</a><br />
                     <strong>Platform:</strong> Google AI Studio Cloud Run Infrastructure
                   </p>
@@ -358,7 +358,7 @@ export const PolicyModal: React.FC<PolicyModalProps> = ({
             <div className="space-y-6">
               <div className="border-b border-stone-300 pb-3">
                 <h3 className="text-2xl font-black uppercase tracking-tight text-stone-950">
-                  Contact New Pulse Editorial Board
+                  Contact News Pulsar Editorial Board
                 </h3>
                 <p className="text-xs text-stone-600 font-sans mt-1">
                   Get in touch for editorial corrections, advertising partnerships, or technical inquiries.

@@ -96,7 +96,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
             </h1>
 
             <p className="text-base sm:text-lg text-zinc-800 max-w-3xl leading-relaxed font-body">
-              At <strong>New Pulse</strong>, reader privacy and algorithmic transparency are foundational principles. 
+              At <strong>News Pulsar</strong>, reader privacy and algorithmic transparency are foundational principles. 
               This document outlines our data handling protocols, Google AdSense disclosures, cookie taxonomy, and your global legal rights.
             </p>
           </div>
@@ -156,7 +156,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
               </h2>
             </div>
             <p className="text-sm text-zinc-800 leading-relaxed font-body">
-              When accessing New Pulse, our systems automatically collect standard, non-personally identifiable diagnostic telemetry to deliver fast, resilient news caching:
+              When accessing News Pulsar, our systems automatically collect standard, non-personally identifiable diagnostic telemetry to deliver fast, resilient news caching:
             </p>
             <ul className="list-disc pl-6 space-y-1.5 text-xs sm:text-sm text-zinc-700 font-body">
               <li><strong>Network Diagnostics:</strong> Client IP address, browser user-agent, operating system, timestamp, and referring URL.</li>
@@ -174,7 +174,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
               </h2>
             </div>
             <p className="text-sm text-zinc-800 leading-relaxed font-body">
-              We partner with <strong>Google AdSense</strong> to display advertisements across New Pulse. In compliance with Google Publisher Policies:
+              We partner with <strong>Google AdSense</strong> to display advertisements across News Pulsar. In compliance with Google Publisher Policies:
             </p>
             <div className="space-y-2 text-xs sm:text-sm text-zinc-800 font-body">
               <p>• Third-party vendors, including Google, use cookies (such as the DoubleClick DART cookie) to serve ads based on your prior visits to this website and other websites across the Internet.</p>
@@ -269,7 +269,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({
               For any questions regarding this Privacy Policy, cookie management, or to exercise your statutory rights, please contact our designated privacy officer:
             </p>
             <div className="p-3 bg-white border border-black text-xs font-mono font-bold space-y-1">
-              <div>• Organization: New Pulse Media &amp; Data Governance</div>
+              <div>• Organization: News Pulsar Media &amp; Data Governance</div>
               <div>• Email: <a href="mailto:fciuttarakhand@gmail.com" className="text-black underline font-black">fciuttarakhand@gmail.com</a></div>
               <div>• Infrastructure: Google AI Studio / Google Cloud Platform</div>
             </div>

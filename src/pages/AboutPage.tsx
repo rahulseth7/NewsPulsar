@@ -98,7 +98,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </h1>
 
             <p className="text-base sm:text-lg text-zinc-800 max-w-3xl leading-relaxed font-body">
-              <strong>New Pulse</strong> is an autonomous real-time news aggregation and journalistic synthesis platform. 
+              <strong>News Pulsar</strong> is an autonomous real-time news aggregation and journalistic synthesis platform. 
               We bridge classical broadsheet editorial rigor with modern distributed web scraping, neural language intelligence, 
               and verified source attribution.
             </p>
@@ -152,7 +152,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           </div>
         </div>
 
-        {/* 4. Core Pillars of New Pulse */}
+        {/* 4. Core Pillars of News Pulsar */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b-2 border-black">
             <Layers className="w-5 h-5 text-black" />
@@ -251,7 +251,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 Commitment to Factual Accuracy
               </h4>
               <p className="text-xs text-zinc-800 leading-relaxed font-body">
-                New Pulse only ingests feeds from vetted journalistic organizations, institutional science desks, and established trade periodicals. We do not index unverified social rumors or sensationalist clickbait.
+                News Pulsar only ingests feeds from vetted journalistic organizations, institutional science desks, and established trade periodicals. We do not index unverified social rumors or sensationalist clickbait.
               </p>
             </div>
 
@@ -304,7 +304,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-4 border-2 border-black bg-[#faf7ee]">
               <div className="text-xs font-mono font-black text-[#ff2a85] uppercase">Publisher &amp; Editorial</div>
-              <div className="text-base font-black text-black mt-1">New Pulse Media Desk</div>
+              <div className="text-base font-black text-black mt-1">News Pulsar Media Desk</div>
               <p className="text-xs text-zinc-700 mt-1">Directing syndication taxonomy and journalistic integrity.</p>
             </div>
 

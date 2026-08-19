@@ -220,7 +220,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div>
               <div className="flex items-center gap-2 justify-center md:justify-start">
                 <h1 className="font-neo font-black text-3xl sm:text-4xl text-black tracking-tighter leading-none group-hover:underline">
-                  {language === 'hi' ? 'न्यू पल्स' : 'NEW PULSE'}
+                  {language === 'hi' ? 'न्यूज़ पल्सर' : 'NEWS PULSAR'}
                 </h1>
                 <span className="bg-[#ff2a85] text-white text-[10px] font-black font-mono px-1.5 py-0.5 border border-black rotate-3">
                   v2.5

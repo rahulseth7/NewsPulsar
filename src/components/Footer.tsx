@@ -42,7 +42,7 @@ export const Footer: React.FC<FooterProps> = ({
               </div>
               <div>
                 <h3 className="text-xl font-black font-neo text-black tracking-tight leading-none">
-                  NEW PULSE
+                  NEWS PULSAR
                 </h3>
                 <span className="text-[10px] font-mono text-[#ff2a85] font-black uppercase tracking-wider block mt-0.5">
                   REAL-TIME NEWS WIRE
@@ -285,7 +285,7 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <div>
             <p className="text-white font-neo font-bold">
-              © {new Date().getFullYear()} NEW PULSE. ALL RIGHTS RESERVED.
+              © {new Date().getFullYear()} NEWS PULSAR. ALL RIGHTS RESERVED.
             </p>
             <p className="text-[11px] text-zinc-400 mt-0.5 font-mono">
               Google AdSense Monetized • Publisher ID: <span className="text-[#ccff00] font-black">ca-pub-6411773855584982</span>
