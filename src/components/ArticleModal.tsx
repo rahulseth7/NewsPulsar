@@ -6,6 +6,7 @@ import { getArticleImageUrl } from '../utils/imageUtils';
 import { getCleanArticleLink } from '../utils/linkUtils';
 import { CATEGORY_HINDI_MAP } from '../utils/hindiTranslator';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { SocialShare } from './SocialShare';
 import { 
   X, 
   ExternalLink, 
@@ -569,8 +570,13 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
                 </div>
               )}
 
+              {/* Social Media Sharing in Reader Mode */}
+              <div className="pt-6 border-t border-current/20">
+                <SocialShare article={article} variant="card" className="bg-transparent border-current" />
+              </div>
+
               {/* Clean Footer Bar within Reader Mode */}
-              <div className="pt-10 mt-12 border-t border-current/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm opacity-80">
+              <div className="pt-8 border-t border-current/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm opacity-80">
                 <button
                   onClick={() => setReaderMode(false)}
                   className="hover:underline cursor-pointer"
@@ -732,7 +738,7 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               <div className="flex items-center gap-2">
                 <Share2 className="w-4 h-4 text-black" />
                 <h3 className="font-neo font-black text-xs uppercase tracking-wider text-black">
-                  SHARE THIS STORY
+                  SOCIAL MEDIA SHARING
                 </h3>
               </div>
               <button
@@ -743,70 +749,7 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               </button>
             </div>
 
-            {/* Direct Social Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <a
-                href={socialLinks.x}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2 px-3 bg-black text-white font-black text-xs border border-black hover:bg-zinc-800 transition-all cursor-pointer neo-shadow-sm"
-              >
-                <span className="font-bold">𝕏</span>
-                <span>Post on 𝕏</span>
-              </a>
-
-              <a
-                href={socialLinks.whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2 px-3 bg-[#25D366] text-black font-black text-xs border border-black hover:brightness-105 transition-all cursor-pointer neo-shadow-sm"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span>WhatsApp</span>
-              </a>
-
-              <a
-                href={socialLinks.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2 px-3 bg-[#00f0ff] text-black font-black text-xs border border-black hover:brightness-105 transition-all cursor-pointer neo-shadow-sm"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                <span>LinkedIn</span>
-              </a>
-
-              <a
-                href={socialLinks.telegram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2 px-3 bg-[#ff2a85] text-white font-black text-xs border border-black hover:brightness-105 transition-all cursor-pointer neo-shadow-sm"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Telegram</span>
-              </a>
-            </div>
-
-            {/* Quick Copy Link Box */}
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="text"
-                readOnly
-                value={getCleanArticleLink(article)}
-                className="flex-1 bg-white border-2 border-black px-3 py-1.5 text-xs font-mono text-black truncate focus:outline-none select-all"
-                onClick={(e) => (e.target as HTMLInputElement).select()}
-              />
-              <button
-                onClick={copyToClipboard}
-                className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-black border-2 border-black transition-all cursor-pointer shrink-0 neo-shadow-sm active:translate-x-0.5 active:translate-y-0.5 ${
-                  copied
-                    ? 'bg-[#00f5a0] text-black'
-                    : 'bg-black text-[#ccff00] hover:bg-zinc-800'
-                }`}
-              >
-                {copied ? <Check className="w-3.5 h-3.5 stroke-[3]" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'COPIED!' : 'COPY LINK'}</span>
-              </button>
-            </div>
+            <SocialShare article={article} variant="card" className="bg-white border-black" />
           </div>
         )}
 
@@ -962,6 +905,11 @@ export const ArticleModal: React.FC<ArticleModalProps> = ({
               <p className="text-zinc-700 text-sm leading-relaxed bg-zinc-100 p-4 border-2 border-black font-body">
                 {article.description}
               </p>
+            </div>
+
+            {/* In-Article Social Media Sharing Component */}
+            <div className="pt-2">
+              <SocialShare article={article} variant="card" />
             </div>
 
           </div>

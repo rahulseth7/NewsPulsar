@@ -246,7 +246,7 @@ export interface NewsSourceInfo {
 
 // Default Scraper Sources (Rich Multi-Category Feeds for Unlimited News Scraping)
 let sources: NewsSourceInfo[] = [
-  // --- Prominent International Outlets ---
+  // --- Prominent International Outlets (Requested Global Network) ---
   {
     id: 'bbc-world',
     name: 'BBC News',
@@ -256,8 +256,48 @@ let sources: NewsSourceInfo[] = [
     active: true,
   },
   {
+    id: 'cnn-world',
+    name: 'CNN International',
+    url: 'https://edition.cnn.com/world',
+    feedUrl: 'http://rss.cnn.com/rss/edition_world.rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'nytimes-world',
+    name: 'The New York Times',
+    url: 'https://www.nytimes.com/section/world',
+    feedUrl: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'wash-post-world',
+    name: 'The Washington Post',
+    url: 'https://www.washingtonpost.com/world',
+    feedUrl: 'https://feeds.washingtonpost.com/rss/world',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'ap-news',
+    name: 'Associated Press (AP)',
+    url: 'https://apnews.com',
+    feedUrl: 'https://news.google.com/rss/search?q=site:apnews.com&hl=en-US&gl=US&ceid=US:en',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'npr-news',
+    name: 'NPR',
+    url: 'https://www.npr.org',
+    feedUrl: 'https://feeds.npr.org/1001/rss.xml',
+    category: 'World',
+    active: true,
+  },
+  {
     id: 'reuters-world',
-    name: 'Reuters World',
+    name: 'Reuters',
     url: 'https://www.reuters.com',
     feedUrl: 'https://news.google.com/rss/search?q=site:reuters.com+world+news&hl=en-US&gl=US&ceid=US:en',
     category: 'World',
@@ -272,42 +312,10 @@ let sources: NewsSourceInfo[] = [
     active: true,
   },
   {
-    id: 'nytimes-world',
-    name: 'The New York Times',
-    url: 'https://www.nytimes.com/section/world',
-    feedUrl: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
-    category: 'World',
-    active: true,
-  },
-  {
-    id: 'cnn-world',
-    name: 'CNN International',
-    url: 'https://edition.cnn.com/world',
-    feedUrl: 'http://rss.cnn.com/rss/edition_world.rss',
-    category: 'World',
-    active: true,
-  },
-  {
-    id: 'al-jazeera',
-    name: 'Al Jazeera',
-    url: 'https://www.aljazeera.com',
-    feedUrl: 'https://www.aljazeera.com/xml/rss/all.xml',
-    category: 'World',
-    active: true,
-  },
-  {
-    id: 'ap-news',
-    name: 'Associated Press (AP)',
-    url: 'https://apnews.com',
-    feedUrl: 'https://news.google.com/rss/search?q=site:apnews.com+world&hl=en-US&gl=US&ceid=US:en',
-    category: 'World',
-    active: true,
-  },
-  {
-    id: 'dw-news',
-    name: 'DW News (Germany)',
-    url: 'https://www.dw.com/en',
-    feedUrl: 'https://rss.dw.com/xml/rss-en-world',
+    id: 'sky-news-world',
+    name: 'Sky News',
+    url: 'https://news.sky.com/world',
+    feedUrl: 'https://feeds.skynews.com/feeds/rss/world.xml',
     category: 'World',
     active: true,
   },
@@ -320,26 +328,442 @@ let sources: NewsSourceInfo[] = [
     active: true,
   },
   {
-    id: 'wash-post-world',
-    name: 'The Washington Post',
-    url: 'https://www.washingtonpost.com/world',
-    feedUrl: 'https://feeds.washingtonpost.com/rss/world',
+    id: 'lemonde',
+    name: 'Le Monde',
+    url: 'https://www.lemonde.fr/en',
+    feedUrl: 'https://www.lemonde.fr/en/rss/une.xml',
     category: 'World',
     active: true,
   },
   {
-    id: 'npr-news',
-    name: 'NPR Top Stories',
-    url: 'https://www.npr.org',
-    feedUrl: 'https://feeds.npr.org/1001/rss.xml',
+    id: 'dw-news',
+    name: 'DW News',
+    url: 'https://www.dw.com/en',
+    feedUrl: 'https://rss.dw.com/xml/rss-en-world',
     category: 'World',
     active: true,
   },
   {
-    id: 'sky-news-world',
-    name: 'Sky News World',
-    url: 'https://news.sky.com/world',
-    feedUrl: 'https://feeds.skynews.com/feeds/rss/world.xml',
+    id: 'spiegel',
+    name: 'Der Spiegel',
+    url: 'https://www.spiegel.de/international',
+    feedUrl: 'https://www.spiegel.de/international/index.rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'cbc-news',
+    name: 'CBC News',
+    url: 'https://www.cbc.ca/news',
+    feedUrl: 'https://www.cbc.ca/cmlink/rss-world',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'globe-and-mail',
+    name: 'The Globe and Mail',
+    url: 'https://www.theglobeandmail.com',
+    feedUrl: 'https://news.google.com/rss/search?q=site:theglobeandmail.com&hl=en-CA&gl=CA&ceid=CA:en',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'abc-australia',
+    name: 'ABC News Australia',
+    url: 'https://www.abc.net.au/news',
+    feedUrl: 'https://www.abc.net.au/news/feed/51120/rss.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'smh-australia',
+    name: 'The Sydney Morning Herald',
+    url: 'https://www.smh.com.au',
+    feedUrl: 'https://www.smh.com.au/rss/world.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'nhk-world',
+    name: 'NHK WORLD-JAPAN',
+    url: 'https://www3.nhk.or.jp/nhkworld',
+    feedUrl: 'https://www3.nhk.or.jp/nhkworld/en/news/rss/index.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'japan-times',
+    name: 'The Japan Times',
+    url: 'https://www.japantimes.co.jp',
+    feedUrl: 'https://www.japantimes.co.jp/feed/topstories/',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'the-hindu',
+    name: 'The Hindu',
+    url: 'https://www.thehindu.com',
+    feedUrl: 'https://www.thehindu.com/news/national/feeder/default.rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'indian-express',
+    name: 'The Indian Express',
+    url: 'https://indianexpress.com',
+    feedUrl: 'https://indianexpress.com/feed/',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'times-of-india',
+    name: 'Times of India',
+    url: 'https://timesofindia.indiatimes.com',
+    feedUrl: 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'xinhua-news',
+    name: 'Xinhua News',
+    url: 'https://english.news.cn',
+    feedUrl: 'http://www.xinhuanet.com/english/rss/worldrss.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'china-daily',
+    name: 'China Daily',
+    url: 'https://www.chinadaily.com.cn',
+    feedUrl: 'http://www.chinadaily.com.cn/rss/world_rss.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'cgtn-news',
+    name: 'CGTN',
+    url: 'https://www.cgtn.com',
+    feedUrl: 'https://news.google.com/rss/search?q=site:cgtn.com&hl=en-US&gl=US&ceid=US:en',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'cna-asia',
+    name: 'Channel NewsAsia (CNA)',
+    url: 'https://www.channelnewsasia.com',
+    feedUrl: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'al-jazeera',
+    name: 'Al Jazeera',
+    url: 'https://www.aljazeera.com',
+    feedUrl: 'https://www.aljazeera.com/xml/rss/all.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'trt-world',
+    name: 'TRT World',
+    url: 'https://www.trtworld.com',
+    feedUrl: 'https://www.trtworld.com/rss/world',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'times-of-israel',
+    name: 'The Times of Israel',
+    url: 'https://www.timesofisrael.com',
+    feedUrl: 'https://www.timesofisrael.com/feed/',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'haaretz',
+    name: 'Haaretz',
+    url: 'https://www.haaretz.com',
+    feedUrl: 'https://news.google.com/rss/search?q=site:haaretz.com&hl=en-US&gl=US&ceid=US:en',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'folha-sp',
+    name: 'Folha de S.Paulo',
+    url: 'https://www1.folha.uol.com.br',
+    feedUrl: 'https://feeds.folha.uol.com.br/mundo/rss091.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'el-universal',
+    name: 'El Universal',
+    url: 'https://www.eluniversal.com.mx',
+    feedUrl: 'https://www.eluniversal.com.mx/rss.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'news24-sa',
+    name: 'News24',
+    url: 'https://www.news24.com',
+    feedUrl: 'https://feeds.24.com/articles/news24/TopStories/rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'sabc-news',
+    name: 'SABC News',
+    url: 'https://www.sabcnews.com',
+    feedUrl: 'https://www.sabcnews.com/sabcnews/feed/',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'channels-tv',
+    name: 'Channels TV',
+    url: 'https://www.channelstv.com',
+    feedUrl: 'https://www.channelstv.com/feed/',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'citizen-digital',
+    name: 'Citizen Digital',
+    url: 'https://citizen.digital',
+    feedUrl: 'https://citizen.digital/rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'rnz-nz',
+    name: 'RNZ (Radio New Zealand)',
+    url: 'https://www.rnz.co.nz',
+    feedUrl: 'https://www.rnz.co.nz/rss/world.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'korea-herald',
+    name: 'The Korea Herald',
+    url: 'https://www.koreaherald.com',
+    feedUrl: 'https://www.koreaherald.com/common/rss_xml.php?ct=102',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'jakarta-post',
+    name: 'The Jakarta Post',
+    url: 'https://www.thejakartapost.com',
+    feedUrl: 'https://www.thejakartapost.com/rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'inquirer-ph',
+    name: 'Philippine Daily Inquirer',
+    url: 'https://www.inquirer.net',
+    feedUrl: 'https://www.inquirer.net/feed/',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'bangkok-post',
+    name: 'Bangkok Post',
+    url: 'https://www.bangkokpost.com',
+    feedUrl: 'https://www.bangkokpost.com/rss/data/topstories.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'dawn-pk',
+    name: 'Dawn',
+    url: 'https://www.dawn.com',
+    feedUrl: 'https://www.dawn.com/feeds/home/',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'bdnews24',
+    name: 'bdnews24',
+    url: 'https://bdnews24.com',
+    feedUrl: 'https://news.google.com/rss/search?q=site:bdnews24.com&hl=en-US&gl=US&ceid=US:en',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'daily-mirror-lk',
+    name: 'Daily Mirror Sri Lanka',
+    url: 'https://www.dailymirror.lk',
+    feedUrl: 'https://www.dailymirror.lk/rss/all_news',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'rte-news',
+    name: 'RTÉ News',
+    url: 'https://www.rte.ie/news',
+    feedUrl: 'https://www.rte.ie/rss/news.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'ansa-it',
+    name: 'ANSA',
+    url: 'https://www.ansa.it',
+    feedUrl: 'https://www.ansa.it/sito/ansait_rss.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'el-pais',
+    name: 'El País',
+    url: 'https://elpais.com',
+    feedUrl: 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'rtp-pt',
+    name: 'RTP Notícias',
+    url: 'https://www.rtp.pt/noticias',
+    feedUrl: 'https://www.rtp.pt/noticias/rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'nos-nl',
+    name: 'NOS',
+    url: 'https://nos.nl',
+    feedUrl: 'https://feeds.nos.nl/nosnieuwsalgemeen',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'svt-se',
+    name: 'SVT Nyheter',
+    url: 'https://www.svt.se/nyheter',
+    feedUrl: 'https://www.svt.se/nyheter/rss.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'nrk-no',
+    name: 'NRK',
+    url: 'https://www.nrk.no',
+    feedUrl: 'https://www.nrk.no/toppsaker.rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'yle-fi',
+    name: 'Yle News',
+    url: 'https://yle.fi/news',
+    feedUrl: 'https://yle.fi/uutiset/rss/paauutiset.rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'swissinfo',
+    name: 'SWI swissinfo.ch',
+    url: 'https://www.swissinfo.ch',
+    feedUrl: 'https://www.swissinfo.ch/eng/rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'orf-at',
+    name: 'ORF News',
+    url: 'https://orf.at',
+    feedUrl: 'https://rss.orf.at/news.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'tvp-world',
+    name: 'TVP World',
+    url: 'https://tvpworld.com',
+    feedUrl: 'https://tvpworld.com/rss',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'ukrinform',
+    name: 'Ukrinform',
+    url: 'https://www.ukrinform.net',
+    feedUrl: 'https://www.ukrinform.net/rss/block-lastnews',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'tass',
+    name: 'TASS',
+    url: 'https://tass.com',
+    feedUrl: 'https://tass.com/rss/v2.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'buenos-aires-times',
+    name: 'Buenos Aires Times',
+    url: 'https://www.batimes.com.ar',
+    feedUrl: 'https://www.batimes.com.ar/feed',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'biobiochile',
+    name: 'BioBioChile',
+    url: 'https://www.biobiochile.cl',
+    feedUrl: 'https://www.biobiochile.cl/feed',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'el-tiempo',
+    name: 'El Tiempo',
+    url: 'https://www.eltiempo.com',
+    feedUrl: 'https://www.eltiempo.com/rss/mundo.xml',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'ahram-online',
+    name: 'Ahram Online',
+    url: 'https://english.ahram.org.eg',
+    feedUrl: 'https://english.ahram.org.eg/Rss/Portal/1/World.aspx',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'morocco-world-news',
+    name: 'Morocco World News',
+    url: 'https://www.moroccoworldnews.com',
+    feedUrl: 'https://www.moroccoworldnews.com/feed',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'addis-standard',
+    name: 'Addis Standard',
+    url: 'https://addisstandard.com',
+    feedUrl: 'https://addisstandard.com/feed/',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'daily-graphic',
+    name: 'Daily Graphic Ghana',
+    url: 'https://www.graphic.com.gh',
+    feedUrl: 'https://news.google.com/rss/search?q=site:graphic.com.gh&hl=en-GH&gl=GH&ceid=GH:en',
+    category: 'World',
+    active: true,
+  },
+  {
+    id: 'euronews',
+    name: 'Euronews',
+    url: 'https://www.euronews.com',
+    feedUrl: 'https://www.euronews.com/rss?format=mrss',
     category: 'World',
     active: true,
   },
@@ -359,16 +783,8 @@ let sources: NewsSourceInfo[] = [
     category: 'World',
     active: true,
   },
-  {
-    id: 'euronews',
-    name: 'Euronews',
-    url: 'https://www.euronews.com',
-    feedUrl: 'https://www.euronews.com/rss?format=mrss',
-    category: 'World',
-    active: true,
-  },
 
-  // --- Prominent Indian Outlets ---
+  // --- Prominent Indian Regional & National Outlets ---
   {
     id: 'times-of-india',
     name: 'Times of India',
@@ -756,7 +1172,7 @@ const STORAGE_FILE = path.join(process.cwd(), 'scraped_articles_db.json');
 const BACKUP_STORAGE_FILE = path.join(process.cwd(), 'scraped_articles_db.bak.json');
 const EXCEL_FILE = path.join(process.cwd(), 'scraped_news_export.xlsx');
 
-// Verified Seed Articles ensuring the website is ALWAYS populated across all categories
+// Verified Historical Seed Articles for initial cold-start archive (never re-timestamped to today)
 const SEED_DATABASE_ARTICLES: NewsArticle[] = [
   {
     id: 'seed-world-1',
@@ -766,7 +1182,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://www.bbc.com/news/world',
     source: 'BBC News',
     category: 'World',
-    pubDate: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-15T08:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 3,
     sentiment: 'Positive',
@@ -799,7 +1215,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://techcrunch.com',
     source: 'TechCrunch',
     category: 'Technology',
-    pubDate: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-14T10:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 4,
     sentiment: 'Analysis',
@@ -832,7 +1248,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://www.livemint.com',
     source: 'Livemint',
     category: 'Business',
-    pubDate: new Date(Date.now() - 95 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-13T09:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 3,
     sentiment: 'Positive',
@@ -865,7 +1281,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://www.nasa.gov',
     source: 'NASA News',
     category: 'Science',
-    pubDate: new Date(Date.now() - 130 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-12T11:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 4,
     sentiment: 'Analysis',
@@ -898,7 +1314,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://www.espn.com',
     source: 'ESPN Sports',
     category: 'Sports',
-    pubDate: new Date(Date.now() - 170 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-11T14:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 3,
     sentiment: 'Positive',
@@ -931,7 +1347,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://www.sciencedaily.com',
     source: 'ScienceDaily',
     category: 'Health',
-    pubDate: new Date(Date.now() - 210 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-10T15:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 4,
     sentiment: 'Positive',
@@ -964,7 +1380,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://timesofindia.indiatimes.com',
     source: 'Times of India',
     category: 'Entertainment',
-    pubDate: new Date(Date.now() - 260 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-09T16:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 3,
     sentiment: 'Positive',
@@ -997,7 +1413,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://techcrunch.com',
     source: 'TechCrunch',
     category: 'Technology',
-    pubDate: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-08T18:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 4,
     sentiment: 'Analysis',
@@ -1030,7 +1446,7 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
     link: 'https://www.nasa.gov',
     source: 'NASA News',
     category: 'Science',
-    pubDate: new Date(Date.now() - 50 * 60 * 1000).toISOString(),
+    pubDate: '2024-01-07T12:00:00.000Z',
     imageUrl: 'https://images.unsplash.com/photo-1517976487507-5b62b70f0312?auto=format&fit=crop&w=800&q=80',
     readTimeMinutes: 4,
     sentiment: 'Positive',
@@ -1918,19 +2334,84 @@ function isRootOrHomepageUrl(urlStr: string): boolean {
 
 const SERVER_SOURCE_DOMAIN_MAP: Record<string, string> = {
   'BBC News': 'bbc.com',
-  'TechCrunch': 'techcrunch.com',
-  'Hacker News': 'news.ycombinator.com',
+  'CNN International': 'cnn.com',
+  'The New York Times': 'nytimes.com',
+  'The Washington Post': 'washingtonpost.com',
+  'Associated Press (AP)': 'apnews.com',
+  'NPR': 'npr.org',
   'NPR Top Stories': 'npr.org',
   'NPR Health': 'npr.org',
+  'Reuters': 'reuters.com',
+  'Reuters World': 'reuters.com',
+  'The Guardian': 'theguardian.com',
+  'Sky News': 'news.sky.com',
+  'Sky News World': 'news.sky.com',
+  'France 24': 'france24.com',
+  'Le Monde': 'lemonde.fr',
+  'DW News': 'dw.com',
+  'Der Spiegel': 'spiegel.de',
+  'CBC News': 'cbc.ca',
+  'The Globe and Mail': 'theglobeandmail.com',
+  'ABC News Australia': 'abc.net.au',
+  'The Sydney Morning Herald': 'smh.com.au',
+  'NHK WORLD-JAPAN': 'nhk.or.jp',
+  'The Japan Times': 'japantimes.co.jp',
+  'The Hindu': 'thehindu.com',
+  'The Indian Express': 'indianexpress.com',
+  'Times of India': 'timesofindia.indiatimes.com',
+  'Xinhua News': 'english.news.cn',
+  'China Daily': 'chinadaily.com.cn',
+  'CGTN': 'cgtn.com',
+  'Channel NewsAsia (CNA)': 'channelnewsasia.com',
+  'Al Jazeera': 'aljazeera.com',
+  'TRT World': 'trtworld.com',
+  'The Times of Israel': 'timesofisrael.com',
+  'Haaretz': 'haaretz.com',
+  'Folha de S.Paulo': 'folha.uol.com.br',
+  'El Universal': 'eluniversal.com.mx',
+  'News24': 'news24.com',
+  'SABC News': 'sabcnews.com',
+  'Channels TV': 'channelstv.com',
+  'Citizen Digital': 'citizen.digital',
+  'RNZ (Radio New Zealand)': 'rnz.co.nz',
+  'The Korea Herald': 'koreaherald.com',
+  'The Jakarta Post': 'thejakartapost.com',
+  'Philippine Daily Inquirer': 'inquirer.net',
+  'Bangkok Post': 'bangkokpost.com',
+  'Dawn': 'dawn.com',
+  'bdnews24': 'bdnews24.com',
+  'Daily Mirror Sri Lanka': 'dailymirror.lk',
+  'RTÉ News': 'rte.ie',
+  'ANSA': 'ansa.it',
+  'El País': 'elpais.com',
+  'RTP Notícias': 'rtp.pt',
+  'NOS': 'nos.nl',
+  'SVT Nyheter': 'svt.se',
+  'NRK': 'nrk.no',
+  'Yle News': 'yle.fi',
+  'SWI swissinfo.ch': 'swissinfo.ch',
+  'ORF News': 'orf.at',
+  'TVP World': 'tvpworld.com',
+  'Ukrinform': 'ukrinform.net',
+  'TASS': 'tass.com',
+  'Buenos Aires Times': 'batimes.com.ar',
+  'BioBioChile': 'biobiochile.cl',
+  'El Tiempo': 'eltiempo.com',
+  'Ahram Online': 'english.ahram.org.eg',
+  'Morocco World News': 'moroccoworldnews.com',
+  'Addis Standard': 'addisstandard.com',
+  'Daily Graphic Ghana': 'graphic.com.gh',
+  'Euronews': 'euronews.com',
+  'South China Morning Post': 'scmp.com',
+  'UN News': 'news.un.org',
+  'TechCrunch': 'techcrunch.com',
+  'Hacker News': 'news.ycombinator.com',
   'The Verge': 'theverge.com',
   'ScienceDaily': 'sciencedaily.com',
   'Google News Business': 'bloomberg.com',
   'Google News Sports': 'espn.com',
   'Google News': 'reuters.com',
   'NDTV News': 'ndtv.com',
-  'Times of India': 'timesofindia.indiatimes.com',
-  'The Hindu': 'thehindu.com',
-  'Indian Express': 'indianexpress.com',
   'Hindustan Times': 'hindustantimes.com',
   'Livemint': 'livemint.com',
   'Google News India': 'news.google.com',
@@ -2188,7 +2669,7 @@ async function enrichExistingArticlesWithSourceImages() {
   }
 }
 
-// Master Scraper Loop
+// Master Scraper Loop with Robust Deduplication & Natural Chronological Aging
 async function scrapeAllSources(): Promise<NewsArticle[]> {
   if (isRefreshing) return cachedArticles;
   isRefreshing = true;
@@ -2196,18 +2677,67 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
 
   const activeSources = sources.filter(s => s.active);
   const results = await Promise.all(activeSources.map(s => scrapeSource(s)));
+  const newlyScraped = results.flat();
 
-  // Merge newly scraped articles with historical articles from persistent storage
+  // Load existing persistent storage database
   const existingArticles = loadStoredArticles();
-  const allArticles = [...results.flat(), ...existingArticles];
 
-  // Strict De-duplication by article ID, canonical link, and exact title while preserving AI summaries
+  // Build existing lookup maps by ID, canonical link, and normalized title
+  const existingMap = new Map<string, NewsArticle>();
+  const existingTitleMap = new Map<string, NewsArticle>();
+  const existingLinkMap = new Map<string, NewsArticle>();
+
+  for (const art of existingArticles) {
+    existingMap.set(art.id, art);
+    const nLink = art.link.toLowerCase().trim();
+    if (nLink) existingLinkMap.set(nLink, art);
+    const nTitle = art.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    if (nTitle) existingTitleMap.set(nTitle, art);
+  }
+
+  // Process freshly scraped items: preserve existing publication timestamps to avoid perpetual front-page pinning
+  const processedNew: NewsArticle[] = [];
+  for (const item of newlyScraped) {
+    const nLink = item.link.toLowerCase().trim();
+    const nTitle = item.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    
+    // Check if article is already in database
+    const matchedExisting = existingMap.get(item.id) || existingLinkMap.get(nLink) || (nTitle ? existingTitleMap.get(nTitle) : undefined);
+
+    if (matchedExisting) {
+      // PRESERVE original authentic pubDate so news naturally ages into subsequent pages over 24-48 hours
+      const preservedDate = matchedExisting.pubDate || item.pubDate;
+      const merged: NewsArticle = {
+        ...matchedExisting,
+        ...item,
+        id: matchedExisting.id,
+        pubDate: preservedDate,
+        aiSummary: matchedExisting.aiSummary || item.aiSummary,
+        hindi: matchedExisting.hindi || item.hindi,
+        imageUrl: (item.imageUrl && !item.imageUrl.includes('unsplash.com')) ? item.imageUrl : (matchedExisting.imageUrl || item.imageUrl),
+      };
+      processedNew.push(merged);
+    } else {
+      // Genuinely new article: keep authentic pubDate
+      processedNew.push(item);
+    }
+  }
+
+  // Combine: processed newly scraped + remaining existing articles
+  const allArticles = [...processedNew, ...existingArticles];
+
+  // Strict Unified De-duplication by ID, Canonical Link, and Normalized Title
   const seenIds = new Set<string>();
   const seenLinks = new Set<string>();
   const seenTitles = new Set<string>();
   const uniqueArticles: NewsArticle[] = [];
 
   for (const article of allArticles) {
+    // If real articles exist, skip seed articles with ID starting with 'seed-'
+    if (processedNew.length > 5 && article.id.startsWith('seed-')) {
+      continue;
+    }
+
     const normalizedTitle = article.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
     const normalizedLink = article.link.toLowerCase().trim();
     
@@ -2217,13 +2747,15 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
       if (normalizedTitle) seenTitles.add(normalizedTitle);
       uniqueArticles.push(article);
     } else {
-      // If article already exists and has AI summary, ensure we retain the summary
-      const existing = uniqueArticles.find(a => a.id === article.id || a.link === article.link);
+      // Retain richest metadata for duplicate instances
+      const existing = uniqueArticles.find(a => a.id === article.id || a.link === article.link || (normalizedTitle && a.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '') === normalizedTitle));
       if (existing) {
         if (!existing.aiSummary && article.aiSummary) {
           existing.aiSummary = article.aiSummary;
         }
-        // Upgrade image if new scrape has an authentic source image
+        if (!existing.hindi && article.hindi) {
+          existing.hindi = article.hindi;
+        }
         if (article.imageUrl && !article.imageUrl.includes('unsplash.com') && existing.imageUrl?.includes('unsplash.com')) {
           existing.imageUrl = article.imageUrl;
         }
@@ -2231,7 +2763,7 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
     }
   }
 
-  // Sort by pubDate descending
+  // Sort by pubDate descending (True chronological sorting: latest in last 24h on Page 1, older on Page 2+)
   uniqueArticles.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
 
   cachedArticles = uniqueArticles;
@@ -2243,7 +2775,7 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
   refreshCount++;
   isRefreshing = false;
 
-  console.log(`[Scraper] Successfully scraped and stored ${cachedArticles.length} total accumulated articles in persistent storage across ${activeSources.length} sources.`);
+  console.log(`[Scraper] Successfully scraped and stored ${cachedArticles.length} unique articles across ${activeSources.length} sources.`);
   return cachedArticles;
 }
 
@@ -5104,6 +5636,164 @@ app.get('/api/videos/export/json', (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename="scraped_viral_videos_${Date.now()}.json"`);
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(cachedViralVideos, null, 2));
+});
+
+// ==========================================
+// NEWSLETTER "DAILY TOP 5" SUBSCRIPTION API
+// ==========================================
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  subscribedAt: string;
+  frequency: 'daily_top_5' | 'breaking_alerts' | 'weekly_digest';
+  categories: string[];
+  active: boolean;
+  source: string;
+}
+
+const NEWSLETTER_SUBSCRIBERS_FILE = path.join(process.cwd(), 'newsletter_subscribers_db.json');
+
+function getStoredNewsletterSubscribers(): NewsletterSubscriber[] {
+  try {
+    if (fs.existsSync(NEWSLETTER_SUBSCRIBERS_FILE)) {
+      const raw = fs.readFileSync(NEWSLETTER_SUBSCRIBERS_FILE, 'utf-8');
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.error('[Newsletter] Failed to read subscribers file:', err);
+  }
+  return [];
+}
+
+function saveStoredNewsletterSubscribers(subscribers: NewsletterSubscriber[]) {
+  try {
+    fs.writeFileSync(NEWSLETTER_SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('[Newsletter] Failed to save subscribers file:', err);
+  }
+}
+
+// In-memory cache of subscribers
+let cachedSubscribers: NewsletterSubscriber[] = getStoredNewsletterSubscribers();
+
+// Helper: Get today's top 5 headlines
+function getDailyTop5Headlines(categoryFilter?: string): NewsArticle[] {
+  let pool = cachedArticles.length > 0 ? cachedArticles : [];
+  if (categoryFilter && categoryFilter !== 'All') {
+    const filtered = pool.filter(a => a.category.toLowerCase() === categoryFilter.toLowerCase());
+    if (filtered.length >= 5) {
+      pool = filtered;
+    }
+  }
+
+  // Sort by freshness and urgency/sentiment prominence
+  const sorted = [...pool].sort((a, b) => {
+    const scoreA = (a.sentiment === 'Urgent' ? 3 : a.sentiment === 'Analysis' ? 2 : 1);
+    const scoreB = (b.sentiment === 'Urgent' ? 3 : b.sentiment === 'Analysis' ? 2 : 1);
+    if (scoreA !== scoreB) return scoreB - scoreA;
+    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+  });
+
+  return sorted.slice(0, 5);
+}
+
+// GET /api/newsletter/daily-top-5 - Retrieve current Day's Top 5 curated stories
+app.get('/api/newsletter/daily-top-5', (req, res) => {
+  const category = (req.query.category as string) || 'All';
+  const top5 = getDailyTop5Headlines(category);
+  res.json({
+    success: true,
+    count: top5.length,
+    date: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+    articles: top5,
+  });
+});
+
+// POST /api/newsletter/subscribe - Subscribe to Daily Top 5 Headlines
+app.post('/api/newsletter/subscribe', (req, res) => {
+  const { email, frequency = 'daily_top_5', categories = ['All'], source = 'web_footer' } = req.body;
+
+  if (!email || typeof email !== 'string' || !email.includes('@') || !email.includes('.')) {
+    return res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const existingIdx = cachedSubscribers.findIndex(s => s.email === cleanEmail);
+
+  let subscriber: NewsletterSubscriber;
+
+  if (existingIdx >= 0) {
+    // Update existing subscription
+    cachedSubscribers[existingIdx].active = true;
+    cachedSubscribers[existingIdx].frequency = frequency;
+    cachedSubscribers[existingIdx].categories = categories;
+    cachedSubscribers[existingIdx].subscribedAt = new Date().toISOString();
+    subscriber = cachedSubscribers[existingIdx];
+  } else {
+    subscriber = {
+      id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      email: cleanEmail,
+      subscribedAt: new Date().toISOString(),
+      frequency,
+      categories,
+      active: true,
+      source,
+    };
+    cachedSubscribers.unshift(subscriber);
+  }
+
+  saveStoredNewsletterSubscribers(cachedSubscribers);
+
+  // Return confirmation along with today's Top 5 digest preview
+  const previewTop5 = getDailyTop5Headlines(categories[0] || 'All');
+
+  res.json({
+    success: true,
+    message: `You're subscribed! The Daily Top 5 will be delivered to ${cleanEmail}.`,
+    subscriber,
+    totalSubscribers: cachedSubscribers.filter(s => s.active).length,
+    todayDigest: {
+      date: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+      articles: previewTop5,
+    }
+  });
+});
+
+// POST /api/newsletter/unsubscribe - Unsubscribe from newsletter
+app.post('/api/newsletter/unsubscribe', (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ success: false, error: 'Email is required.' });
+  }
+
+  const cleanEmail = (email as string).trim().toLowerCase();
+  const sub = cachedSubscribers.find(s => s.email === cleanEmail);
+
+  if (sub) {
+    sub.active = false;
+    saveStoredNewsletterSubscribers(cachedSubscribers);
+    res.json({ success: true, message: `Successfully unsubscribed ${cleanEmail} from Daily Top 5 digest.` });
+  } else {
+    res.json({ success: true, message: 'Email was not found in active subscriber list.' });
+  }
+});
+
+// GET /api/newsletter/subscribers - Subscriber stats for admin
+app.get('/api/newsletter/subscribers', (req, res) => {
+  const activeSubs = cachedSubscribers.filter(s => s.active);
+  res.json({
+    success: true,
+    total: cachedSubscribers.length,
+    active: activeSubs.length,
+    subscribers: activeSubs.map(s => ({
+      id: s.id,
+      email: s.email.replace(/(.{2})(.*)(@.*)/, '$1***$3'), // Masked for privacy
+      frequency: s.frequency,
+      subscribedAt: s.subscribedAt,
+      categories: s.categories,
+    }))
+  });
 });
 
 // Health check

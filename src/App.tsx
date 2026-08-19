@@ -15,6 +15,7 @@ import { Pagination } from './components/Pagination';
 import { AdSenseUnit } from './components/AdSenseUnit';
 import { NewsCarousel } from './components/NewsCarousel';
 import { Footer } from './components/Footer';
+import { NewsletterSignup } from './components/NewsletterSignup';
 import { PolicyModal, PolicyTab } from './components/PolicyModal';
 import { CookieConsentBanner } from './components/CookieConsentBanner';
 import { ShortcutsModal } from './components/ShortcutsModal';
@@ -60,9 +61,9 @@ export default function App() {
   const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
   const [layoutMode, setLayoutMode] = useState<'grid' | 'compact'>('grid');
 
-  // Pagination State
+  // Pagination State - 14 Posts Per Page Default
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [itemsPerPage, setItemsPerPage] = useState(14);
 
   // Bookmarks state (persistent in localStorage)
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>(() => {
@@ -74,8 +75,55 @@ export default function App() {
     }
   });
 
+  // Session Read / Seen Article Tracking
+  const [readArticleIds, setReadArticleIds] = useState<string[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('newspulse_session_read_articles');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   // Modal states
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+
+  const handleOpenArticle = (article: NewsArticle) => {
+    setSelectedArticle(article);
+    setReadArticleIds((prev) => {
+      if (prev.includes(article.id)) return prev;
+      const updated = [...prev, article.id];
+      try {
+        sessionStorage.setItem('newspulse_session_read_articles', JSON.stringify(updated));
+      } catch (_) {}
+      return updated;
+    });
+  };
+
+  // Category Read Count Aggregator for CategoryFilter
+  const readCategoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      All: 0,
+      World: 0,
+      Technology: 0,
+      Science: 0,
+      Business: 0,
+      Sports: 0,
+      Entertainment: 0,
+      Health: 0,
+    };
+    if (!data?.articles) return counts;
+    const readSet = new Set(readArticleIds);
+    data.articles.forEach((art) => {
+      if (readSet.has(art.id)) {
+        counts.All = (counts.All || 0) + 1;
+        if (art.category && counts[art.category] !== undefined) {
+          counts[art.category] = (counts[art.category] || 0) + 1;
+        }
+      }
+    });
+    return counts;
+  }, [data?.articles, readArticleIds]);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [addSourceOpen, setAddSourceOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
@@ -351,13 +399,13 @@ export default function App() {
 
   const navigateToNextArticle = () => {
     if (hasNextArticle) {
-      setSelectedArticle(filteredArticles[currentArticleIndex + 1]);
+      handleOpenArticle(filteredArticles[currentArticleIndex + 1]);
     }
   };
 
   const navigateToPrevArticle = () => {
     if (hasPrevArticle) {
-      setSelectedArticle(filteredArticles[currentArticleIndex - 1]);
+      handleOpenArticle(filteredArticles[currentArticleIndex - 1]);
     }
   };
 
@@ -620,7 +668,7 @@ export default function App() {
         <DatabasePage
           onBackToNews={() => handleNavigatePage('home')}
           onNavigatePage={handleNavigatePage}
-          onOpenArticle={(art) => setSelectedArticle(art)}
+          onOpenArticle={handleOpenArticle}
           articles={data?.articles || []}
           onArticlesUpdated={(updatedArticles) => {
             if (data) {
@@ -661,7 +709,7 @@ export default function App() {
           {data && data.breakingNews && data.breakingNews.length > 0 && (
             <Ticker
               breakingArticles={data.breakingNews}
-              onSelectArticle={(art) => setSelectedArticle(art)}
+              onSelectArticle={handleOpenArticle}
             />
           )}
 
@@ -693,24 +741,27 @@ export default function App() {
               {data?.articles && data.articles.length > 0 && (selectedCategory === 'All' || !selectedCategory) ? (
                 <NewsCarousel
                   articles={data.articles}
-                  onOpenArticle={(art) => setSelectedArticle(art)}
+                  onOpenArticle={handleOpenArticle}
+                  language={language}
                 />
               ) : null}
 
               {/* Google AdSense Top Leaderboard Banner */}
               <AdSenseUnit type="banner" format="horizontal" />
 
-              {/* Controls Section: Categories, Layout Switcher */}
+              {/* Controls Section: Categories with Session Read Progress Bar, Layout Switcher */}
               <div className="space-y-4">
                 
                 {/* Top Control Bar */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b-2 border-black pb-3">
                   
-                  {/* Category Pills */}
+                  {/* Category Filter with Read/Seen Bubble & Progress Bar */}
                   <CategoryFilter
                     selectedCategory={selectedCategory}
                     onSelectCategory={setSelectedCategory}
                     categoryCounts={data?.stats?.categoryCounts || {}}
+                    readCounts={readCategoryCounts}
+                    language={language}
                   />
 
                   {/* Layout Mode Switcher */}
@@ -864,7 +915,7 @@ export default function App() {
                             article={article}
                             isBookmarked={bookmarkedIds.includes(article.id)}
                             onToggleBookmark={handleToggleBookmark}
-                            onOpenArticle={(art) => setSelectedArticle(art)}
+                            onOpenArticle={handleOpenArticle}
                           />
                         </React.Fragment>
                       );
@@ -889,8 +940,12 @@ export default function App() {
 
             </main>
 
-            {/* Right Side Skyscraper AdSense Column */}
-            <aside className="hidden xl:block w-[180px] 2xl:w-[210px] shrink-0 sticky top-20 self-start space-y-4">
+            {/* Right Side Skyscraper Column with Persistent Daily Top 5 Widget & Ad */}
+            <aside className="hidden xl:block w-[200px] 2xl:w-[230px] shrink-0 sticky top-20 self-start space-y-4">
+              <NewsletterSignup
+                variant="sidebar"
+                onOpenArticle={handleOpenArticle}
+              />
               <AdSenseUnit
                 type="skyscraper"
                 slot="1234567892"
@@ -907,6 +962,7 @@ export default function App() {
         onOpenPolicy={handleOpenPolicy}
         onOpenDashboard={() => handleNavigatePage('dashboard')}
         onNavigatePage={handleNavigatePage}
+        onOpenArticle={handleOpenArticle}
         totalArticles={data?.totalArticles || 0}
         lastRefreshedAt={data?.lastRefreshedAt}
       />

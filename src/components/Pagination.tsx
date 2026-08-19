@@ -60,13 +60,13 @@ export const Pagination: React.FC<PaginationProps> = ({
             aria-label="Items per page"
             className="bg-white border-2 border-black px-2 py-1 text-black font-mono text-xs cursor-pointer font-black neo-shadow-sm focus:outline-none"
           >
-            <option value={12}>12</option>
-            <option value={24}>24</option>
-            <option value={48}>48</option>
-            <option value={96}>96</option>
-            <option value={150}>150</option>
+            <option value={14}>14</option>
+            <option value={28}>28</option>
+            <option value={42}>42</option>
+            <option value={56}>56</option>
+            <option value={70}>70</option>
+            <option value={140}>140</option>
             <option value={300}>300</option>
-            <option value={500}>500</option>
           </select>
         </div>
       </div>

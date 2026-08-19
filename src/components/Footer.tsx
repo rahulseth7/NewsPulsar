@@ -1,12 +1,14 @@
 import React from 'react';
 import { Newspaper, ShieldCheck, DollarSign, Rss, FileCode, Lock, Mail, Database, Download, BarChart3, ExternalLink } from 'lucide-react';
 import { PolicyTab } from './PolicyModal';
-import { PageView } from '../types';
+import { PageView, NewsArticle } from '../types';
+import { NewsletterSignup } from './NewsletterSignup';
 
 interface FooterProps {
   onOpenPolicy: (tab: PolicyTab) => void;
   onOpenDashboard?: () => void;
   onNavigatePage?: (page: PageView) => void;
+  onOpenArticle?: (article: NewsArticle) => void;
   totalArticles?: number;
   lastRefreshedAt?: string;
 }
@@ -15,6 +17,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenPolicy,
   onOpenDashboard,
   onNavigatePage,
+  onOpenArticle,
   totalArticles = 0,
   lastRefreshedAt,
 }) => {
@@ -30,6 +33,10 @@ export const Footer: React.FC<FooterProps> = ({
 
   return (
     <footer className="w-full bg-[#faf7ee] text-black mt-12 border-t-[3px] border-black shadow-[0_-4px_0_0_#000] font-neo safe-bottom">
+      
+      {/* Persistent Daily Top 5 Newsletter Signup Banner */}
+      <NewsletterSignup variant="footer" onOpenArticle={onOpenArticle} />
+
       {/* Upper Footer Columns */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
