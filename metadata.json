@@ -1,0 +1,6 @@
+{
+  "name": "New Pulse",
+  "description": "Live news aggregator and executive gazette platform featuring real-time RSS scraping, AI rephrasing, interactive Trending Topics visualization, AI Auto-Tagging taxonomy engine, and dual-layer persistent storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

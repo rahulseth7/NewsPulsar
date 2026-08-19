@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .font-neo {
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+  .font-display {
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+  .font-heading {
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+  .font-body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .font-mono-tag {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Neo-Brutalist Hard Shadow System */
+  .neo-shadow {
+    box-shadow: 4px 4px 0px 0px #000000;
+  }
+  .neo-shadow-sm {
+    box-shadow: 2px 2px 0px 0px #000000;
+  }
+  .neo-shadow-md {
+    box-shadow: 4px 4px 0px 0px #000000;
+  }
+  .neo-shadow-lg {
+    box-shadow: 6px 6px 0px 0px #000000;
+  }
+  .neo-shadow-xl {
+    box-shadow: 8px 8px 0px 0px #000000;
+  }
+  .neo-shadow-hover {
+    box-shadow: 4px 4px 0px 0px #000000;
+    transition: all 0.15s ease;
+  }
+  .neo-shadow-hover:hover {
+    box-shadow: 6px 6px 0px 0px #000000;
+    transform: translate(-2px, -2px);
+  }
+  .neo-shadow-hover:active {
+    box-shadow: 1px 1px 0px 0px #000000;
+    transform: translate(2px, 2px);
+  }
+  
+  .neo-shadow-pink {
+    box-shadow: 4px 4px 0px 0px #ff2a85;
+  }
+  .neo-shadow-cyan {
+    box-shadow: 4px 4px 0px 0px #00f0ff;
+  }
+  .neo-shadow-lime {
+    box-shadow: 4px 4px 0px 0px #ccff00;
+  }
+  .neo-shadow-yellow {
+    box-shadow: 4px 4px 0px 0px #ffe600;
+  }
+
+  .touch-scrolling {
+    -webkit-overflow-scrolling: touch;
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+/* Base styles for Neo-Brutalist Theme */
+html, body {
+  min-height: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  touch-action: manipulation;
+  background-color: #faf7ee;
+  color: #000000;
+}
+
+/* Neo-Brutalist High-Contrast Scrollbar */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: #faf7ee;
+  border-left: 2px solid #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ff2a85;
+}
+
+
+
