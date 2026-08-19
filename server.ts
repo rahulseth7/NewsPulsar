@@ -4240,145 +4240,357 @@ function saveStoredViralVideos(videos: ViralVideo[]): void {
 
 cachedViralVideos = loadStoredViralVideos();
 
-// Video RSS Feeds for Continuous Live Internet Scraping
-const VIDEO_RSS_SOURCES = [
-  {
-    name: 'YouTube Trending Tech',
-    feedUrl: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCvjjYvJEwpLgkgsYx280eWg', // Verge
-    category: 'Tech' as VideoCategory,
-    platform: 'youtube' as VideoPlatform,
-  },
-  {
-    name: 'YouTube MKBHD Tech',
-    feedUrl: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ', // MKBHD
-    category: 'Tech' as VideoCategory,
-    platform: 'youtube' as VideoPlatform,
-  },
-  {
-    name: 'Reddit Videos',
-    feedUrl: 'https://www.reddit.com/r/videos/.rss',
-    category: 'Viral' as VideoCategory,
-    platform: 'reddit' as VideoPlatform,
-  },
-  {
-    name: 'Reddit Next Level',
-    feedUrl: 'https://www.reddit.com/r/nextfuckinglevel/.rss',
-    category: 'Viral' as VideoCategory,
-    platform: 'reddit' as VideoPlatform,
-  },
-  {
-    name: 'TED Talks Video',
-    feedUrl: 'https://feeds.feedburner.com/tedtalks_video',
-    category: 'Science' as VideoCategory,
-    platform: 'web' as VideoPlatform,
-  }
+// Video RSS & JSON Sources for Continuous Live Internet Scraping
+interface VideoScrapeSource {
+  name: string;
+  type: 'reddit_json' | 'youtube_rss' | 'vimeo_rss' | 'web_rss';
+  url: string;
+  category: VideoCategory;
+  platform: VideoPlatform;
+  channelId?: string;
+  subreddit?: string;
+}
+
+const SCRAPE_USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 (NewsPulse/3.0; News Aggregator)',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0',
 ];
+
+function getRandomUserAgent(): string {
+  return SCRAPE_USER_AGENTS[Math.floor(Math.random() * SCRAPE_USER_AGENTS.length)];
+}
 
 // Helper: Extract YouTube ID from link
 function extractYouTubeId(url: string): string | null {
   if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
   const match = url.match(regExp);
   return (match && match[2].length === 11) ? match[2] : null;
 }
 
-// Scrape live viral videos from feeds
-async function scrapeViralVideoFeeds(): Promise<{ scraped: number; total: number }> {
-  const parser = new Parser({
-    customFields: {
-      item: [
-        ['media:group', 'mediaGroup'],
-        ['media:thumbnail', 'mediaThumbnail'],
-        ['yt:videoId', 'ytVideoId'],
-      ]
-    }
-  });
+// Helper: Fetch JSON with timeout and User-Agent
+async function fetchJsonSafe(url: string, timeoutMs: number = 8000): Promise<any> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': getRandomUserAgent(),
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      }
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err: any) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
+// Helper: Fetch XML text with timeout and User-Agent
+async function fetchXmlSafe(url: string, timeoutMs: number = 8000): Promise<string | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': getRandomUserAgent(),
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      }
+    });
+    if (!res.ok) return null;
+    return await res.text();
+  } catch (err: any) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Helper: Query oEmbed for metadata (YouTube / Vimeo)
+async function fetchOEmbedData(videoUrl: string): Promise<{ title?: string; author?: string; thumbnail?: string; html?: string } | null> {
+  const ytId = extractYouTubeId(videoUrl);
+  if (ytId) {
+    const data = await fetchJsonSafe(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${ytId}&format=json`, 5000);
+    if (data) {
+      return {
+        title: data.title,
+        author: data.author_name,
+        thumbnail: data.thumbnail_url || `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`,
+        html: data.html
+      };
+    }
+    return {
+      thumbnail: `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`
+    };
+  }
+
+  if (videoUrl.includes('vimeo.com')) {
+    const data = await fetchJsonSafe(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(videoUrl)}`, 5000);
+    if (data) {
+      return {
+        title: data.title,
+        author: data.author_name,
+        thumbnail: data.thumbnail_url,
+        html: data.html
+      };
+    }
+  }
+
+  return null;
+}
+
+const VIDEO_SCRAPE_FEEDS: VideoScrapeSource[] = [
+  // Reddit High-Velocity Viral Subreddits
+  { name: 'Reddit Videos', type: 'reddit_json', url: 'https://www.reddit.com/r/videos/hot.json?limit=25', category: 'Viral', platform: 'reddit', subreddit: 'videos' },
+  { name: 'Reddit Next Level', type: 'reddit_json', url: 'https://www.reddit.com/r/nextfuckinglevel/hot.json?limit=25', category: 'Viral', platform: 'reddit', subreddit: 'nextfuckinglevel' },
+  { name: 'Reddit Damnthatsinteresting', type: 'reddit_json', url: 'https://www.reddit.com/r/Damnthatsinteresting/hot.json?limit=25', category: 'Science', platform: 'reddit', subreddit: 'Damnthatsinteresting' },
+  { name: 'Reddit Contagious Laughter', type: 'reddit_json', url: 'https://www.reddit.com/r/ContagiousLaughter/hot.json?limit=25', category: 'Humor', platform: 'reddit', subreddit: 'ContagiousLaughter' },
+  { name: 'Reddit Tech & Gadgets', type: 'reddit_json', url: 'https://www.reddit.com/r/gadgets/hot.json?limit=25', category: 'Tech', platform: 'reddit', subreddit: 'gadgets' },
+  { name: 'Reddit Space', type: 'reddit_json', url: 'https://www.reddit.com/r/space/hot.json?limit=25', category: 'Science', platform: 'reddit', subreddit: 'space' },
+
+  // YouTube Channel Video Feeds
+  { name: 'The Verge Video Wire', type: 'youtube_rss', url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCvjjYvJEwpLgkgsYx280eWg', category: 'Tech', platform: 'youtube', channelId: 'UCvjjYvJEwpLgkgsYx280eWg' },
+  { name: 'MKBHD Tech Reviews', type: 'youtube_rss', url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCBJycsmduvYEL83R_U4JriQ', category: 'Tech', platform: 'youtube', channelId: 'UCBJycsmduvYEL83R_U4JriQ' },
+  { name: 'Kurzgesagt Science', type: 'youtube_rss', url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q', category: 'Science', platform: 'youtube', channelId: 'UCsXVk37bltHxD1rDPwtNM8Q' },
+  { name: 'TED-Ed Animations', type: 'youtube_rss', url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCsooa4yRKGN_zEE8iknghZA', category: 'Science', platform: 'youtube', channelId: 'UCsooa4yRKGN_zEE8iknghZA' },
+  { name: 'Mark Rober Engineering', type: 'youtube_rss', url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCY1kMZp36IQSyNx_9h4mpCg', category: 'Tech', platform: 'youtube', channelId: 'UCY1kMZp36IQSyNx_9h4mpCg' },
+  { name: 'NASA Jet Propulsion Lab', type: 'youtube_rss', url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UC70ghv53i7U4Wb_4h6Q_7-A', category: 'Science', platform: 'youtube', channelId: 'UC70ghv53i7U4Wb_4h6Q_7-A' },
+  { name: 'IGN Gaming & Trailers', type: 'youtube_rss', url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCKy1dAqELo0zrOtPkf0eTMw', category: 'Gaming', platform: 'youtube', channelId: 'UCKy1dAqELo0zrOtPkf0eTMw' },
+
+  // Vimeo & Web RSS
+  { name: 'Vimeo Staff Picks', type: 'vimeo_rss', url: 'https://vimeo.com/channels/staffpicks/videos/rss', category: 'Entertainment', platform: 'vimeo' },
+  { name: 'TED Talks Video', type: 'web_rss', url: 'https://feeds.feedburner.com/tedtalks_video', category: 'Science', platform: 'web' },
+];
+
+// Scrape live viral videos from internet feeds
+async function scrapeViralVideoFeeds(): Promise<{ scraped: number; total: number; sourcesReport: { name: string; found: number; status: string }[] }> {
   const existingMap = new Map<string, ViralVideo>();
   cachedViralVideos.forEach(v => existingMap.set(v.id, v));
   let newlyScraped = 0;
+  const sourcesReport: { name: string; found: number; status: string }[] = [];
 
-  for (const src of VIDEO_RSS_SOURCES) {
+  for (const src of VIDEO_SCRAPE_FEEDS) {
+    let sourceFoundCount = 0;
+
     try {
-      const feed = await parser.parseURL(src.feedUrl);
-      if (feed && Array.isArray(feed.items)) {
-        for (const item of feed.items.slice(0, 8)) {
-          const rawLink = item.link || '';
-          const ytId = item.ytVideoId || extractYouTubeId(rawLink);
-          const rawTitle = (item.title || '').trim();
-          if (!rawTitle) continue;
+      if (src.type === 'reddit_json') {
+        const json = await fetchJsonSafe(src.url, 7000);
+        if (json && json.data && Array.isArray(json.data.children)) {
+          for (const child of json.data.children) {
+            const post = child.data;
+            if (!post || post.over_18) continue;
 
-          const vidId = `vid-${crypto.createHash('md5').update(rawLink || rawTitle).digest('hex').slice(0, 12)}`;
+            const postUrl = post.url_overridden_by_dest || post.url || '';
+            const isVideo = post.is_video || postUrl.includes('v.redd.it') || postUrl.includes('youtube.com') || postUrl.includes('youtu.be') || postUrl.endsWith('.mp4') || post.post_hint === 'hosted:video';
+            if (!isVideo && !extractYouTubeId(postUrl) && !post.media?.reddit_video) continue;
 
-          if (existingMap.has(vidId)) continue;
+            const rawTitle = (post.title || '').trim();
+            if (!rawTitle) continue;
 
-          let embedUrl = '';
-          let thumbnailUrl = 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1200&q=80';
+            const vidId = `vid-reddit-${post.id || crypto.createHash('md5').update(postUrl || rawTitle).digest('hex').slice(0, 10)}`;
+            if (existingMap.has(vidId)) continue;
 
-          if (ytId) {
-            embedUrl = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0`;
-            thumbnailUrl = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
-          } else if (rawLink.includes('vimeo.com')) {
-            const vimeoMatch = rawLink.match(/vimeo\.com\/(\d+)/);
-            if (vimeoMatch) {
-              embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+            const ytId = extractYouTubeId(postUrl);
+            let embedUrl = '';
+            let platform: VideoPlatform = 'reddit';
+            let thumbnailUrl = 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1200&q=80';
+
+            if (ytId) {
+              platform = 'youtube';
+              embedUrl = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0`;
+              thumbnailUrl = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+            } else if (post.preview?.images?.[0]?.source?.url) {
+              thumbnailUrl = post.preview.images[0].source.url.replace(/&amp;/g, '&');
+            } else if (post.thumbnail && post.thumbnail.startsWith('http')) {
+              thumbnailUrl = post.thumbnail;
+            }
+
+            const videoUrl = postUrl || `https://reddit.com${post.permalink}`;
+            if (!embedUrl) {
+              embedUrl = videoUrl;
+            }
+
+            const upvotes = post.score || post.ups || 1500;
+            const viewsEst = Math.max(upvotes * (Math.floor(Math.random() * 25) + 15), 100000);
+            const likesEst = Math.max(Math.floor(upvotes * 0.9), 5000);
+            const viralScore = Math.min(Math.floor(Math.random() * 10) + 90, 99);
+
+            const autoTags = generateHeuristicTags(rawTitle, post.selftext || '', src.category, `r/${src.subreddit}`);
+            const videoTags = ['#Viral', `#r_${src.subreddit}`, `#${src.category}`, ...autoTags.tags].slice(0, 6);
+
+            const newVideo: ViralVideo = {
+              id: vidId,
+              title: rawTitle,
+              description: (post.selftext || '').slice(0, 250) || `Viral clip from r/${src.subreddit} with ${upvotes.toLocaleString()} upvotes and massive engagement.`,
+              videoUrl,
+              embedUrl,
+              thumbnailUrl,
+              source: `Reddit (r/${src.subreddit})`,
+              author: post.author ? `u/${post.author}` : 'Reddit Community',
+              platform,
+              viewsCount: viewsEst,
+              likesCount: likesEst,
+              duration: '02:30',
+              pubDate: post.created_utc ? new Date(post.created_utc * 1000).toISOString() : new Date().toISOString(),
+              category: src.category,
+              tags: videoTags,
+              seoKeywords: autoTags.seoKeywords,
+              slug: rawTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '').slice(0, 60),
+              metaDescription: `${rawTitle}. Trending clip on Reddit r/${src.subreddit}.`,
+              sentiment: autoTags.sentiment,
+              isViralTrend: true,
+              viralScore,
+              aiTakeaway: `High-velocity viral moment on Reddit with ${upvotes.toLocaleString()} upvotes and rapid cross-platform re-sharing.`,
+            };
+
+            existingMap.set(vidId, newVideo);
+            newlyScraped++;
+            sourceFoundCount++;
+          }
+        }
+      } else if (src.type === 'youtube_rss') {
+        const xml = await fetchXmlSafe(src.url, 7000);
+        if (xml) {
+          // Parse YouTube XML entries using regex matching
+          const entryRegex = /<entry>([\s\S]*?)<\/entry>/g;
+          let entryMatch: RegExpExecArray | null;
+
+          while ((entryMatch = entryRegex.exec(xml)) !== null) {
+            const block = entryMatch[1];
+            const videoIdMatch = block.match(/<yt:videoId>(.*?)<\/yt:videoId>/) || block.match(/<id>.*?([a-zA-Z0-9_-]{11})<\/id>/);
+            const titleMatch = block.match(/<title>(.*?)<\/title>/);
+            const authorMatch = block.match(/<name>(.*?)<\/name>/);
+            const publishedMatch = block.match(/<published>(.*?)<\/published>/);
+            const descMatch = block.match(/<media:description>([\s\S]*?)<\/media:description>/);
+
+            if (!videoIdMatch || !titleMatch) continue;
+
+            const ytId = videoIdMatch[1].trim();
+            const rawTitle = titleMatch[1].replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1').trim();
+            if (!ytId || !rawTitle) continue;
+
+            const vidId = `vid-yt-${ytId}`;
+            if (existingMap.has(vidId)) continue;
+
+            const rawDesc = (descMatch ? descMatch[1] : '').replace(/<[^>]*>/g, ' ').slice(0, 280);
+            const autoTags = generateHeuristicTags(rawTitle, rawDesc, src.category, src.name);
+            const videoTags = ['#Viral', `#${src.category}`, ...autoTags.tags].slice(0, 6);
+
+            const randomViews = Math.floor(Math.random() * 3500000) + 650000;
+            const randomLikes = Math.floor(randomViews * (Math.random() * 0.07 + 0.03));
+            const viralScore = Math.floor(Math.random() * 12) + 88;
+
+            const newVideo: ViralVideo = {
+              id: vidId,
+              title: rawTitle,
+              description: rawDesc || `Trending release from ${src.name} capturing widespread viewership.`,
+              videoUrl: `https://www.youtube.com/watch?v=${ytId}`,
+              embedUrl: `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0`,
+              thumbnailUrl: `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`,
+              source: src.name,
+              author: authorMatch ? authorMatch[1].trim() : src.name,
+              platform: 'youtube',
+              viewsCount: randomViews,
+              likesCount: randomLikes,
+              duration: '08:45',
+              pubDate: publishedMatch ? new Date(publishedMatch[1]).toISOString() : new Date().toISOString(),
+              category: src.category,
+              tags: videoTags,
+              seoKeywords: autoTags.seoKeywords,
+              slug: rawTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '').slice(0, 60),
+              metaDescription: `${rawTitle}. Watch official release from ${src.name} on NewsPulse.`,
+              sentiment: autoTags.sentiment,
+              isViralTrend: true,
+              viralScore,
+              aiTakeaway: `Top trending video from ${src.name} delivering high production value and in-depth analysis.`,
+            };
+
+            existingMap.set(vidId, newVideo);
+            newlyScraped++;
+            sourceFoundCount++;
+          }
+        }
+      } else if (src.type === 'vimeo_rss' || src.type === 'web_rss') {
+        const parser = new Parser();
+        const xml = await fetchXmlSafe(src.url, 7000);
+        if (xml) {
+          const feed = await parser.parseString(xml);
+          if (feed && Array.isArray(feed.items)) {
+            for (const item of feed.items.slice(0, 6)) {
+              const rawTitle = (item.title || '').trim();
+              const rawLink = item.link || '';
+              if (!rawTitle || !rawLink) continue;
+
+              const vidId = `vid-${crypto.createHash('md5').update(rawLink || rawTitle).digest('hex').slice(0, 12)}`;
+              if (existingMap.has(vidId)) continue;
+
+              let embedUrl = rawLink;
+              let thumbnailUrl = 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1200&q=80';
+
+              if (rawLink.includes('vimeo.com')) {
+                const vimeoMatch = rawLink.match(/vimeo\.com\/(\d+)/);
+                if (vimeoMatch) embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+              }
+
+              const autoTags = generateHeuristicTags(rawTitle, item.contentSnippet || '', src.category, src.name);
+              const newVideo: ViralVideo = {
+                id: vidId,
+                title: rawTitle,
+                description: (item.contentSnippet || rawTitle).slice(0, 260),
+                videoUrl: rawLink,
+                embedUrl,
+                thumbnailUrl,
+                source: src.name,
+                author: item.creator || src.name,
+                platform: src.platform,
+                viewsCount: Math.floor(Math.random() * 800000) + 100000,
+                likesCount: Math.floor(Math.random() * 50000) + 5000,
+                duration: '04:20',
+                pubDate: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+                category: src.category,
+                tags: ['#Viral', `#${src.category}`, ...autoTags.tags].slice(0, 6),
+                seoKeywords: autoTags.seoKeywords,
+                slug: rawTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '').slice(0, 60),
+                metaDescription: `${rawTitle} - ${src.name}`,
+                sentiment: 'Positive',
+                isViralTrend: true,
+                viralScore: 89,
+                aiTakeaway: `Staff-curated viral video showcase from ${src.name}.`,
+              };
+
+              existingMap.set(vidId, newVideo);
+              newlyScraped++;
+              sourceFoundCount++;
             }
           }
-
-          const rawDesc = (item.contentSnippet || item.content || item.summary || rawTitle).replace(/<[^>]*>/g, ' ').slice(0, 300);
-          
-          // Auto-generate tags & keywords
-          const autoTags = generateHeuristicTags(rawTitle, rawDesc, src.category, src.name);
-          const videoTags = ['#Viral', `#${src.category}`, ...autoTags.tags].slice(0, 6);
-
-          const randomViews = Math.floor(Math.random() * 4000000) + 500000;
-          const randomLikes = Math.floor(randomViews * (Math.random() * 0.08 + 0.03));
-          const viralScore = Math.floor(Math.random() * 15) + 85; // 85-99
-
-          const newVideo: ViralVideo = {
-            id: vidId,
-            title: rawTitle,
-            description: rawDesc || 'Trending viral internet clip capturing high velocity views and social engagement.',
-            videoUrl: rawLink || `https://www.youtube.com/watch?v=${ytId || ''}`,
-            embedUrl: embedUrl || (ytId ? `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0` : rawLink),
-            thumbnailUrl,
-            source: src.name,
-            author: item.creator || item['dc:creator'] || src.name,
-            platform: src.platform,
-            viewsCount: randomViews,
-            likesCount: randomLikes,
-            duration: '03:45',
-            pubDate: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
-            category: src.category,
-            tags: videoTags,
-            seoKeywords: autoTags.seoKeywords,
-            slug: rawTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '').slice(0, 60),
-            metaDescription: `${rawTitle}. Watch trending video footage, viewer reactions, and analysis on NewsPulse.`,
-            sentiment: autoTags.sentiment,
-            isViralTrend: true,
-            viralScore,
-            aiTakeaway: `Trending rapidly across ${src.platform.toUpperCase()} with ${Math.round(randomViews / 1000)}k+ active views and high social momentum.`,
-          };
-
-          existingMap.set(vidId, newVideo);
-          newlyScraped++;
         }
       }
+
+      sourcesReport.push({ name: src.name, found: sourceFoundCount, status: 'OK' });
     } catch (err: any) {
       console.warn(`[ViralVideosScraper] Error scraping ${src.name}:`, err.message || err);
+      sourcesReport.push({ name: src.name, found: 0, status: 'FAILED: ' + (err.message || 'Error') });
     }
   }
 
   cachedViralVideos = Array.from(existingMap.values()).sort((a, b) => (b.viralScore || 0) - (a.viralScore || 0));
   saveStoredViralVideos(cachedViralVideos);
 
-  return { scraped: newlyScraped, total: cachedViralVideos.length };
+  console.log(`[ViralVideosScraper] Scraping complete: ${newlyScraped} new videos scraped. Total database size: ${cachedViralVideos.length}`);
+  return { scraped: newlyScraped, total: cachedViralVideos.length, sourcesReport };
 }
 
 // Background auto-scraper for videos on server boot
 setTimeout(() => {
   scrapeViralVideoFeeds().catch(console.warn);
-}, 3000);
+}, 2000);
 
 // --- REST API ENDPOINTS FOR VIRAL VIDEOS ---
 
@@ -4477,9 +4689,10 @@ app.post('/api/videos/scrape-now', async (req, res) => {
     const result = await scrapeViralVideoFeeds();
     res.json({
       success: true,
-      message: `Scraping completed. Scraped ${result.scraped} new viral video(s).`,
+      message: `Scraping completed! Discovered ${result.scraped} new viral videos across internet feeds. (Database now contains ${result.total} videos)`,
       newVideosScraped: result.scraped,
       totalVideos: result.total,
+      sourcesReport: result.sourcesReport,
       videos: cachedViralVideos
     });
   } catch (err: any) {
@@ -4487,8 +4700,8 @@ app.post('/api/videos/scrape-now', async (req, res) => {
   }
 });
 
-// POST /api/videos/add - Manually submit a video URL (YouTube, Vimeo, etc.)
-app.post('/api/videos/add', (req, res) => {
+// POST /api/videos/add - Manually submit a video URL (YouTube, Vimeo, etc.) with automatic oEmbed metadata resolution
+app.post('/api/videos/add', async (req, res) => {
   const { title, videoUrl, category = 'Viral', description = '', tags = [] } = req.body;
 
   if (!videoUrl) {
@@ -4499,11 +4712,23 @@ app.post('/api/videos/add', (req, res) => {
   let embedUrl = videoUrl;
   let platform: VideoPlatform = 'web';
   let thumbnailUrl = 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1200&q=80';
+  let authorName = 'NewsPulse Contributor';
+  let resolvedTitle = title || '';
+
+  // Try oEmbed metadata fetch
+  const oembed = await fetchOEmbedData(videoUrl);
+  if (oembed) {
+    if (!resolvedTitle && oembed.title) resolvedTitle = oembed.title;
+    if (oembed.author) authorName = oembed.author;
+    if (oembed.thumbnail) thumbnailUrl = oembed.thumbnail;
+  }
 
   if (ytId) {
     platform = 'youtube';
     embedUrl = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0`;
-    thumbnailUrl = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+    if (!thumbnailUrl || thumbnailUrl.includes('unsplash')) {
+      thumbnailUrl = `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+    }
   } else if (videoUrl.includes('vimeo.com')) {
     platform = 'vimeo';
     const vimeoMatch = videoUrl.match(/vimeo\.com\/(\d+)/);
@@ -4514,23 +4739,23 @@ app.post('/api/videos/add', (req, res) => {
     platform = 'tiktok';
   }
 
-  const finalTitle = title || (ytId ? `Trending YouTube Clip (${ytId})` : 'Viral Internet Video');
-  const autoTags = generateHeuristicTags(finalTitle, description, category, 'User Submission');
+  const finalTitle = resolvedTitle || (ytId ? `Trending YouTube Video (${ytId})` : 'Viral Internet Video Clip');
+  const autoTags = generateHeuristicTags(finalTitle, description, category, authorName);
   const customTags = Array.isArray(tags) && tags.length > 0 ? tags : ['#Viral', `#${category}`, ...autoTags.tags];
 
   const newVideo: ViralVideo = {
     id: `vid-custom-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     title: finalTitle,
-    description: description || 'User-curated viral video clip trending on social platforms.',
+    description: description || `Indexed viral video by ${authorName}.`,
     videoUrl,
     embedUrl,
     thumbnailUrl,
-    source: 'Community Curated',
-    author: 'NewsPulse Contributor',
+    source: 'Community / Web Index',
+    author: authorName,
     platform,
-    viewsCount: 150000,
-    likesCount: 12000,
-    duration: '03:00',
+    viewsCount: Math.floor(Math.random() * 500000) + 150000,
+    likesCount: Math.floor(Math.random() * 30000) + 10000,
+    duration: '03:30',
     pubDate: new Date().toISOString(),
     category: category as VideoCategory,
     tags: customTags.map((t: string) => t.startsWith('#') ? t : `#${t}`),
@@ -4539,8 +4764,8 @@ app.post('/api/videos/add', (req, res) => {
     metaDescription: `${finalTitle} - watch online on NewsPulse.`,
     sentiment: 'Positive',
     isViralTrend: true,
-    viralScore: 92,
-    aiTakeaway: 'Newly indexed viral community submission.',
+    viralScore: 93,
+    aiTakeaway: `Newly indexed video by ${authorName} trending on ${platform.toUpperCase()}.`,
   };
 
   cachedViralVideos.unshift(newVideo);
@@ -4548,7 +4773,7 @@ app.post('/api/videos/add', (req, res) => {
 
   res.json({
     success: true,
-    message: 'Video added successfully to viral database.',
+    message: 'Video indexed and added to viral database.',
     video: newVideo
   });
 });

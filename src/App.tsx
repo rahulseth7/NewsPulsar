@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { NewsArticle, NewsCategory, NewsResponse, NewsSourceInfo } from './types';
+import { NewsArticle, NewsCategory, NewsResponse, NewsSourceInfo, Language } from './types';
 import { fetchNews, triggerRefresh, toggleSource, getCachedDatabaseNews } from './services/newsApi';
 import { Header, PageView } from './components/Header';
 import { RefreshTimerBar } from './components/RefreshTimerBar';
@@ -33,6 +33,7 @@ export default function App() {
   const [loading, setLoading] = useState(() => !getCachedDatabaseNews());
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [language, setLanguage] = useState<Language>('en');
 
   // Active Top-Level Page View
   const [activePage, setActivePage] = useState<PageView>(() => {
@@ -565,6 +566,8 @@ export default function App() {
         activePage={activePage}
         onNavigatePage={handleNavigatePage}
         totalArticles={data?.articles?.length || 0}
+        language={language}
+        onToggleLanguage={setLanguage}
       />
 
       {/* 2. Page Router Rendering */}
@@ -635,7 +638,7 @@ export default function App() {
         <ViralVideosPage
           onBackToNews={() => handleNavigatePage('home')}
           onNavigatePage={handleNavigatePage}
-          language="en"
+          language={language}
         />
       )}
 
