@@ -1,8 +1,7 @@
 import React from 'react';
-import { Newspaper, ShieldCheck, DollarSign, Rss, FileCode, Lock, Mail, Database, Download, BarChart3 } from 'lucide-react';
+import { Newspaper, ShieldCheck, DollarSign, Rss, FileCode, Lock, Mail, Database, Download, BarChart3, ExternalLink } from 'lucide-react';
 import { PolicyTab } from './PolicyModal';
-
-export type PageView = 'home' | 'about' | 'advertise' | 'contact' | 'privacy' | 'dashboard';
+import { PageView } from '../types';
 
 interface FooterProps {
   onOpenPolicy: (tab: PolicyTab) => void;
@@ -145,6 +144,16 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <a
+                  href="/api/videos/sitemap.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-1 transition-colors"
+                >
+                  <span className="bg-[#ff2a85] text-white px-1 font-black">/api/videos/sitemap.xml</span>
+                </a>
+              </li>
+              <li>
+                <a
                   href="/news-sitemap.xml"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -190,6 +199,35 @@ export const Footer: React.FC<FooterProps> = ({
             </p>
 
             <div className="flex flex-col gap-1.5 text-xs font-neo font-black">
+              {onNavigatePage && (
+                <button
+                  onClick={() => handleNav('videos')}
+                  className="flex items-center justify-between px-3 py-1.5 bg-[#ff2a85] hover:bg-[#e01e74] text-white border-2 border-black neo-shadow-sm transition-all cursor-pointer"
+                  title="Open Viral Videos & Internet Clips Hub"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span>🎬 VIRAL VIDEOS HUB</span>
+                  </span>
+                  <span className="text-[10px] font-mono bg-black text-[#ccff00] px-1 border border-black font-bold">
+                    TRENDING
+                  </span>
+                </button>
+              )}
+              {onNavigatePage && (
+                <button
+                  onClick={() => handleNav('database')}
+                  className="flex items-center justify-between px-3 py-1.5 bg-[#ccff00] hover:bg-[#b8e600] text-black border-2 border-black neo-shadow-sm transition-all cursor-pointer"
+                  title="Open Scraped News Database Explorer"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Database className="w-3.5 h-3.5 text-black" />
+                    <span>SCRAPED DATABASE</span>
+                  </span>
+                  <span className="text-[10px] font-mono bg-black text-[#ccff00] px-1 border border-black font-bold">
+                    {totalArticles}
+                  </span>
+                </button>
+              )}
               {onOpenDashboard && (
                 <button
                   onClick={onOpenDashboard}

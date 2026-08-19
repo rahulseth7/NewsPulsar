@@ -1,6 +1,7 @@
 import { NewsResponse, NewsArticle, AISummaryResponse, NewsSourceInfo, TrendingTopicsData, TrendingTopicItem, NewsCategory, AutoTagSuggestion, BatchAutoTagResult, HindiArticleContent } from '../types';
 import { getArticleImageUrl } from '../utils/imageUtils';
 import { resolveCleanArticleLink } from '../utils/linkUtils';
+import { saveArticlesToIndexedDb, loadArticlesFromIndexedDb, getArticleCountFromIndexedDb } from '../utils/indexedDbStorage';
 
 const CLIENT_SOURCES_KEY = 'news_pulse_client_sources';
 const CLIENT_DATABASE_CACHE_KEY = 'newspulse_articles_db_cache';
@@ -1003,16 +1004,28 @@ const FALLBACK_ARTICLES: NewsArticle[] = [
 ];
 
 export async function fetchNews(): Promise<NewsResponse> {
+  // 1. First retrieve all articles currently preserved in IndexedDB & LocalStorage
+  let localDbArticles: NewsArticle[] = [];
+  try {
+    const idbArticles = await loadArticlesFromIndexedDb();
+    if (idbArticles && idbArticles.length > 0) {
+      localDbArticles = idbArticles;
+    }
+  } catch {}
+
+  if (localDbArticles.length === 0) {
+    const cachedDb = getCachedDatabaseNews();
+    if (cachedDb && Array.isArray(cachedDb.articles)) {
+      localDbArticles = cachedDb.articles;
+    }
+  }
+
   try {
     const res = await fetch('/api/news');
     const contentType = res.headers.get('content-type');
     if (res.ok && contentType && contentType.includes('application/json')) {
       const data = await res.json();
       if (data && data.articles && Array.isArray(data.articles) && data.articles.length > 0) {
-        // Merge with existing local cache to ensure historical items are never lost
-        const cachedDb = getCachedDatabaseNews();
-        const existingArticles: NewsArticle[] = (cachedDb && Array.isArray(cachedDb.articles)) ? cachedDb.articles : [];
-
         const titleSet = new Set<string>();
         const idSet = new Set<string>();
         const mergedArticles: NewsArticle[] = [];
@@ -1028,8 +1041,9 @@ export async function fetchNews(): Promise<NewsResponse> {
           }
         };
 
+        // Prefer newest articles from server, but retain all past local articles
         data.articles.forEach(addArt);
-        existingArticles.forEach(addArt);
+        localDbArticles.forEach(addArt);
         mergedArticles.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
 
         const mergedData: NewsResponse = {
@@ -1038,9 +1052,20 @@ export async function fetchNews(): Promise<NewsResponse> {
           totalArticles: mergedArticles.length,
         };
 
+        // Persist to both IndexedDB and LocalStorage
         try {
-          localStorage.setItem(CLIENT_DATABASE_CACHE_KEY, JSON.stringify(mergedData));
+          saveArticlesToIndexedDb(mergedArticles);
         } catch (_) {}
+
+        try {
+          // Store recent slice in localStorage to avoid quota limits
+          const localSlice = {
+            ...mergedData,
+            articles: mergedArticles.slice(0, 300),
+          };
+          localStorage.setItem(CLIENT_DATABASE_CACHE_KEY, JSON.stringify(localSlice));
+        } catch (_) {}
+
         return mergedData;
       }
     }
@@ -1051,6 +1076,7 @@ export async function fetchNews(): Promise<NewsResponse> {
   // Fallback to cumulative client-side live RSS scraper
   const clientScraped = await fetchClientSideNews();
   try {
+    saveArticlesToIndexedDb(clientScraped.articles);
     localStorage.setItem(CLIENT_DATABASE_CACHE_KEY, JSON.stringify(clientScraped));
   } catch (_) {}
   return clientScraped;
@@ -1066,8 +1092,15 @@ export async function triggerRefresh(): Promise<NewsResponse> {
     if (res.ok && contentType && contentType.includes('application/json')) {
       const data = await res.json();
       if (data && data.articles && Array.isArray(data.articles) && data.articles.length > 0) {
-        const cachedDb = getCachedDatabaseNews();
-        const existingArticles: NewsArticle[] = (cachedDb && Array.isArray(cachedDb.articles)) ? cachedDb.articles : [];
+        let existingArticles: NewsArticle[] = [];
+        try {
+          existingArticles = await loadArticlesFromIndexedDb();
+        } catch {}
+
+        if (existingArticles.length === 0) {
+          const cachedDb = getCachedDatabaseNews();
+          existingArticles = (cachedDb && Array.isArray(cachedDb.articles)) ? cachedDb.articles : [];
+        }
 
         const titleSet = new Set<string>();
         const idSet = new Set<string>();
@@ -1095,8 +1128,17 @@ export async function triggerRefresh(): Promise<NewsResponse> {
         };
 
         try {
-          localStorage.setItem(CLIENT_DATABASE_CACHE_KEY, JSON.stringify(mergedData));
+          saveArticlesToIndexedDb(mergedArticles);
         } catch (_) {}
+
+        try {
+          const localSlice = {
+            ...mergedData,
+            articles: mergedArticles.slice(0, 300),
+          };
+          localStorage.setItem(CLIENT_DATABASE_CACHE_KEY, JSON.stringify(localSlice));
+        } catch (_) {}
+
         return mergedData;
       }
     }
@@ -1106,6 +1148,7 @@ export async function triggerRefresh(): Promise<NewsResponse> {
 
   const clientScraped = await fetchClientSideNews();
   try {
+    saveArticlesToIndexedDb(clientScraped.articles);
     localStorage.setItem(CLIENT_DATABASE_CACHE_KEY, JSON.stringify(clientScraped));
   } catch (_) {}
   return clientScraped;
@@ -1115,21 +1158,34 @@ export async function fetchDatabaseInfo(): Promise<any> {
   try {
     const res = await fetch('/api/database/status');
     if (res.ok) {
-      return await res.json();
+      const data = await res.json();
+      const idbCount = await getArticleCountFromIndexedDb();
+      return {
+        ...data,
+        indexedDbArticlesStored: idbCount,
+      };
     }
   } catch (err) {
     console.error('Failed to fetch database status:', err);
   }
+
+  const idbCount = await getArticleCountFromIndexedDb();
   return {
-    success: false,
-    storageType: 'Client LocalStorage Database Cache',
-    totalArticlesStored: getCachedDatabaseNews()?.articles?.length || 0,
+    success: true,
+    storageType: 'Client Dual-Layer IndexedDB & LocalStorage Database',
+    totalArticlesStored: idbCount || getCachedDatabaseNews()?.articles?.length || 0,
+    indexedDbArticlesStored: idbCount,
   };
 }
 
-export async function syncDatabaseStorage(): Promise<{ success: boolean; message: string; totalArticlesStored?: number }> {
+export async function syncDatabaseStorage(clientArticles?: NewsArticle[]): Promise<{ success: boolean; message: string; totalArticlesStored?: number }> {
   try {
-    const res = await fetch('/api/database/sync', { method: 'POST' });
+    const articlesToSync = clientArticles || await loadArticlesFromIndexedDb();
+    const res = await fetch('/api/database/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articles: articlesToSync })
+    });
     if (res.ok) {
       return await res.json();
     }
@@ -1155,6 +1211,21 @@ export async function createDatabaseBackup(): Promise<{ success: boolean; messag
     success: false,
     message: 'Failed to create server database snapshot.',
   };
+}
+
+export async function fetchAllDatabaseArticles(): Promise<NewsArticle[]> {
+  try {
+    const res = await fetch('/api/database/articles');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.articles)) {
+        saveArticlesToIndexedDb(data.articles);
+        return data.articles;
+      }
+    }
+  } catch {}
+
+  return await loadArticlesFromIndexedDb();
 }
 
 export async function fetchAISummary(article: NewsArticle): Promise<AISummaryResponse> {

@@ -23,6 +23,9 @@ import { AdvertisePage } from './pages/AdvertisePage';
 import { ContactPage } from './pages/ContactPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { DatabasePage } from './pages/DatabasePage';
+import { ViralVideosPage } from './pages/ViralVideosPage';
+import { DatabaseTelemetryBar } from './components/DatabaseTelemetryBar';
 import { RefreshCw, LayoutGrid, List, SlidersHorizontal, BookmarkCheck, AlertCircle, Sparkles, Command, Keyboard } from 'lucide-react';
 
 export default function App() {
@@ -34,13 +37,13 @@ export default function App() {
   // Active Top-Level Page View
   const [activePage, setActivePage] = useState<PageView>(() => {
     try {
-      const hash = window.location.hash.replace('#', '').toLowerCase();
-      if (['about', 'advertise', 'contact', 'privacy', 'dashboard'].includes(hash)) {
+      const hash = window.location.hash.replace('#', '').split('?')[0].toLowerCase();
+      if (['about', 'advertise', 'contact', 'privacy', 'dashboard', 'database', 'videos'].includes(hash)) {
         return hash as PageView;
       }
       const params = new URLSearchParams(window.location.search);
       const pageParam = params.get('page')?.toLowerCase();
-      if (pageParam && ['about', 'advertise', 'contact', 'privacy', 'dashboard'].includes(pageParam)) {
+      if (pageParam && ['about', 'advertise', 'contact', 'privacy', 'dashboard', 'database', 'videos'].includes(pageParam)) {
         return pageParam as PageView;
       }
     } catch {
@@ -117,8 +120,8 @@ export default function App() {
   // Sync with browser hash changes / back-forward buttons
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '').toLowerCase();
-      if (['about', 'advertise', 'contact', 'privacy', 'dashboard'].includes(hash)) {
+      const hash = window.location.hash.replace('#', '').split('?')[0].toLowerCase();
+      if (['about', 'advertise', 'contact', 'privacy', 'dashboard', 'database', 'videos'].includes(hash)) {
         setActivePage(hash as PageView);
       } else {
         setActivePage('home');
@@ -160,6 +163,10 @@ export default function App() {
       title = 'Privacy Policy, GDPR/CCPA & Cookie Preferences - New Pulse';
     } else if (activePage === 'dashboard') {
       title = 'Newsroom Command & Traffic Analytics Dashboard - New Pulse';
+    } else if (activePage === 'database') {
+      title = 'Scraped News Database & Zero-Loss Storage Explorer - New Pulse';
+    } else if (activePage === 'videos') {
+      title = 'Trending Viral Videos & Internet Clips Feed - New Pulse';
     } else if (selectedArticle) {
       title = `${selectedArticle.title} | New Pulse`;
     } else if (searchQuery.trim()) {
@@ -557,6 +564,7 @@ export default function App() {
         }}
         activePage={activePage}
         onNavigatePage={handleNavigatePage}
+        totalArticles={data?.articles?.length || 0}
       />
 
       {/* 2. Page Router Rendering */}
@@ -605,6 +613,32 @@ export default function App() {
         />
       )}
 
+      {activePage === 'database' && (
+        <DatabasePage
+          onBackToNews={() => handleNavigatePage('home')}
+          onNavigatePage={handleNavigatePage}
+          onOpenArticle={(art) => setSelectedArticle(art)}
+          articles={data?.articles || []}
+          onArticlesUpdated={(updatedArticles) => {
+            if (data) {
+              setData({
+                ...data,
+                articles: updatedArticles,
+                totalArticles: updatedArticles.length,
+              });
+            }
+          }}
+        />
+      )}
+
+      {activePage === 'videos' && (
+        <ViralVideosPage
+          onBackToNews={() => handleNavigatePage('home')}
+          onNavigatePage={handleNavigatePage}
+          language="en"
+        />
+      )}
+
       {/* 3. Default Home View: Live News Feed */}
       {activePage === 'home' && (
         <>
@@ -643,6 +677,15 @@ export default function App() {
             {/* Center Main Content Area */}
             <main className="flex-1 min-w-0 max-w-7xl w-full mx-auto space-y-6">
               
+              {/* Real-time Zero-Loss Database Telemetry Banner */}
+              <DatabaseTelemetryBar
+                totalArticles={data?.articles?.length || 0}
+                lastScrapedAt={data?.lastRefreshedAt}
+                onOpenDatabase={() => handleNavigatePage('database')}
+                onTriggerScrape={handleRefresh}
+                isScraping={isRefreshing}
+              />
+
               {/* Featured News Hero Carousel */}
               {data?.articles && data.articles.length > 0 && (selectedCategory === 'All' || !selectedCategory) ? (
                 <NewsCarousel

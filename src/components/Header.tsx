@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { RefreshCw, Search, Bookmark, LayoutDashboard, BarChart3, Rss, Twitter, Linkedin, Youtube, Video, Share2, Globe } from 'lucide-react';
-import { NewsCategory, Language } from '../types';
+import { RefreshCw, Search, Bookmark, LayoutDashboard, BarChart3, Database, Rss, Twitter, Linkedin, Youtube, Video, Share2, Globe } from 'lucide-react';
+import { NewsCategory, Language, PageView } from '../types';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { CATEGORY_HINDI_MAP, UI_STRINGS_HINDI } from '../utils/hindiTranslator';
 
-export type PageView = 'home' | 'about' | 'advertise' | 'contact' | 'privacy' | 'dashboard';
+export type { PageView };
 
 interface HeaderProps {
   searchQuery: string;
@@ -28,6 +28,7 @@ interface HeaderProps {
   language?: Language;
   onToggleLanguage?: (lang: Language) => void;
   isTranslating?: boolean;
+  totalArticles?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -49,6 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
   language = 'en',
   onToggleLanguage = () => {},
   isTranslating = false,
+  totalArticles = 0,
 }) => {
   const [showSearchInput, setShowSearchInput] = useState(false);
 
@@ -118,6 +120,34 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               {language === 'hi' ? 'गोपनीयता नीति' : 'PRIVACY POLICY'}
+            </button>
+            <button
+              onClick={() => onNavigatePage ? onNavigatePage('videos') : null}
+              className={`text-black font-black px-2.5 py-0.5 border border-black neo-shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                activePage === 'videos' ? 'bg-[#ff2a85] text-white' : 'bg-[#ff2a85] text-white hover:bg-[#e01e74]'
+              }`}
+              title="Access Scraped Viral Internet Videos & Clips"
+            >
+              <Video className="w-3.5 h-3.5" />
+              <span>{language === 'hi' ? '🎬 वायरल वीडियो' : '🎬 VIRAL VIDEOS'}</span>
+              <span className="bg-black text-[#ccff00] font-mono text-[9px] px-1 py-0.2">
+                HOT
+              </span>
+            </button>
+            <button
+              onClick={() => onNavigatePage ? onNavigatePage('database') : null}
+              className={`text-black font-black px-2.5 py-0.5 border border-black neo-shadow-sm transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                activePage === 'database' ? 'bg-[#ccff00]' : 'bg-[#ffe600] hover:bg-[#ccff00]'
+              }`}
+              title="Access Scraped News Database & Archive"
+            >
+              <Database className="w-3.5 h-3.5 text-black" />
+              <span>{language === 'hi' ? '🗄️ डेटाबेस' : '🗄️ DATABASE'}</span>
+              {totalArticles !== undefined && totalArticles > 0 && (
+                <span className="bg-black text-[#ccff00] font-mono text-[9px] px-1 py-0.2">
+                  {totalArticles}
+                </span>
+              )}
             </button>
             <button
               onClick={() => onNavigatePage ? onNavigatePage('dashboard') : onOpenDashboard?.()}
@@ -271,6 +301,30 @@ export const Header: React.FC<HeaderProps> = ({
               isTranslating={isTranslating}
               variant="default"
             />
+
+            {/* Viral Videos Button */}
+            <button
+              onClick={() => onNavigatePage ? onNavigatePage('videos') : null}
+              className={`px-2.5 py-1.5 border border-black neo-shadow-sm text-xs font-neo font-black transition-all cursor-pointer hidden sm:flex items-center gap-1.5 whitespace-nowrap ${
+                activePage === 'videos' ? 'bg-[#ff2a85] text-white' : 'bg-[#ff2a85] text-white hover:bg-[#e01e74]'
+              }`}
+              title="Access Scraped Viral Internet Videos & Clips"
+            >
+              <Video className="w-3.5 h-3.5 text-white shrink-0" />
+              <span>{language === 'hi' ? 'वायरल' : 'VIRAL'}</span>
+            </button>
+
+            {/* Database Button */}
+            <button
+              onClick={() => onNavigatePage ? onNavigatePage('database') : null}
+              className={`px-2.5 py-1.5 border border-black neo-shadow-sm text-xs font-neo font-black transition-all cursor-pointer hidden sm:flex items-center gap-1.5 whitespace-nowrap ${
+                activePage === 'database' ? 'bg-[#ccff00] text-black' : 'bg-[#ffe600] hover:bg-[#ccff00] text-black'
+              }`}
+              title="Access Scraped News Database & Archive"
+            >
+              <Database className="w-3.5 h-3.5 text-black shrink-0" />
+              <span>{language === 'hi' ? 'डेटाबेस' : 'DATABASE'}</span>
+            </button>
 
             {/* Dashboard Button */}
             <button

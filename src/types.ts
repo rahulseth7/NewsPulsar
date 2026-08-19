@@ -217,4 +217,47 @@ export interface TranslateBatchResponse {
   error?: string;
 }
 
+export type VideoPlatform = 'youtube' | 'tiktok' | 'reddit' | 'vimeo' | 'twitter' | 'web';
+
+export type VideoCategory = 'Viral' | 'Tech' | 'Science' | 'Entertainment' | 'Humor' | 'Gaming' | 'News' | 'Sports';
+
+export interface ViralVideo {
+  id: string;
+  title: string;
+  description: string;
+  videoUrl: string;
+  embedUrl: string;
+  thumbnailUrl: string;
+  source: string;
+  author?: string;
+  platform: VideoPlatform;
+  viewsCount: number;
+  likesCount: number;
+  duration: string; // e.g. "03:45"
+  pubDate: string; // ISO string
+  category: VideoCategory;
+  tags: string[]; // e.g. ["#Viral", "#AI", "#Tech"]
+  seoKeywords: string[];
+  slug: string;
+  metaDescription: string;
+  sentiment?: SentimentType;
+  isViralTrend: boolean;
+  viralScore: number; // 1 to 100
+  aiTakeaway?: string;
+  hindiTitle?: string;
+  hindiDescription?: string;
+}
+
+export interface ViralVideoResponse {
+  videos: ViralVideo[];
+  totalVideos: number;
+  lastScrapedAt: string;
+  trendingTags: { tag: string; count: number }[];
+  platformBreakdown: Record<string, number>;
+  categoryBreakdown: Record<string, number>;
+}
+
+export type PageView = 'home' | 'about' | 'advertise' | 'contact' | 'privacy' | 'dashboard' | 'database' | 'videos';
+
+
 
