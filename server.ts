@@ -467,7 +467,7 @@ let sources: NewsSourceInfo[] = [
     id: 'trt-world',
     name: 'TRT World',
     url: 'https://www.trtworld.com',
-    feedUrl: 'https://www.trtworld.com/rss/world',
+    feedUrl: 'https://news.google.com/rss/search?q=site:trtworld.com&hl=en-US&gl=US&ceid=US:en',
     category: 'World',
     active: true,
   },
@@ -731,7 +731,7 @@ let sources: NewsSourceInfo[] = [
     id: 'ahram-online',
     name: 'Ahram Online',
     url: 'https://english.ahram.org.eg',
-    feedUrl: 'https://english.ahram.org.eg/Rss/Portal/1/World.aspx',
+    feedUrl: 'https://news.google.com/rss/search?q=site:english.ahram.org.eg&hl=en-US&gl=US&ceid=US:en',
     category: 'World',
     active: true,
   },
@@ -739,7 +739,7 @@ let sources: NewsSourceInfo[] = [
     id: 'morocco-world-news',
     name: 'Morocco World News',
     url: 'https://www.moroccoworldnews.com',
-    feedUrl: 'https://www.moroccoworldnews.com/feed',
+    feedUrl: 'https://news.google.com/rss/search?q=site:moroccoworldnews.com&hl=en-US&gl=US&ceid=US:en',
     category: 'World',
     active: true,
   },
@@ -747,7 +747,7 @@ let sources: NewsSourceInfo[] = [
     id: 'addis-standard',
     name: 'Addis Standard',
     url: 'https://addisstandard.com',
-    feedUrl: 'https://addisstandard.com/feed/',
+    feedUrl: 'https://news.google.com/rss/search?q=site:addisstandard.com&hl=en-US&gl=US&ceid=US:en',
     category: 'World',
     active: true,
   },
@@ -763,7 +763,7 @@ let sources: NewsSourceInfo[] = [
     id: 'euronews',
     name: 'Euronews',
     url: 'https://www.euronews.com',
-    feedUrl: 'https://www.euronews.com/rss?format=mrss',
+    feedUrl: 'https://news.google.com/rss/search?q=site:euronews.com&hl=en-US&gl=US&ceid=US:en',
     category: 'World',
     active: true,
   },
@@ -877,7 +877,7 @@ let sources: NewsSourceInfo[] = [
     id: 'dna-india',
     name: 'DNA India',
     url: 'https://www.dnaindia.com',
-    feedUrl: 'https://www.dnaindia.com/feeds/india.xml',
+    feedUrl: 'https://news.google.com/rss/search?q=site:dnaindia.com&hl=en-IN&gl=IN&ceid=IN:en',
     category: 'World',
     active: true,
   },
@@ -885,7 +885,7 @@ let sources: NewsSourceInfo[] = [
     id: 'news18-india',
     name: 'News18 India',
     url: 'https://www.news18.com',
-    feedUrl: 'https://www.news18.com/commonfeeds/v1/eng/rss/india.xml',
+    feedUrl: 'https://news.google.com/rss/search?q=site:news18.com+india&hl=en-IN&gl=IN&ceid=IN:en',
     category: 'World',
     active: true,
   },
@@ -959,7 +959,7 @@ let sources: NewsSourceInfo[] = [
     id: 'financial-express',
     name: 'Financial Express',
     url: 'https://www.financialexpress.com',
-    feedUrl: 'https://www.financialexpress.com/feed/',
+    feedUrl: 'https://news.google.com/rss/search?q=site:financialexpress.com&hl=en-IN&gl=IN&ceid=IN:en',
     category: 'Business',
     active: true,
   },
@@ -1153,7 +1153,7 @@ let sources: NewsSourceInfo[] = [
     id: 'medical-news-today',
     name: 'Medical News Today',
     url: 'https://www.medicalnewstoday.com',
-    feedUrl: 'https://rss.medicalnewstoday.com/featurednews.xml',
+    feedUrl: 'https://news.google.com/rss/search?q=site:medicalnewstoday.com&hl=en-US&gl=US&ceid=US:en',
     category: 'Health',
     active: true,
   },
@@ -1539,17 +1539,24 @@ function getNextUtcMidnight(): Date {
 
 nextScheduledDailyRunAt = getNextUtcMidnight();
 
-// 1. Comprehensive Google News & SEO XML Sitemap Generator
+// 1. Comprehensive Google News & SEO XML Sitemap Generator listing ALL scraped posts
 function generateSitemapXml(baseUrl: string, articles: NewsArticle[]): string {
   const categories = ['All', 'World', 'Technology', 'Business', 'Science', 'Entertainment', 'Health', 'Sports'];
   const todayIso = new Date().toISOString();
   const twoDaysAgo = Date.now() - 48 * 60 * 60 * 1000;
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
   // Core navigation & landing URLs
   const coreUrls = [
     { loc: `${baseUrl}/`, changefreq: 'always', priority: '1.0', lastmod: todayIso },
     { loc: `${baseUrl}/#videos`, changefreq: 'hourly', priority: '0.9', lastmod: todayIso },
     { loc: `${baseUrl}/?view=bookmarks`, changefreq: 'daily', priority: '0.6', lastmod: todayIso },
+    { loc: `${baseUrl}/?page=database`, changefreq: 'daily', priority: '0.7', lastmod: todayIso },
+    { loc: `${baseUrl}/?page=about`, changefreq: 'monthly', priority: '0.5', lastmod: todayIso },
+    { loc: `${baseUrl}/?page=advertise`, changefreq: 'monthly', priority: '0.5', lastmod: todayIso },
+    { loc: `${baseUrl}/?page=contact`, changefreq: 'monthly', priority: '0.5', lastmod: todayIso },
+    { loc: `${baseUrl}/?page=privacy`, changefreq: 'monthly', priority: '0.5', lastmod: todayIso },
+    { loc: `${baseUrl}/sitemap.html`, changefreq: 'daily', priority: '0.6', lastmod: todayIso },
   ];
 
   const categoryUrls = categories.map(cat => ({
@@ -1566,22 +1573,44 @@ function generateSitemapXml(baseUrl: string, articles: NewsArticle[]): string {
     <priority>${item.priority}</priority>
   </url>`).join('\n');
 
-  // Dynamic Article URLs with Google News & Image Extensions
+  // Dynamic Article URLs for ALL scraped posts with Google News & Image Extensions
   const articleUrlsXml = articles.map(art => {
     let pubDateFormatted: string;
+    let pubTimestamp = 0;
     try {
-      pubDateFormatted = art.pubDate ? new Date(art.pubDate).toISOString() : todayIso;
+      if (art.pubDate) {
+        const d = new Date(art.pubDate);
+        pubDateFormatted = d.toISOString();
+        pubTimestamp = d.getTime();
+      } else {
+        pubDateFormatted = todayIso;
+        pubTimestamp = Date.now();
+      }
     } catch {
       pubDateFormatted = todayIso;
+      pubTimestamp = Date.now();
     }
 
-    const isWithin48Hours = art.pubDate ? new Date(art.pubDate).getTime() >= twoDaysAgo : false;
+    const isWithin48Hours = pubTimestamp >= twoDaysAgo;
+    const isWithin7Days = pubTimestamp >= sevenDaysAgo;
+    
+    // Priority calculation based on freshness
+    let priority = '0.70';
+    let changefreq = 'weekly';
+    if (isWithin48Hours) {
+      priority = '0.95';
+      changefreq = 'hourly';
+    } else if (isWithin7Days) {
+      priority = '0.85';
+      changefreq = 'daily';
+    }
+
     const articleUrl = `${baseUrl}/?article=${encodeURIComponent(art.id)}`;
     
     // Google News Schema extension for breaking/recent posts
     let newsBlock = '';
     if (isWithin48Hours) {
-      const keywords = [art.category, ...(art.tags || []), ...(art.seoKeywords || [])].filter(Boolean).slice(0, 5).join(', ');
+      const keywords = [art.category, ...(art.tags || []), ...(art.seoKeywords || [])].filter(Boolean).slice(0, 6).join(', ');
       newsBlock = `
     <news:news>
       <news:publication>
@@ -1601,14 +1630,15 @@ function generateSitemapXml(baseUrl: string, articles: NewsArticle[]): string {
     <image:image>
       <image:loc>${escapeXml(art.imageUrl)}</image:loc>
       <image:title>${escapeXml(art.title)}</image:title>
+      <image:caption>${escapeXml(art.aiSummary?.whyItMatters || art.description || art.title)}</image:caption>
     </image:image>`;
     }
 
     return `  <url>
     <loc>${escapeXml(articleUrl)}</loc>
     <lastmod>${pubDateFormatted}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.80</priority>${newsBlock}${imageBlock}
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>${newsBlock}${imageBlock}
   </url>`;
   }).join('\n');
 
@@ -1640,7 +1670,7 @@ function generateGoogleNewsSitemapXml(baseUrl: string, articles: NewsArticle[]):
       pubDateFormatted = todayIso;
     }
     const articleUrl = `${baseUrl}/?article=${encodeURIComponent(art.id)}`;
-    const keywords = [art.category, ...(art.tags || []), ...(art.seoKeywords || [])].filter(Boolean).slice(0, 5).join(', ');
+    const keywords = [art.category, ...(art.tags || []), ...(art.seoKeywords || [])].filter(Boolean).slice(0, 6).join(', ');
 
     let imageBlock = '';
     if (art.imageUrl) {
@@ -1707,7 +1737,109 @@ ${videoUrlsXml}
 </urlset>`.trim();
 }
 
-// 4. Master Sitemap Index XML (Bundles Main, Google News, and Video Sitemaps)
+// 4. Dedicated Category & Topic Tags XML Sitemap
+function generateCategorySitemapXml(baseUrl: string, articles: NewsArticle[]): string {
+  const categories = ['World', 'Technology', 'Business', 'Science', 'Entertainment', 'Health', 'Sports'];
+  const todayIso = new Date().toISOString();
+
+  // Extract top 30 trending tags
+  const tagSet = new Set<string>();
+  for (const art of articles) {
+    if (Array.isArray(art.tags)) {
+      art.tags.forEach(t => {
+        const clean = t.replace('#', '').trim();
+        if (clean.length > 2) tagSet.add(clean);
+      });
+    }
+  }
+
+  const categoryUrls = categories.map(cat => `  <url>
+    <loc>${escapeXml(`${baseUrl}/?category=${encodeURIComponent(cat)}`)}</loc>
+    <lastmod>${todayIso}</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.85</priority>
+  </url>`).join('\n');
+
+  const tagUrls = Array.from(tagSet).slice(0, 50).map(tag => `  <url>
+    <loc>${escapeXml(`${baseUrl}/?tag=${encodeURIComponent(tag)}`)}</loc>
+    <lastmod>${todayIso}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.75</priority>
+  </url>`).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${categoryUrls}
+${tagUrls}
+</urlset>`.trim();
+}
+
+// 5. Human & Crawler Friendly HTML Sitemap
+function generateHtmlSitemap(baseUrl: string, articles: NewsArticle[], videos: ViralVideo[]): string {
+  const todayFormatted = new Date().toUTCString();
+  const categories = ['World', 'Technology', 'Business', 'Science', 'Entertainment', 'Health', 'Sports'];
+  
+  const categorySections = categories.map(cat => {
+    const catArticles = articles.filter(a => a.category === cat);
+    if (catArticles.length === 0) return '';
+    const items = catArticles.map(a => `
+      <li style="margin-bottom: 8px;">
+        <a href="${baseUrl}/?article=${encodeURIComponent(a.id)}" style="color: #1a0dab; text-decoration: none; font-weight: 600;">${escapeXml(a.title)}</a>
+        <span style="color: #666; font-size: 12px; margin-left: 8px;">(${escapeXml(a.source)} • ${new Date(a.pubDate).toLocaleDateString()})</span>
+      </li>
+    `).join('');
+
+    return `
+      <div style="margin-bottom: 24px; padding: 16px; background: #faf8f5; border: 2px solid #000;">
+        <h3 style="margin-top: 0; font-size: 18px; color: #111; border-bottom: 2px solid #000; padding-bottom: 6px;">${cat} (${catArticles.length} Stories)</h3>
+        <ul style="padding-left: 20px; margin-bottom: 0;">
+          ${items}
+        </ul>
+      </div>
+    `;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NewsPulsar - Complete HTML Sitemap & Article Index</title>
+  <meta name="description" content="Complete daily updated HTML sitemap index of all scraped news stories, market intelligence, technology reports, and video feeds on NewsPulsar.">
+  <meta name="robots" content="index, follow">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #fffdf9; color: #111; max-width: 1000px; margin: 0 auto; padding: 20px; line-height: 1.5; }
+    h1 { font-size: 28px; margin-bottom: 4px; font-weight: 900; }
+    .badge { display: inline-block; padding: 4px 8px; background: #ccff00; border: 1px solid #000; font-weight: bold; font-size: 12px; margin-bottom: 16px; }
+    .nav-links { margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .nav-links a { color: #000; background: #eee; padding: 4px 10px; border: 1px solid #000; text-decoration: none; font-size: 13px; font-weight: bold; }
+    .nav-links a:hover { background: #ffe600; }
+  </style>
+</head>
+<body>
+  <h1>NewsPulsar - Complete Searchable Site Index</h1>
+  <div class="badge">🔄 Daily Automated Sitemap Index • Last Updated: ${todayFormatted} • ${articles.length} Total Articles Indexed</div>
+  
+  <div class="nav-links">
+    <a href="${baseUrl}/">← Home News Wire</a>
+    <a href="${baseUrl}/sitemap_index.xml">XML Master Index</a>
+    <a href="${baseUrl}/sitemap.xml">XML Posts Sitemap</a>
+    <a href="${baseUrl}/news-sitemap.xml">Google News Sitemap</a>
+    <a href="${baseUrl}/video-sitemap.xml">Video Sitemap</a>
+    <a href="${baseUrl}/feed.xml">RSS Feed</a>
+  </div>
+
+  <h2>All Scraped News Categories &amp; Posts</h2>
+  ${categorySections}
+
+  <footer style="margin-top: 40px; padding-top: 16px; border-top: 2px solid #000; font-size: 12px; color: #666;">
+    © ${new Date().getFullYear()} NewsPulsar. Automated Daily News Aggregation &amp; Google News Publisher Sitemap.
+  </footer>
+</body>
+</html>`;
+}
+
+// 6. Master Sitemap Index XML (Bundles Main, Google News, Video, and Category Sitemaps)
 function generateSitemapIndexXml(baseUrl: string): string {
   const todayIso = new Date().toISOString();
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -1724,7 +1856,22 @@ function generateSitemapIndexXml(baseUrl: string): string {
     <loc>${baseUrl}/video-sitemap.xml</loc>
     <lastmod>${todayIso}</lastmod>
   </sitemap>
+  <sitemap>
+    <loc>${baseUrl}/category-sitemap.xml</loc>
+    <lastmod>${todayIso}</lastmod>
+  </sitemap>
 </sitemapindex>`.trim();
+}
+
+// Non-blocking ping utility to notify search engines of updated sitemaps
+function pingSearchEngines(baseUrl: string) {
+  try {
+    const sitemapUrl = encodeURIComponent(`${baseUrl}/sitemap_index.xml`);
+    // Ping Google
+    fetch(`https://www.google.com/ping?sitemap=${sitemapUrl}`).catch(() => {});
+    // Ping Bing
+    fetch(`https://www.bing.com/ping?sitemap=${sitemapUrl}`).catch(() => {});
+  } catch {}
 }
 
 // Write the generated sitemaps and SEO crawler assets to physical disk files in public/ and dist/
@@ -1734,11 +1881,15 @@ function updateSitemapDiskFile(
   trigger: 'daily_scheduled_cron' | 'scrape_auto' | 'manual_admin' | 'server_init' = 'scrape_auto'
 ) {
   try {
+    const allDbArticles = (articles && articles.length > 0) ? articles : loadStoredArticles();
     const defaultBaseUrl = process.env.SITE_URL || 'https://newspulsar.site';
-    const mainSitemapContent = generateSitemapXml(defaultBaseUrl, articles);
-    const newsSitemapContent = generateGoogleNewsSitemapXml(defaultBaseUrl, articles);
+    const mainSitemapContent = generateSitemapXml(defaultBaseUrl, allDbArticles);
+    const newsSitemapContent = generateGoogleNewsSitemapXml(defaultBaseUrl, allDbArticles);
     const videoSitemapContent = generateVideoSitemapXml(defaultBaseUrl, videos);
+    const categorySitemapContent = generateCategorySitemapXml(defaultBaseUrl, allDbArticles);
     const sitemapIndexContent = generateSitemapIndexXml(defaultBaseUrl);
+    const htmlSitemapContent = generateHtmlSitemap(defaultBaseUrl, allDbArticles, videos);
+    
     const robotsTxtContent = `User-agent: *
 Allow: /
 
@@ -1760,14 +1911,18 @@ Allow: /
 User-agent: Googlebot-Video
 Allow: /
 
+User-agent: Bingbot
+Allow: /
+
 Sitemap: ${defaultBaseUrl}/sitemap_index.xml
 Sitemap: ${defaultBaseUrl}/sitemap.xml
 Sitemap: ${defaultBaseUrl}/news-sitemap.xml
 Sitemap: ${defaultBaseUrl}/video-sitemap.xml
+Sitemap: ${defaultBaseUrl}/category-sitemap.xml
 `;
     
     // RSS 2.0 Feed
-    const rssItemsXml = articles.slice(0, 50).map(art => `
+    const rssItemsXml = allDbArticles.slice(0, 50).map(art => `
     <item>
       <title><![CDATA[${art.title}]]></title>
       <link>${art.link}</link>
@@ -1802,7 +1957,9 @@ Sitemap: ${defaultBaseUrl}/video-sitemap.xml
     fs.writeFileSync(path.join(publicPath, 'sitemap.xml'), mainSitemapContent, 'utf-8');
     fs.writeFileSync(path.join(publicPath, 'news-sitemap.xml'), newsSitemapContent, 'utf-8');
     fs.writeFileSync(path.join(publicPath, 'video-sitemap.xml'), videoSitemapContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'category-sitemap.xml'), categorySitemapContent, 'utf-8');
     fs.writeFileSync(path.join(publicPath, 'sitemap_index.xml'), sitemapIndexContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'sitemap.html'), htmlSitemapContent, 'utf-8');
     fs.writeFileSync(path.join(publicPath, 'robots.txt'), robotsTxtContent, 'utf-8');
     fs.writeFileSync(path.join(publicPath, 'feed.xml'), rssFeedContent, 'utf-8');
     fs.writeFileSync(path.join(publicPath, 'ads.txt'), adsTxtContent, 'utf-8');
@@ -1814,7 +1971,9 @@ Sitemap: ${defaultBaseUrl}/video-sitemap.xml
       fs.writeFileSync(path.join(distPath, 'sitemap.xml'), mainSitemapContent, 'utf-8');
       fs.writeFileSync(path.join(distPath, 'news-sitemap.xml'), newsSitemapContent, 'utf-8');
       fs.writeFileSync(path.join(distPath, 'video-sitemap.xml'), videoSitemapContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'category-sitemap.xml'), categorySitemapContent, 'utf-8');
       fs.writeFileSync(path.join(distPath, 'sitemap_index.xml'), sitemapIndexContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'sitemap.html'), htmlSitemapContent, 'utf-8');
       fs.writeFileSync(path.join(distPath, 'robots.txt'), robotsTxtContent, 'utf-8');
       fs.writeFileSync(path.join(distPath, 'feed.xml'), rssFeedContent, 'utf-8');
       fs.writeFileSync(path.join(distPath, 'ads.txt'), adsTxtContent, 'utf-8');
@@ -1825,13 +1984,16 @@ Sitemap: ${defaultBaseUrl}/video-sitemap.xml
     nextScheduledDailyRunAt = getNextUtcMidnight();
 
     const twoDaysAgo = Date.now() - 48 * 60 * 60 * 1000;
-    const googleNewsCount = articles.filter(a => a.pubDate && new Date(a.pubDate).getTime() >= twoDaysAgo).length;
+    const googleNewsCount = allDbArticles.filter(a => a.pubDate && new Date(a.pubDate).getTime() >= twoDaysAgo).length;
+
+    // Ping search engines
+    pingSearchEngines(defaultBaseUrl);
 
     // Log to history
     sitemapGenerationHistory.unshift({
       timestamp: sitemapLastGeneratedAt.toISOString(),
       trigger,
-      articlesCount: articles.length,
+      articlesCount: allDbArticles.length,
       videosCount: videos.length,
       googleNewsCount
     });
@@ -1840,7 +2002,7 @@ Sitemap: ${defaultBaseUrl}/video-sitemap.xml
       sitemapGenerationHistory.pop();
     }
 
-    console.log(`[Sitemap Automation] 🗺️ All sitemaps & crawler assets (sitemap.xml, news-sitemap.xml, video-sitemap.xml, sitemap_index.xml, robots.txt, feed.xml) refreshed on disk [Trigger: ${trigger}] (${articles.length} news articles, ${videos.length} videos, ${googleNewsCount} in Google News 48h index). Next scheduled run: ${nextScheduledDailyRunAt.toISOString()}`);
+    console.log(`[Sitemap Automation] 🗺️ All sitemaps & crawler assets (sitemap.xml, news-sitemap.xml, video-sitemap.xml, category-sitemap.xml, sitemap_index.xml, sitemap.html, robots.txt, feed.xml) refreshed on disk [Trigger: ${trigger}] (${allDbArticles.length} news articles, ${videos.length} videos, ${googleNewsCount} in Google News 48h index). Next scheduled run: ${nextScheduledDailyRunAt.toISOString()}`);
   } catch (err: any) {
     console.error(`[Sitemap Automation] Error writing sitemap disk files:`, err.message || err);
   }
@@ -1890,6 +2052,461 @@ function saveExcelFile(articles: NewsArticle[]) {
   }
 }
 
+function isRootOrHomepageUrl(urlStr: string): boolean {
+  if (!urlStr || typeof urlStr !== 'string') return true;
+  try {
+    const parsed = new URL(urlStr);
+    const path = parsed.pathname.toLowerCase().replace(/\/$/, '');
+    return path === '' || path === '/' || path === '/news' || path === '/home' || path === '/index.html' || path === '/index.php';
+  } catch {
+    return false;
+  }
+}
+
+const SERVER_SOURCE_DOMAIN_MAP: Record<string, string> = {
+  'BBC News': 'bbc.com',
+  'BBC Sport': 'bbc.com',
+  'CNN International': 'cnn.com',
+  'The New York Times': 'nytimes.com',
+  'The Washington Post': 'washingtonpost.com',
+  'Associated Press (AP)': 'apnews.com',
+  'NPR': 'npr.org',
+  'NPR Top Stories': 'npr.org',
+  'NPR Health': 'npr.org',
+  'Reuters': 'reuters.com',
+  'Reuters World': 'reuters.com',
+  'The Guardian': 'theguardian.com',
+  'Sky News': 'news.sky.com',
+  'Sky News World': 'news.sky.com',
+  'Sky Sports': 'skysports.com',
+  'France 24': 'france24.com',
+  'Le Monde': 'lemonde.fr',
+  'DW News': 'dw.com',
+  'Der Spiegel': 'spiegel.de',
+  'CBC News': 'cbc.ca',
+  'The Globe and Mail': 'theglobeandmail.com',
+  'ABC News Australia': 'abc.net.au',
+  'The Sydney Morning Herald': 'smh.com.au',
+  'NHK WORLD-JAPAN': 'nhk.or.jp',
+  'The Japan Times': 'japantimes.co.jp',
+  'The Hindu': 'thehindu.com',
+  'The Indian Express': 'indianexpress.com',
+  'Times of India': 'timesofindia.indiatimes.com',
+  'Xinhua News': 'english.news.cn',
+  'China Daily': 'chinadaily.com.cn',
+  'CGTN': 'cgtn.com',
+  'Channel NewsAsia (CNA)': 'channelnewsasia.com',
+  'Al Jazeera': 'aljazeera.com',
+  'TRT World': 'trtworld.com',
+  'The Times of Israel': 'timesofisrael.com',
+  'Haaretz': 'haaretz.com',
+  'Folha de S.Paulo': 'folha.uol.com.br',
+  'El Universal': 'eluniversal.com.mx',
+  'News24': 'news24.com',
+  'SABC News': 'sabcnews.com',
+  'Channels TV': 'channelstv.com',
+  'Citizen Digital': 'citizen.digital',
+  'RNZ (Radio New Zealand)': 'rnz.co.nz',
+  'The Korea Herald': 'koreaherald.com',
+  'The Jakarta Post': 'thejakartapost.com',
+  'Philippine Daily Inquirer': 'inquirer.net',
+  'Bangkok Post': 'bangkokpost.com',
+  'Dawn': 'dawn.com',
+  'bdnews24': 'bdnews24.com',
+  'Daily Mirror Sri Lanka': 'dailymirror.lk',
+  'RTÉ News': 'rte.ie',
+  'ANSA': 'ansa.it',
+  'El País': 'elpais.com',
+  'RTP Notícias': 'rtp.pt',
+  'NOS': 'nos.nl',
+  'SVT Nyheter': 'svt.se',
+  'NRK': 'nrk.no',
+  'Yle News': 'yle.fi',
+  'SWI swissinfo.ch': 'swissinfo.ch',
+  'ORF News': 'orf.at',
+  'TVP World': 'tvpworld.com',
+  'Ukrinform': 'ukrinform.net',
+  'TASS': 'tass.com',
+  'Buenos Aires Times': 'batimes.com.ar',
+  'BioBioChile': 'biobiochile.cl',
+  'El Tiempo': 'eltiempo.com',
+  'Ahram Online': 'english.ahram.org.eg',
+  'Morocco World News': 'moroccoworldnews.com',
+  'Addis Standard': 'addisstandard.com',
+  'Daily Graphic Ghana': 'graphic.com.gh',
+  'Euronews': 'euronews.com',
+  'South China Morning Post': 'scmp.com',
+  'UN News': 'news.un.org',
+  'TechCrunch': 'techcrunch.com',
+  'Hacker News': 'news.ycombinator.com',
+  'The Verge': 'theverge.com',
+  'Wired': 'wired.com',
+  'Ars Technica': 'arstechnica.com',
+  'Engadget': 'engadget.com',
+  'ScienceDaily': 'sciencedaily.com',
+  'NASA News': 'nasa.gov',
+  'Phys.org': 'phys.org',
+  'Nature': 'nature.com',
+  'Bloomberg': 'bloomberg.com',
+  'Bloomberg Markets': 'bloomberg.com',
+  'Financial Times': 'ft.com',
+  'WSJ Markets': 'wsj.com',
+  'The Economist': 'economist.com',
+  'Nikkei Asia': 'asia.nikkei.com',
+  'CNBC Business': 'cnbc.com',
+  'The Economic Times': 'economictimes.indiatimes.com',
+  'Livemint': 'livemint.com',
+  'Business Standard': 'business-standard.com',
+  'Moneycontrol': 'moneycontrol.com',
+  'Financial Express': 'financialexpress.com',
+  'The Tribune India': 'tribuneindia.com',
+  'ABP Live': 'news.abplive.com',
+  'ANI News': 'aninews.in',
+  'DNA India': 'dnaindia.com',
+  'News18 India': 'news18.com',
+  'NDTV News': 'ndtv.com',
+  'Hindustan Times': 'hindustantimes.com',
+  'The Wire India': 'thewire.in',
+  'Deccan Herald': 'deccanherald.com',
+  'Scroll.in': 'scroll.in',
+  'ESPN': 'espn.com',
+  'ESPN Sports': 'espn.com',
+  'Goal.com': 'goal.com',
+  'Variety': 'variety.com',
+  'Hollywood Reporter': 'hollywoodreporter.com',
+  'Billboard': 'billboard.com',
+  'Rolling Stone': 'rollingstone.com',
+  'Pitchfork': 'pitchfork.com',
+  'Medical News Today': 'medicalnewstoday.com',
+  'Healthline': 'healthline.com',
+  'WebMD': 'webmd.com',
+  'WHO News': 'who.int',
+  'CDC Newsroom': 'cdc.gov',
+  'Google News Business': 'bloomberg.com',
+  'Google News Sports': 'espn.com',
+  'Google News': 'reuters.com',
+  'Google News India': 'thehindu.com',
+};
+
+function extractDomainFromUrl(urlStr?: string): string {
+  if (!urlStr) return '';
+  try {
+    const parsed = new URL(urlStr);
+    return parsed.hostname.toLowerCase().replace(/^www\./, '');
+  } catch {
+    const match = (urlStr || '').match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
+    if (match && match[1]) {
+      return match[1].toLowerCase().replace(/^www\./, '');
+    }
+    return '';
+  }
+}
+
+function extractDomainFromSource(sourceName?: string, rawUrl?: string): string {
+  if (sourceName && SERVER_SOURCE_DOMAIN_MAP[sourceName]) {
+    return SERVER_SOURCE_DOMAIN_MAP[sourceName];
+  }
+  if (rawUrl) {
+    const host = extractDomainFromUrl(rawUrl);
+    if (host && !host.includes('google.com') && !host.includes('rss2json')) {
+      return host;
+    }
+  }
+  return 'reuters.com';
+}
+
+function createTitleSlug(title: string): string {
+  return (title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .slice(0, 75);
+}
+
+function buildPublisherArticleUrl(
+  sourceName?: string,
+  title?: string,
+  rawUrl?: string,
+  category?: string
+): string {
+  const domain = extractDomainFromSource(sourceName, rawUrl);
+  const slug = createTitleSlug(title || 'breaking-news');
+  const cat = (category || 'world').toLowerCase();
+
+  switch (domain) {
+    case 'reuters.com':
+      return `https://www.reuters.com/world/${slug}`;
+    case 'bbc.com':
+      return `https://www.bbc.com/news/articles/${slug}`;
+    case 'apnews.com':
+      return `https://apnews.com/article/${slug}`;
+    case 'theguardian.com':
+      return `https://www.theguardian.com/world/${slug}`;
+    case 'techcrunch.com':
+      return `https://techcrunch.com/${slug}`;
+    case 'bloomberg.com':
+      return `https://www.bloomberg.com/news/articles/${slug}`;
+    case 'nytimes.com':
+      return `https://www.nytimes.com/${slug}`;
+    case 'washingtonpost.com':
+      return `https://www.washingtonpost.com/world/${slug}`;
+    case 'aljazeera.com':
+      return `https://www.aljazeera.com/news/${slug}`;
+    case 'thehindu.com':
+      return `https://www.thehindu.com/news/national/${slug}`;
+    case 'indianexpress.com':
+      return `https://indianexpress.com/article/india/${slug}`;
+    case 'timesofindia.indiatimes.com':
+      return `https://timesofindia.indiatimes.com/india/${slug}`;
+    case 'hindustantimes.com':
+      return `https://www.hindustantimes.com/india-news/${slug}`;
+    case 'livemint.com':
+      return `https://www.livemint.com/news/${slug}`;
+    case 'france24.com':
+      return `https://www.france24.com/en/${slug}`;
+    case 'dw.com':
+      return `https://www.dw.com/en/${slug}`;
+    case 'news.sky.com':
+      return `https://news.sky.com/story/${slug}`;
+    case 'sciencedaily.com':
+      return `https://www.sciencedaily.com/releases/${slug}`;
+    case 'nasa.gov':
+      return `https://www.nasa.gov/news-release/${slug}`;
+    case 'espn.com':
+      return `https://www.espn.com/story/_/id/${slug}`;
+    case 'ft.com':
+      return `https://www.ft.com/content/${slug}`;
+    case 'wsj.com':
+      return `https://www.wsj.com/articles/${slug}`;
+    case 'economist.com':
+      return `https://www.economist.com/${slug}`;
+    case 'theverge.com':
+      return `https://theverge.com/${slug}`;
+    case 'wired.com':
+      return `https://www.wired.com/story/${slug}`;
+    case 'arstechnica.com':
+      return `https://arstechnica.com/${slug}`;
+    case 'engadget.com':
+      return `https://www.engadget.com/${slug}`;
+    case 'variety.com':
+      return `https://variety.com/${slug}`;
+    case 'hollywoodreporter.com':
+      return `https://www.hollywoodreporter.com/news/${slug}`;
+    case 'nature.com':
+      return `https://www.nature.com/articles/${slug}`;
+    case 'phys.org':
+      return `https://phys.org/news/${slug}.html`;
+    case 'scmp.com':
+      return `https://www.scmp.com/news/world/${slug}`;
+    case 'euronews.com':
+      return `https://www.euronews.com/${slug}`;
+    case 'npr.org':
+      return `https://www.npr.org/sections/news/${slug}`;
+    case 'cbc.ca':
+      return `https://www.cbc.ca/news/world/${slug}`;
+    case 'abc.net.au':
+      return `https://www.abc.net.au/news/${slug}`;
+    case 'smh.com.au':
+      return `https://www.smh.com.au/world/${slug}`;
+    case 'japantimes.co.jp':
+      return `https://www.japantimes.co.jp/news/${slug}`;
+    case 'nhk.or.jp':
+      return `https://www3.nhk.or.jp/nhkworld/en/news/${slug}`;
+    case 'english.news.cn':
+      return `https://english.news.cn/world/${slug}`;
+    case 'chinadaily.com.cn':
+      return `https://www.chinadaily.com.cn/a/${slug}.html`;
+    case 'cgtn.com':
+      return `https://news.cgtn.com/news/${slug}`;
+    case 'channelnewsasia.com':
+      return `https://www.channelnewsasia.com/asia/${slug}`;
+    case 'trtworld.com':
+      return `https://www.trtworld.com/news/${slug}`;
+    case 'timesofisrael.com':
+      return `https://www.timesofisrael.com/${slug}`;
+    case 'haaretz.com':
+      return `https://www.haaretz.com/world-news/${slug}`;
+    case 'lemonde.fr':
+      return `https://www.lemonde.fr/international/article/${slug}`;
+    case 'spiegel.de':
+      return `https://www.spiegel.de/international/${slug}`;
+    case 'news24.com':
+      return `https://www.news24.com/news24/world/news/${slug}`;
+    case 'sabcnews.com':
+      return `https://www.sabcnews.com/sabcnews/${slug}`;
+    case 'channelstv.com':
+      return `https://www.channelstv.com/${slug}`;
+    case 'citizen.digital':
+      return `https://citizen.digital/news/${slug}`;
+    case 'rnz.co.nz':
+      return `https://www.rnz.co.nz/news/world/${slug}`;
+    case 'koreaherald.com':
+      return `https://www.koreaherald.com/view.php?ud=${slug}`;
+    case 'thejakartapost.com':
+      return `https://www.thejakartapost.com/world/${slug}`;
+    case 'inquirer.net':
+      return `https://newsinfo.inquirer.net/${slug}`;
+    case 'bangkokpost.com':
+      return `https://www.bangkokpost.com/world/${slug}`;
+    case 'dawn.com':
+      return `https://www.dawn.com/news/${slug}`;
+    case 'bdnews24.com':
+      return `https://bdnews24.com/world/${slug}`;
+    case 'dailymirror.lk':
+      return `https://www.dailymirror.lk/world-news/${slug}`;
+    case 'rte.ie':
+      return `https://www.rte.ie/news/world/${slug}`;
+    case 'ansa.it':
+      return `https://www.ansa.it/english/news/${slug}`;
+    case 'elpais.com':
+      return `https://elpais.com/internacional/${slug}`;
+    case 'nos.nl':
+      return `https://nos.nl/artikel/${slug}`;
+    case 'svt.se':
+      return `https://www.svt.se/nyheter/${slug}`;
+    case 'nrk.no':
+      return `https://www.nrk.no/urix/${slug}`;
+    case 'yle.fi':
+      return `https://yle.fi/a/${slug}`;
+    case 'swissinfo.ch':
+      return `https://www.swissinfo.ch/eng/${slug}`;
+    case 'orf.at':
+      return `https://orf.at/stories/${slug}`;
+    case 'ukrinform.net':
+      return `https://www.ukrinform.net/rubric-world/${slug}.html`;
+    case 'tass.com':
+      return `https://tass.com/world/${slug}`;
+    case 'thewire.in':
+      return `https://thewire.in/${cat}/${slug}`;
+    case 'deccanherald.com':
+      return `https://www.deccanherald.com/india/${slug}`;
+    case 'scroll.in':
+      return `https://scroll.in/article/${slug}`;
+    case 'dnaindia.com':
+      return `https://www.dnaindia.com/india/report-${slug}`;
+    case 'news18.com':
+      return `https://www.news18.com/news/${slug}.html`;
+    case 'ndtv.com':
+      return `https://www.ndtv.com/india-news/${slug}`;
+    case 'aninews.in':
+      return `https://www.aninews.in/news/${slug}`;
+    case 'tribuneindia.com':
+      return `https://www.tribuneindia.com/news/nation/${slug}`;
+    case 'news.abplive.com':
+      return `https://news.abplive.com/news/${slug}`;
+    case 'medicalnewstoday.com':
+      return `https://www.medicalnewstoday.com/articles/${slug}`;
+    case 'healthline.com':
+      return `https://www.healthline.com/health-news/${slug}`;
+    case 'webmd.com':
+      return `https://www.webmd.com/health/${slug}`;
+    case 'who.int':
+      return `https://www.who.int/news/item/${slug}`;
+    case 'cdc.gov':
+      return `https://www.cdc.gov/media/releases/${slug}.html`;
+    default:
+      return domain.startsWith('www.')
+        ? `https://${domain}/${cat}/${slug}`
+        : `https://www.${domain}/${cat}/${slug}`;
+  }
+}
+
+function resolveCleanArticleLink(
+  rawLink?: string,
+  rawGuid?: string,
+  rawDescriptionHtml?: string,
+  sourceName?: string,
+  title?: string,
+  category?: string
+): string {
+  if (rawDescriptionHtml && typeof rawDescriptionHtml === 'string') {
+    const hrefMatches = rawDescriptionHtml.match(/href=["'](https?:\/\/[^"']+)["']/gi);
+    if (hrefMatches) {
+      for (const match of hrefMatches) {
+        const urlMatch = match.match(/href=["'](https?:\/\/[^"']+)["']/i);
+        if (urlMatch && urlMatch[1]) {
+          const cand = urlMatch[1].trim();
+          if (
+            cand.startsWith('http') &&
+            !cand.includes('news.google.com') &&
+            !cand.includes('google.com') &&
+            !cand.includes('rss2json.com') &&
+            !cand.includes('allorigins.win') &&
+            !cand.includes('codetabs.com') &&
+            !cand.includes('corsproxy') &&
+            !isRootOrHomepageUrl(cand)
+          ) {
+            return cand;
+          }
+        }
+      }
+    }
+  }
+
+  if (
+    rawGuid &&
+    typeof rawGuid === 'string' &&
+    rawGuid.startsWith('http') &&
+    !rawGuid.includes('news.google.com') &&
+    !rawGuid.includes('google.com') &&
+    !rawGuid.includes('rss2json.com') &&
+    !isRootOrHomepageUrl(rawGuid)
+  ) {
+    return rawGuid.trim();
+  }
+
+  if (
+    rawLink &&
+    typeof rawLink === 'string' &&
+    rawLink.startsWith('http') &&
+    !rawLink.includes('news.google.com') &&
+    !rawLink.includes('google.com') &&
+    !rawLink.includes('rss2json.com') &&
+    !isRootOrHomepageUrl(rawLink)
+  ) {
+    return rawLink.trim();
+  }
+
+  return buildPublisherArticleUrl(sourceName, title, rawLink, category);
+}
+
+function sanitizeLoadedArticles(articles: NewsArticle[]): NewsArticle[] {
+  if (!Array.isArray(articles)) return [];
+  const seenDomains = new Set<string>();
+  const seenTitles = new Set<string>();
+  const seenIds = new Set<string>();
+  const result: NewsArticle[] = [];
+
+  for (const art of articles) {
+    if (!art || !art.title) continue;
+    const cleanLink = resolveCleanArticleLink(art.link, (art as any).guid, art.description, art.source, art.title, art.category);
+    const domain = extractDomainFromUrl(cleanLink);
+    const normTitle = (art.title || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+
+    if (domain && seenDomains.has(domain)) {
+      continue;
+    }
+    if (normTitle && seenTitles.has(normTitle)) {
+      continue;
+    }
+    if (seenIds.has(art.id)) {
+      continue;
+    }
+
+    if (domain) seenDomains.add(domain);
+    if (normTitle) seenTitles.add(normTitle);
+    seenIds.add(art.id);
+
+    result.push({
+      ...art,
+      link: cleanLink,
+    });
+  }
+
+  return result;
+}
+
 // High-Durability Helper to load articles from persistent JSON storage with automatic backup recovery and seed initialization
 function loadStoredArticles(): NewsArticle[] {
   // 1. Try primary storage file
@@ -1898,8 +2515,9 @@ function loadStoredArticles(): NewsArticle[] {
       const data = fs.readFileSync(STORAGE_FILE, 'utf-8');
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        console.log(`[Database Storage] Successfully loaded ${parsed.length} persistent news articles from primary database.`);
-        return parsed;
+        const sanitized = sanitizeLoadedArticles(parsed);
+        console.log(`[Database Storage] Successfully loaded ${sanitized.length} persistent news articles from primary database.`);
+        return sanitized;
       }
     }
   } catch (err: any) {
@@ -1912,11 +2530,12 @@ function loadStoredArticles(): NewsArticle[] {
       const data = fs.readFileSync(BACKUP_STORAGE_FILE, 'utf-8');
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        console.log(`[Database Storage] Restored ${parsed.length} news articles from backup database file.`);
+        const sanitized = sanitizeLoadedArticles(parsed);
+        console.log(`[Database Storage] Restored ${sanitized.length} news articles from backup database file.`);
         try {
-          fs.writeFileSync(STORAGE_FILE, JSON.stringify(parsed, null, 2), 'utf-8');
+          fs.writeFileSync(STORAGE_FILE, JSON.stringify(sanitized, null, 2), 'utf-8');
         } catch (_) {}
-        return parsed;
+        return sanitized;
       }
     }
   } catch (err: any) {
@@ -1925,14 +2544,15 @@ function loadStoredArticles(): NewsArticle[] {
 
   // 3. If brand new or empty, initialize with robust seed dataset and immediately persist
   console.log(`[Database Storage] Initializing fresh persistent database with ${SEED_DATABASE_ARTICLES.length} verified news stories.`);
+  const initialSeeds = sanitizeLoadedArticles(SEED_DATABASE_ARTICLES);
   try {
-    const jsonStr = JSON.stringify(SEED_DATABASE_ARTICLES, null, 2);
+    const jsonStr = JSON.stringify(initialSeeds, null, 2);
     fs.writeFileSync(STORAGE_FILE, jsonStr, 'utf-8');
     fs.writeFileSync(BACKUP_STORAGE_FILE, jsonStr, 'utf-8');
   } catch (e: any) {
     console.error(`[Database Storage] Error writing initial database seeds:`, e.message || e);
   }
-  return [...SEED_DATABASE_ARTICLES];
+  return [...initialSeeds];
 }
 
 // Atomic & Durable Database Save
@@ -2711,160 +3331,6 @@ function generateProportionalSummary(
   return data.rephrasedStory || data.rephrasedLead;
 }
 
-function isRootOrHomepageUrl(urlStr: string): boolean {
-  if (!urlStr || typeof urlStr !== 'string') return true;
-  try {
-    const parsed = new URL(urlStr);
-    const path = parsed.pathname.toLowerCase().replace(/\/$/, '');
-    return path === '' || path === '/' || path === '/news' || path === '/home' || path === '/index.html' || path === '/index.php';
-  } catch {
-    return false;
-  }
-}
-
-const SERVER_SOURCE_DOMAIN_MAP: Record<string, string> = {
-  'BBC News': 'bbc.com',
-  'CNN International': 'cnn.com',
-  'The New York Times': 'nytimes.com',
-  'The Washington Post': 'washingtonpost.com',
-  'Associated Press (AP)': 'apnews.com',
-  'NPR': 'npr.org',
-  'NPR Top Stories': 'npr.org',
-  'NPR Health': 'npr.org',
-  'Reuters': 'reuters.com',
-  'Reuters World': 'reuters.com',
-  'The Guardian': 'theguardian.com',
-  'Sky News': 'news.sky.com',
-  'Sky News World': 'news.sky.com',
-  'France 24': 'france24.com',
-  'Le Monde': 'lemonde.fr',
-  'DW News': 'dw.com',
-  'Der Spiegel': 'spiegel.de',
-  'CBC News': 'cbc.ca',
-  'The Globe and Mail': 'theglobeandmail.com',
-  'ABC News Australia': 'abc.net.au',
-  'The Sydney Morning Herald': 'smh.com.au',
-  'NHK WORLD-JAPAN': 'nhk.or.jp',
-  'The Japan Times': 'japantimes.co.jp',
-  'The Hindu': 'thehindu.com',
-  'The Indian Express': 'indianexpress.com',
-  'Times of India': 'timesofindia.indiatimes.com',
-  'Xinhua News': 'english.news.cn',
-  'China Daily': 'chinadaily.com.cn',
-  'CGTN': 'cgtn.com',
-  'Channel NewsAsia (CNA)': 'channelnewsasia.com',
-  'Al Jazeera': 'aljazeera.com',
-  'TRT World': 'trtworld.com',
-  'The Times of Israel': 'timesofisrael.com',
-  'Haaretz': 'haaretz.com',
-  'Folha de S.Paulo': 'folha.uol.com.br',
-  'El Universal': 'eluniversal.com.mx',
-  'News24': 'news24.com',
-  'SABC News': 'sabcnews.com',
-  'Channels TV': 'channelstv.com',
-  'Citizen Digital': 'citizen.digital',
-  'RNZ (Radio New Zealand)': 'rnz.co.nz',
-  'The Korea Herald': 'koreaherald.com',
-  'The Jakarta Post': 'thejakartapost.com',
-  'Philippine Daily Inquirer': 'inquirer.net',
-  'Bangkok Post': 'bangkokpost.com',
-  'Dawn': 'dawn.com',
-  'bdnews24': 'bdnews24.com',
-  'Daily Mirror Sri Lanka': 'dailymirror.lk',
-  'RTÉ News': 'rte.ie',
-  'ANSA': 'ansa.it',
-  'El País': 'elpais.com',
-  'RTP Notícias': 'rtp.pt',
-  'NOS': 'nos.nl',
-  'SVT Nyheter': 'svt.se',
-  'NRK': 'nrk.no',
-  'Yle News': 'yle.fi',
-  'SWI swissinfo.ch': 'swissinfo.ch',
-  'ORF News': 'orf.at',
-  'TVP World': 'tvpworld.com',
-  'Ukrinform': 'ukrinform.net',
-  'TASS': 'tass.com',
-  'Buenos Aires Times': 'batimes.com.ar',
-  'BioBioChile': 'biobiochile.cl',
-  'El Tiempo': 'eltiempo.com',
-  'Ahram Online': 'english.ahram.org.eg',
-  'Morocco World News': 'moroccoworldnews.com',
-  'Addis Standard': 'addisstandard.com',
-  'Daily Graphic Ghana': 'graphic.com.gh',
-  'Euronews': 'euronews.com',
-  'South China Morning Post': 'scmp.com',
-  'UN News': 'news.un.org',
-  'TechCrunch': 'techcrunch.com',
-  'Hacker News': 'news.ycombinator.com',
-  'The Verge': 'theverge.com',
-  'ScienceDaily': 'sciencedaily.com',
-  'Google News Business': 'bloomberg.com',
-  'Google News Sports': 'espn.com',
-  'Google News': 'reuters.com',
-  'NDTV News': 'ndtv.com',
-  'Hindustan Times': 'hindustantimes.com',
-  'Livemint': 'livemint.com',
-  'Google News India': 'news.google.com',
-};
-
-function resolveCleanArticleLink(
-  rawLink?: string,
-  rawGuid?: string,
-  rawDescriptionHtml?: string,
-  sourceName?: string,
-  title?: string
-): string {
-  if (rawDescriptionHtml && typeof rawDescriptionHtml === 'string') {
-    const hrefMatches = rawDescriptionHtml.match(/href=["'](https?:\/\/[^"']+)["']/gi);
-    if (hrefMatches) {
-      for (const match of hrefMatches) {
-        const urlMatch = match.match(/href=["'](https?:\/\/[^"']+)["']/i);
-        if (urlMatch && urlMatch[1]) {
-          const cand = urlMatch[1].trim();
-          if (
-            cand.startsWith('http') &&
-            !cand.includes('news.google.com') &&
-            !cand.includes('rss2json.com') &&
-            !cand.includes('allorigins.win') &&
-            !isRootOrHomepageUrl(cand)
-          ) {
-            return cand;
-          }
-        }
-      }
-    }
-  }
-
-  if (
-    rawGuid &&
-    typeof rawGuid === 'string' &&
-    rawGuid.startsWith('http') &&
-    !rawGuid.includes('news.google.com') &&
-    !isRootOrHomepageUrl(rawGuid)
-  ) {
-    return rawGuid.trim();
-  }
-
-  if (
-    rawLink &&
-    typeof rawLink === 'string' &&
-    rawLink.startsWith('http') &&
-    !rawLink.includes('news.google.com') &&
-    !isRootOrHomepageUrl(rawLink)
-  ) {
-    return rawLink.trim();
-  }
-
-  const cleanTitle = (title || '').replace(/["']/g, '').trim();
-  const domain = (sourceName && SERVER_SOURCE_DOMAIN_MAP[sourceName]) || 'google.com';
-
-  if (cleanTitle) {
-    return `https://www.google.com/search?q=site:${encodeURIComponent(domain)}+${encodeURIComponent(cleanTitle)}&btnI=1`;
-  }
-
-  return rawLink || `https://${domain}`;
-}
-
 // Generate MD5-based Unique Article IDs to fix duplicate React keys
 function generateArticleId(link: string, title: string, sourceId: string): string {
   const raw = `${link}-${title}`.trim();
@@ -2904,23 +3370,92 @@ function generateSeoMetadataAndTags(title: string, desc: string, category: strin
   return { tags, seoKeywords, slug, metaDescription };
 }
 
+// Robust RSS fetcher with browser headers, UTF-8 BOM removal, and fallback resiliency
+async function fetchRssFeedRobustly(feedUrl: string, fallbackName?: string): Promise<any> {
+  // Step 1: Direct HTTP fetch with browser headers & XML cleaning
+  try {
+    const res = await fetch(feedUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml, application/atom+xml, text/html;q=0.9, */*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      signal: AbortSignal.timeout(9000),
+    });
+
+    if (res.ok) {
+      let xml = await res.text();
+      // Remove UTF-8 BOM and any non-XML characters before the opening tag
+      xml = xml.replace(/^\uFEFF/, '').trim();
+      const firstTagIndex = xml.indexOf('<');
+      if (firstTagIndex > 0) {
+        xml = xml.slice(firstTagIndex);
+      }
+      if (xml.startsWith('<')) {
+        const feed = await parser.parseString(xml);
+        if (feed && Array.isArray(feed.items) && feed.items.length > 0) {
+          return feed;
+        }
+      }
+    }
+  } catch (directErr) {
+    // Continue to next recovery step
+  }
+
+  // Step 2: Fallback to standard parser
+  try {
+    const feed = await parser.parseURL(feedUrl);
+    if (feed && Array.isArray(feed.items) && feed.items.length > 0) {
+      return feed;
+    }
+  } catch (parserErr) {
+    // Continue to Google News bridge
+  }
+
+  // Step 3: Google News RSS query fallback
+  if (fallbackName) {
+    try {
+      const fallbackUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(fallbackName)}&hl=en-US&gl=US&ceid=US:en`;
+      const fallbackRes = await fetch(fallbackUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+        },
+        signal: AbortSignal.timeout(8000),
+      });
+
+      if (fallbackRes.ok) {
+        let xml = await fallbackRes.text();
+        xml = xml.replace(/^\uFEFF/, '').trim();
+        const firstTagIndex = xml.indexOf('<');
+        if (firstTagIndex > 0) xml = xml.slice(firstTagIndex);
+        return await parser.parseString(xml);
+      }
+      return await parser.parseURL(fallbackUrl);
+    } catch (fbErr) {
+      // Both attempts failed
+    }
+  }
+
+  return { items: [] };
+}
+
 // Scrape Single Source with Source Webpage Image Extraction (Unlimited Scraped Articles)
 async function scrapeSource(source: NewsSourceInfo): Promise<NewsArticle[]> {
   try {
-    const feed = await parser.parseURL(source.feedUrl);
-    // Unlimited ingestion: extract all items provided by the RSS/Atom feed
+    const feed = await fetchRssFeedRobustly(source.feedUrl, source.name);
+    // Ingestion: extract all items provided by the RSS/Atom feed
     const rawItems = feed.items || [];
-    const articles: NewsArticle[] = [];
 
     source.lastScrapedAt = new Date().toISOString();
 
     // Process items in parallel with controlled concurrency for webpage image scraping
     const processedArticles = await Promise.all(
-      rawItems.map(async (item) => {
+      rawItems.map(async (item: any) => {
         if (!item.title) return null;
 
         const rawDesc = item.contentSnippet || item.description || item.content || item.summary || '';
-        const title = cleanHtmlText(item.title);
+        const title = cleanHtmlText(item.title.replace(/ - [^-]+$/, ''));
         const rephrased = rephraseScrapedArticle(title, rawDesc, source.category, source.name);
         const cleanLink = resolveCleanArticleLink(item.link, item.guid, rawDesc, source.name, title);
         const articleId = generateArticleId(cleanLink, title, source.id);
@@ -2970,63 +3505,8 @@ async function scrapeSource(source: NewsSourceInfo): Promise<NewsArticle[]> {
     source.articleCount = validArticles.length;
     return validArticles;
   } catch (err: any) {
-    console.warn(`[Scraper] Primary feed error for ${source.name} (${source.feedUrl}):`, err.message || err);
-    
-    // Fallback google news RSS if original feed encounters CORS/network block/parsing error
-    try {
-      const fallbackUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(source.name)}&hl=en-US&gl=US&ceid=US:en`;
-      const fallbackFeed = await parser.parseURL(fallbackUrl);
-      const fallbackItems = fallbackFeed.items || [];
-
-      const processedFallback = await Promise.all(
-        fallbackItems.map(async (item) => {
-          if (!item.title) return null;
-          const title = cleanHtmlText(item.title.replace(/ - [^-]+$/, ''));
-          const rawDesc = item.contentSnippet || item.description || '';
-          const rephrased = rephraseScrapedArticle(title, rawDesc, source.category, source.name);
-          const cleanLink = resolveCleanArticleLink(item.link, item.guid, rawDesc, source.name, title);
-          const articleId = generateArticleId(cleanLink, title, source.id);
-
-          let imageUrl = extractImageFromRssItem(item);
-          if (!imageUrl && cleanLink && cleanLink.startsWith('http') && !isRootOrHomepageUrl(cleanLink)) {
-            try {
-              imageUrl = await scrapeOgImageFromSourceWebpage(cleanLink, 3000);
-            } catch {}
-          }
-          if (!imageUrl) {
-            imageUrl = getSemanticallyMatchedNewsImage(title, source.category, rephrased.rephrasedStory);
-          }
-
-          const { tags, seoKeywords, slug, metaDescription } = generateSeoMetadataAndTags(rephrased.rephrasedTitle || title, rephrased.rephrasedStory, source.category, source.name);
-
-          return {
-            id: articleId,
-            title: rephrased.rephrasedTitle || title,
-            description: rephrased.rephrasedStory,
-            contentSnippet: rephrased.rephrasedLead,
-            link: cleanLink,
-            source: source.name,
-            category: source.category,
-            pubDate: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
-            imageUrl,
-            readTimeMinutes: estimateReadTime(title + ' ' + rephrased.rephrasedStory),
-            sentiment: rephrased.sentiment,
-            tags,
-            seoKeywords,
-            slug,
-            metaDescription,
-            aiSummary: rephrased,
-          } as NewsArticle;
-        })
-      );
-
-      const validFallback = processedFallback.filter((a): a is NewsArticle => a !== null);
-      source.articleCount = validFallback.length;
-      return validFallback;
-    } catch (fallbackErr) {
-      console.warn(`[Scraper] Fallback feed also failed for ${source.name}`);
-      return [];
-    }
+    console.warn(`[Scraper] Notice for ${source.name}:`, err.message || err);
+    return [];
   }
 }
 
@@ -3116,7 +3596,9 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
   // Combine: processed newly scraped + remaining existing articles
   const allArticles = [...processedNew, ...existingArticles];
 
-  // Strict Unified De-duplication by ID, Canonical Link, and Normalized Title
+  // Strict Unified De-duplication by Domain (URL), ID, Canonical Link, and Normalized Title
+  // Enforces that every single post has a different domain (URL)
+  const seenDomains = new Set<string>();
   const seenIds = new Set<string>();
   const seenLinks = new Set<string>();
   const seenTitles = new Set<string>();
@@ -3128,17 +3610,22 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
       continue;
     }
 
+    const cleanLink = resolveCleanArticleLink(
+      article.link,
+      (article as any).guid,
+      article.description,
+      article.source,
+      article.title,
+      article.category
+    );
+    const domain = extractDomainFromUrl(cleanLink);
     const normalizedTitle = article.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-    const normalizedLink = article.link.toLowerCase().trim();
+    const normalizedLink = cleanLink.toLowerCase().trim();
     
-    if (!seenIds.has(article.id) && !seenLinks.has(normalizedLink) && (!normalizedTitle || !seenTitles.has(normalizedTitle))) {
-      seenIds.add(article.id);
-      seenLinks.add(normalizedLink);
-      if (normalizedTitle) seenTitles.add(normalizedTitle);
-      uniqueArticles.push(article);
-    } else {
-      // Retain richest metadata for duplicate instances
-      const existing = uniqueArticles.find(a => a.id === article.id || a.link === article.link || (normalizedTitle && a.title.toLowerCase().trim().replace(/[^a-z0-9]/g, '') === normalizedTitle));
+    // Check if domain, ID, link, or normalized title has already been seen in this batch
+    if (domain && seenDomains.has(domain)) {
+      // Retain richest metadata if duplicate domain instance
+      const existing = uniqueArticles.find(a => extractDomainFromUrl(a.link) === domain);
       if (existing) {
         if (!existing.aiSummary && article.aiSummary) {
           existing.aiSummary = article.aiSummary;
@@ -3150,7 +3637,25 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
           existing.imageUrl = article.imageUrl;
         }
       }
+      continue;
     }
+
+    if (normalizedTitle && seenTitles.has(normalizedTitle)) {
+      continue;
+    }
+    if (seenIds.has(article.id) || seenLinks.has(normalizedLink)) {
+      continue;
+    }
+
+    if (domain) seenDomains.add(domain);
+    if (normalizedTitle) seenTitles.add(normalizedTitle);
+    seenIds.add(article.id);
+    seenLinks.add(normalizedLink);
+
+    uniqueArticles.push({
+      ...article,
+      link: cleanLink,
+    });
   }
 
   // Sort by pubDate descending (True chronological sorting: latest in last 24h on Page 1, older on Page 2+)
@@ -3170,10 +3675,17 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
 }
 
 // Initial Scrape & Sitemap Generation
-updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'server_init');
+try {
+  updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'server_init');
+} catch (e: any) {
+  console.error('[Sitemap] Initial update error:', e?.message || e);
+}
+
 scrapeAllSources().then(() => {
   // Run background enrichment pass for stored articles
-  enrichExistingArticlesWithSourceImages();
+  enrichExistingArticlesWithSourceImages().catch((e: any) => console.error('[Enrichment] Error:', e?.message || e));
+}).catch((e: any) => {
+  console.error('[Scraper] Initial scrape error:', e?.message || e);
 });
 
 // Set Up 10-Minute Recurring Interval for News Scraping & Dynamic Updating
@@ -3182,7 +3694,7 @@ setInterval(() => {
   scrapeAllSources();
 }, REFRESH_INTERVAL_MS);
 
-// Daily Automation (Every 24 Hours): Schedule daily midnight UTC index rebuild and recurring 24-hour job
+// Daily Automation (Every 24 Hours): Schedule daily midnight UTC index rebuild, recurring 24-hour job, and resilient watchdog
 function initDailySitemapScheduler() {
   const now = new Date();
   const nextMidnight = getNextUtcMidnight();
@@ -3190,16 +3702,34 @@ function initDailySitemapScheduler() {
   
   console.log(`[Daily Sitemap Automation] ⏱️ Next scheduled daily midnight sitemap rebuild in ${Math.round(msUntilMidnight / 60000)} minutes (${nextMidnight.toISOString()}).`);
   
-  setTimeout(() => {
-    console.log(`[Daily Sitemap Automation] 📅 Executing scheduled Daily Midnight Sitemap & Google News Index Generation at ${new Date().toISOString()}...`);
+  const executeDailyRebuild = async () => {
+    console.log(`[Daily Sitemap Automation] 📅 Executing scheduled Daily Sitemap, Google News & SEO Index Generation at ${new Date().toISOString()}...`);
+    try {
+      // Ingest latest breaking news to include in today's sitemap
+      await scrapeAllSources();
+    } catch (e: any) {
+      console.warn('[Daily Sitemap Automation] Source scrape warning prior to sitemap generation:', e?.message || e);
+    }
     updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'daily_scheduled_cron');
+  };
+
+  setTimeout(() => {
+    executeDailyRebuild();
     
     // Reschedule recurring 24h cron
     setInterval(() => {
-      console.log(`[Daily Sitemap Automation] 📅 Executing 24h Recurring Daily Sitemap & Google News Index Generation at ${new Date().toISOString()}...`);
-      updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'daily_scheduled_cron');
+      executeDailyRebuild();
     }, 24 * 60 * 60 * 1000);
   }, msUntilMidnight);
+
+  // Resilient Watchdog: Check every 30 minutes if 24 hours have elapsed since last daily generation
+  setInterval(() => {
+    const elapsedMs = Date.now() - sitemapLastGeneratedAt.getTime();
+    if (elapsedMs >= 24 * 60 * 60 * 1000) {
+      console.log(`[Daily Sitemap Watchdog] 🛡️ 24h cycle elapsed (${Math.round(elapsedMs / 3600000)}h since last generation). Running automated daily sitemap rebuild...`);
+      executeDailyRebuild();
+    }
+  }, 30 * 60 * 1000);
 }
 
 initDailySitemapScheduler();
@@ -4810,6 +5340,24 @@ app.get(['/video-sitemap.xml', '/videos-sitemap.xml'], (req, res) => {
   res.send(sitemapXml);
 });
 
+// GET /category-sitemap.xml & /categories-sitemap.xml - Dedicated Category & Topic Tags XML Sitemap
+app.get(['/category-sitemap.xml', '/categories-sitemap.xml'], (req, res) => {
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=3600');
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  const sitemapXml = generateCategorySitemapXml(baseUrl, cachedArticles);
+  res.send(sitemapXml);
+});
+
+// GET /sitemap.html & /sitemap - User & Bot Searchable HTML Sitemap
+app.get(['/sitemap.html', '/sitemap'], (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=3600');
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  const sitemapHtml = generateHtmlSitemap(baseUrl, cachedArticles, cachedViralVideos);
+  res.send(sitemapHtml);
+});
+
 // GET /sitemap_index.xml - Master Sitemap Index bundling Main, Google News, and Video Sitemaps
 app.get('/sitemap_index.xml', (req, res) => {
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
@@ -6267,7 +6815,11 @@ export { app };
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: false,
+        ws: false,
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);
@@ -6280,9 +6832,35 @@ async function startServer() {
   }
 
   if (!process.env.NETLIFY && !process.env.LAMBDA_TASK_ROOT && !process.env.VERCEL) {
-    app.listen(PORT, "0.0.0.0", () => {
+    const server = app.listen(PORT, "0.0.0.0", () => {
       console.log(`[News Pulse Server] Server running on http://0.0.0.0:${PORT}`);
     });
+
+    server.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        console.warn(`[News Pulse Server] Port ${PORT} busy, waiting for release...`);
+        setTimeout(() => {
+          try {
+            server.close();
+          } catch {}
+          server.listen(PORT, "0.0.0.0");
+        }, 1000);
+      } else {
+        console.error('[News Pulse Server] Server listen error:', err);
+      }
+    });
+
+    const shutdown = () => {
+      try {
+        server.close(() => {
+          process.exit(0);
+        });
+      } catch {
+        process.exit(0);
+      }
+    };
+    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', shutdown);
   }
 }
 

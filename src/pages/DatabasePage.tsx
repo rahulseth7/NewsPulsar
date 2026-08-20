@@ -24,10 +24,13 @@ import {
   TrendingUp, 
   Server,
   Activity,
-  AlertCircle
+  AlertCircle,
+  Globe,
+  Copy,
+  Check
 } from 'lucide-react';
-import { NewsArticle, NewsCategory, Language, PageView } from '../types';
-import { fetchDatabaseInfo, syncDatabaseStorage, createDatabaseBackup, fetchAllDatabaseArticles } from '../services/newsApi';
+import { NewsArticle, NewsCategory, Language, PageView, SitemapStatusInfo } from '../types';
+import { fetchDatabaseInfo, syncDatabaseStorage, createDatabaseBackup, fetchAllDatabaseArticles, fetchSitemapStatus, regenerateSitemapNow } from '../services/newsApi';
 import { CATEGORY_HINDI_MAP, UI_STRINGS_HINDI } from '../utils/hindiTranslator';
 
 function formatDate(dateStr: string, language: string = 'en'): string {
@@ -89,15 +92,46 @@ export const DatabasePage: React.FC<DatabasePageProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [dbStatus, setDbStatus] = useState<any>(null);
+  const [sitemapInfo, setSitemapInfo] = useState<SitemapStatusInfo | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isScrapingNow, setIsScrapingNow] = useState(false);
+  const [isReindexingSitemap, setIsReindexingSitemap] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
-  // Load live database telemetry on mount
+  // Load live database telemetry and sitemap status on mount
   const loadDbInfo = async () => {
-    const info = await fetchDatabaseInfo();
+    const [info, sitemap] = await Promise.all([
+      fetchDatabaseInfo(),
+      fetchSitemapStatus()
+    ]);
     setDbStatus(info);
+    if (sitemap) setSitemapInfo(sitemap);
+  };
+
+  const handleReindexSitemap = async () => {
+    setIsReindexingSitemap(true);
+    try {
+      const res = await regenerateSitemapNow();
+      if (res && res.success) {
+        setStatusMessage(`⚡ Sitemap Re-indexed! ${res.totalArticlesIndexed} posts and ${res.totalVideosIndexed} videos refreshed across all sitemap protocols.`);
+        const sitemap = await fetchSitemapStatus();
+        if (sitemap) setSitemapInfo(sitemap);
+      }
+    } catch (err: any) {
+      setStatusMessage('Sitemap regeneration failed: ' + err.message);
+    } finally {
+      setIsReindexingSitemap(false);
+      setTimeout(() => setStatusMessage(null), 5000);
+    }
+  };
+
+  const handleCopyUrl = (url: string) => {
+    const fullUrl = window.location.origin + url;
+    navigator.clipboard.writeText(fullUrl);
+    setCopiedUrl(url);
+    setTimeout(() => setCopiedUrl(null), 2000);
   };
 
   useEffect(() => {
@@ -410,6 +444,248 @@ export const DatabasePage: React.FC<DatabasePageProps> = ({
             <FileCode className="w-3.5 h-3.5" />
             <span>JSON Database</span>
           </button>
+        </div>
+      </div>
+
+      {/* 3.5. Automated Daily Sitemap & Search Console Indexing Center */}
+      <div className="bg-[#faf7ee] border-2 border-black neo-shadow p-4 sm:p-5 space-y-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 border-b-2 border-black pb-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-[#ccff00] border-2 border-black neo-shadow-sm text-black">
+                <Globe className="w-4 h-4" />
+              </div>
+              <h2 className="text-base sm:text-lg font-black font-neo text-black tracking-tight uppercase">
+                DAILY AUTOMATED SITEMAP &amp; SEARCH ENGINE INDEXER
+              </h2>
+              <span className="px-2 py-0.5 bg-emerald-300 text-emerald-950 border border-black font-mono font-black text-[10px] uppercase">
+                ● 24h Cron Active
+              </span>
+            </div>
+            <p className="text-xs text-zinc-700 font-bold">
+              Automatically updates daily listing all scraped articles &amp; video feeds so Google, Bing, and RSS crawlers index every story.
+            </p>
+          </div>
+
+          <button
+            onClick={handleReindexSitemap}
+            disabled={isReindexingSitemap}
+            className="px-3 py-1.5 bg-[#ccff00] hover:bg-[#b8e600] text-black font-neo font-black text-xs border-2 border-black neo-shadow-sm flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+            title="Force immediate sitemap regeneration"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isReindexingSitemap ? 'animate-spin' : ''}`} />
+            <span>{isReindexingSitemap ? 'RE-INDEXING...' : '⚡ RE-INDEX SITEMAP NOW'}</span>
+          </button>
+        </div>
+
+        {/* Schedule & Telemetry Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="p-3 bg-white border-2 border-black">
+            <div className="text-[10px] font-mono font-bold text-zinc-600 uppercase">Total Articles In Sitemap</div>
+            <div className="text-2xl font-black font-neo text-black mt-1">
+              {sitemapInfo?.totalArticlesIndexed ?? articles.length}
+            </div>
+            <div className="text-[10px] text-zinc-600 font-bold mt-0.5">
+              100% of database indexed
+            </div>
+          </div>
+
+          <div className="p-3 bg-white border-2 border-black">
+            <div className="text-[10px] font-mono font-bold text-zinc-600 uppercase">Google News 48h Index</div>
+            <div className="text-2xl font-black font-neo text-[#ff2a85] mt-1">
+              {sitemapInfo?.googleNewsArticles48h ?? 0}
+            </div>
+            <div className="text-[10px] text-zinc-600 font-bold mt-0.5">
+              Eligible breaking stories
+            </div>
+          </div>
+
+          <div className="p-3 bg-white border-2 border-black">
+            <div className="text-[10px] font-mono font-bold text-zinc-600 uppercase">Last Generated</div>
+            <div className="text-xs font-mono font-black text-black mt-1 truncate">
+              {sitemapInfo?.lastGeneratedAt ? new Date(sitemapInfo.lastGeneratedAt).toLocaleTimeString() : 'Active'}
+            </div>
+            <div className="text-[10px] text-zinc-600 font-bold mt-0.5">
+              Disk files synchronized
+            </div>
+          </div>
+
+          <div className="p-3 bg-white border-2 border-black">
+            <div className="text-[10px] font-mono font-bold text-zinc-600 uppercase">Next Daily Cron Run</div>
+            <div className="text-xs font-mono font-black text-emerald-800 mt-1 truncate">
+              {sitemapInfo?.nextScheduledDailyRunAt ? new Date(sitemapInfo.nextScheduledDailyRunAt).toLocaleTimeString() : 'Midnight UTC'}
+            </div>
+            <div className="text-[10px] text-zinc-600 font-bold mt-0.5">
+              24h recurring automated sync
+            </div>
+          </div>
+        </div>
+
+        {/* Sitemaps Direct Links */}
+        <div className="space-y-2">
+          <div className="text-xs font-mono font-black text-black uppercase tracking-wider">
+            Active Sitemap URLs (Ready for Google Search Console &amp; Bing Webmaster):
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            
+            {/* Master Index */}
+            <div className="p-2.5 bg-white border-2 border-black flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-xs font-mono font-black text-black truncate">/sitemap_index.xml</div>
+                <div className="text-[10px] text-zinc-600 font-bold">Master Sitemap Index</div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => handleCopyUrl('/sitemap_index.xml')}
+                  className="p-1 bg-[#eee] hover:bg-[#ddd] border border-black text-black cursor-pointer"
+                  title="Copy URL"
+                >
+                  {copiedUrl === '/sitemap_index.xml' ? <Check className="w-3 h-3 text-emerald-700" /> : <Copy className="w-3 h-3" />}
+                </button>
+                <a
+                  href="/sitemap_index.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-1 bg-black text-white font-mono font-bold text-[10px] border border-black hover:bg-zinc-800 flex items-center gap-1"
+                >
+                  <span>Open</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Posts Sitemap */}
+            <div className="p-2.5 bg-white border-2 border-black flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-xs font-mono font-black text-black truncate">/sitemap.xml</div>
+                <div className="text-[10px] text-zinc-600 font-bold">All Posts &amp; Images</div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => handleCopyUrl('/sitemap.xml')}
+                  className="p-1 bg-[#eee] hover:bg-[#ddd] border border-black text-black cursor-pointer"
+                  title="Copy URL"
+                >
+                  {copiedUrl === '/sitemap.xml' ? <Check className="w-3 h-3 text-emerald-700" /> : <Copy className="w-3 h-3" />}
+                </button>
+                <a
+                  href="/sitemap.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-1 bg-black text-white font-mono font-bold text-[10px] border border-black hover:bg-zinc-800 flex items-center gap-1"
+                >
+                  <span>Open</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Google News Sitemap */}
+            <div className="p-2.5 bg-white border-2 border-black flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-xs font-mono font-black text-black truncate">/news-sitemap.xml</div>
+                <div className="text-[10px] text-zinc-600 font-bold">Google News (48 Hours)</div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => handleCopyUrl('/news-sitemap.xml')}
+                  className="p-1 bg-[#eee] hover:bg-[#ddd] border border-black text-black cursor-pointer"
+                  title="Copy URL"
+                >
+                  {copiedUrl === '/news-sitemap.xml' ? <Check className="w-3 h-3 text-emerald-700" /> : <Copy className="w-3 h-3" />}
+                </button>
+                <a
+                  href="/news-sitemap.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-1 bg-black text-white font-mono font-bold text-[10px] border border-black hover:bg-zinc-800 flex items-center gap-1"
+                >
+                  <span>Open</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Video Sitemap */}
+            <div className="p-2.5 bg-white border-2 border-black flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-xs font-mono font-black text-black truncate">/video-sitemap.xml</div>
+                <div className="text-[10px] text-zinc-600 font-bold">Google Video Search</div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => handleCopyUrl('/video-sitemap.xml')}
+                  className="p-1 bg-[#eee] hover:bg-[#ddd] border border-black text-black cursor-pointer"
+                  title="Copy URL"
+                >
+                  {copiedUrl === '/video-sitemap.xml' ? <Check className="w-3 h-3 text-emerald-700" /> : <Copy className="w-3 h-3" />}
+                </button>
+                <a
+                  href="/video-sitemap.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-1 bg-black text-white font-mono font-bold text-[10px] border border-black hover:bg-zinc-800 flex items-center gap-1"
+                >
+                  <span>Open</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Category Sitemap */}
+            <div className="p-2.5 bg-white border-2 border-black flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-xs font-mono font-black text-black truncate">/category-sitemap.xml</div>
+                <div className="text-[10px] text-zinc-600 font-bold">Categories &amp; Topic Tags</div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => handleCopyUrl('/category-sitemap.xml')}
+                  className="p-1 bg-[#eee] hover:bg-[#ddd] border border-black text-black cursor-pointer"
+                  title="Copy URL"
+                >
+                  {copiedUrl === '/category-sitemap.xml' ? <Check className="w-3 h-3 text-emerald-700" /> : <Copy className="w-3 h-3" />}
+                </button>
+                <a
+                  href="/category-sitemap.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-1 bg-black text-white font-mono font-bold text-[10px] border border-black hover:bg-zinc-800 flex items-center gap-1"
+                >
+                  <span>Open</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            </div>
+
+            {/* HTML Sitemap */}
+            <div className="p-2.5 bg-white border-2 border-black flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-xs font-mono font-black text-black truncate">/sitemap.html</div>
+                <div className="text-[10px] text-zinc-600 font-bold">Searchable HTML Index</div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  onClick={() => handleCopyUrl('/sitemap.html')}
+                  className="p-1 bg-[#eee] hover:bg-[#ddd] border border-black text-black cursor-pointer"
+                  title="Copy URL"
+                >
+                  {copiedUrl === '/sitemap.html' ? <Check className="w-3 h-3 text-emerald-700" /> : <Copy className="w-3 h-3" />}
+                </button>
+                <a
+                  href="/sitemap.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-1 bg-black text-white font-mono font-bold text-[10px] border border-black hover:bg-zinc-800 flex items-center gap-1"
+                >
+                  <span>Open</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
 

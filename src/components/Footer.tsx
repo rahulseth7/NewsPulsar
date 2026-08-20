@@ -133,40 +133,19 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="flex items-center gap-2 pb-2 border-b-2 border-black">
               <FileCode className="w-4 h-4 text-black shrink-0" />
               <h4 className="font-neo font-black text-xs uppercase tracking-wider text-black">
-                SYNDICATION &amp; RSS
+                SYNDICATION &amp; SITEMAP
               </h4>
             </div>
 
-            <ul className="space-y-1 text-xs font-mono font-bold">
+            <ul className="space-y-1.5 text-xs font-mono font-bold">
               <li>
                 <a
-                  href="/feed.xml"
+                  href="/sitemap_index.xml"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-1 transition-colors"
+                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-0.5 transition-colors"
                 >
-                  <Rss className="w-3.5 h-3.5 text-black shrink-0" />
-                  <span>/feed.xml (RSS 2.0)</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/api/videos/sitemap.xml"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-1 transition-colors"
-                >
-                  <span className="bg-[#ff2a85] text-white px-1 font-black">/api/videos/sitemap.xml</span>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/news-sitemap.xml"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-1 transition-colors"
-                >
-                  <span>/news-sitemap.xml</span>
+                  <span className="bg-[#ccff00] px-1 border border-black text-[11px]">/sitemap_index.xml (Master Index)</span>
                 </a>
               </li>
               <li>
@@ -174,22 +153,58 @@ export const Footer: React.FC<FooterProps> = ({
                   href="/sitemap.xml"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-1 transition-colors"
+                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-0.5 transition-colors"
                 >
-                  <span>/sitemap.xml</span>
+                  <span>/sitemap.xml (All Scraped Posts)</span>
                 </a>
               </li>
               <li>
                 <a
-                  href="/ads.txt"
+                  href="/news-sitemap.xml"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-1 transition-colors"
+                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-0.5 transition-colors"
                 >
-                  <span className="bg-[#ccff00] px-1 border border-black">/ads.txt (Verified)</span>
+                  <span>/news-sitemap.xml (Google News 48h)</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/video-sitemap.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-0.5 transition-colors"
+                >
+                  <span className="bg-[#ff2a85] text-white px-1 text-[11px]">/video-sitemap.xml (Videos)</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/sitemap.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-0.5 transition-colors"
+                >
+                  <span className="bg-amber-200 px-1 border border-black text-[11px]">/sitemap.html (HTML Index)</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/feed.xml"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-black hover:text-[#ff2a85] py-0.5 transition-colors"
+                >
+                  <Rss className="w-3.5 h-3.5 text-black shrink-0" />
+                  <span>/feed.xml (RSS 2.0)</span>
                 </a>
               </li>
             </ul>
+
+            <div className="pt-1 text-[10px] text-zinc-600 font-mono flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+              <span>Daily Automated Cron Sync Active</span>
+            </div>
           </div>
 
         </div>

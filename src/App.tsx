@@ -26,6 +26,7 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DatabasePage } from './pages/DatabasePage';
 import { ViralVideosPage } from './pages/ViralVideosPage';
+import { ensureUniqueDomainPerPost } from './utils/linkUtils';
 import { RefreshCw, LayoutGrid, List, SlidersHorizontal, BookmarkCheck, AlertCircle, Sparkles, Command, Keyboard } from 'lucide-react';
 
 export default function App() {
@@ -308,7 +309,7 @@ export default function App() {
   const filteredArticles = useMemo(() => {
     if (!data || !data.articles) return [];
 
-    return data.articles.filter((article) => {
+    const matched = data.articles.filter((article) => {
       // Bookmarks filter
       if (showBookmarksOnly && !bookmarkedIds.includes(article.id)) {
         return false;
@@ -349,6 +350,9 @@ export default function App() {
 
       return true;
     });
+
+    // Ensure every single post has a unique distinct domain (URL)
+    return ensureUniqueDomainPerPost(matched);
   }, [data, searchQuery, selectedCategory, selectedSource, showBookmarksOnly, bookmarkedIds]);
 
   // Reset page to 1 whenever filters change
