@@ -5958,6 +5958,18 @@ app.get('/api/newsletter/subscribers', (req, res) => {
   });
 });
 
+// Google Search Console Site Verification Endpoint
+app.get('/googled43dd531c722dedd.html', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send('google-site-verification: googled43dd531c722dedd.html');
+});
+
+// Google AdSense ads.txt Endpoint
+app.get('/ads.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.send('google.com, pub-6411773855584982, DIRECT, f08c47fec0942fa0\n');
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
