@@ -1473,6 +1473,38 @@ const SEED_DATABASE_ARTICLES: NewsArticle[] = [
   }
 ];
 
+export type VideoPlatform = 'youtube' | 'tiktok' | 'reddit' | 'vimeo' | 'twitter' | 'web';
+export type VideoCategory = 'Viral' | 'Tech' | 'Science' | 'Entertainment' | 'Humor' | 'Gaming' | 'News' | 'Sports';
+
+export interface ViralVideo {
+  id: string;
+  title: string;
+  description: string;
+  videoUrl: string;
+  embedUrl: string;
+  thumbnailUrl: string;
+  source: string;
+  author?: string;
+  platform: VideoPlatform;
+  viewsCount: number;
+  likesCount: number;
+  duration: string;
+  pubDate: string;
+  category: VideoCategory;
+  tags: string[];
+  seoKeywords: string[];
+  slug: string;
+  metaDescription: string;
+  sentiment?: 'Urgent' | 'Positive' | 'Neutral' | 'Analysis' | 'Warning';
+  isViralTrend: boolean;
+  viralScore: number;
+  aiTakeaway?: string;
+  hindiTitle?: string;
+  hindiDescription?: string;
+}
+
+let cachedViralVideos: ViralVideo[] = [];
+
 // XML Sanitizer Helper
 function escapeXml(str: string): string {
   if (!str) return '';
@@ -1485,16 +1517,38 @@ function escapeXml(str: string): string {
 }
 
 let sitemapLastGeneratedAt: Date = new Date();
+let nextScheduledDailyRunAt: Date = new Date();
 
-// Comprehensive Google News & SEO XML Sitemap Generator
+export interface SitemapGenerationLog {
+  timestamp: string;
+  trigger: 'daily_scheduled_cron' | 'scrape_auto' | 'manual_admin' | 'server_init';
+  articlesCount: number;
+  videosCount: number;
+  googleNewsCount: number;
+}
+
+const sitemapGenerationHistory: SitemapGenerationLog[] = [];
+
+// Calculate next daily UTC midnight timestamp
+function getNextUtcMidnight(): Date {
+  const next = new Date();
+  next.setUTCDate(next.getUTCDate() + 1);
+  next.setUTCHours(0, 0, 0, 0);
+  return next;
+}
+
+nextScheduledDailyRunAt = getNextUtcMidnight();
+
+// 1. Comprehensive Google News & SEO XML Sitemap Generator
 function generateSitemapXml(baseUrl: string, articles: NewsArticle[]): string {
   const categories = ['All', 'World', 'Technology', 'Business', 'Science', 'Entertainment', 'Health', 'Sports'];
   const todayIso = new Date().toISOString();
   const twoDaysAgo = Date.now() - 48 * 60 * 60 * 1000;
 
-  // 1. Core navigation & landing URLs
+  // Core navigation & landing URLs
   const coreUrls = [
     { loc: `${baseUrl}/`, changefreq: 'always', priority: '1.0', lastmod: todayIso },
+    { loc: `${baseUrl}/#videos`, changefreq: 'hourly', priority: '0.9', lastmod: todayIso },
     { loc: `${baseUrl}/?view=bookmarks`, changefreq: 'daily', priority: '0.6', lastmod: todayIso },
   ];
 
@@ -1512,7 +1566,7 @@ function generateSitemapXml(baseUrl: string, articles: NewsArticle[]): string {
     <priority>${item.priority}</priority>
   </url>`).join('\n');
 
-  // 2. Dynamic Article URLs with Google News & Image Extensions
+  // Dynamic Article URLs with Google News & Image Extensions
   const articleUrlsXml = articles.map(art => {
     let pubDateFormatted: string;
     try {
@@ -1567,31 +1621,170 @@ ${articleUrlsXml}
 </urlset>`.trim();
 }
 
-// Write the generated sitemap to the physical disk files in public/ and dist/
-function updateSitemapDiskFile(articles: NewsArticle[]) {
+// 2. Dedicated Google News XML Sitemap (Filtered strictly for last 48 hours per Google News Publisher specs)
+function generateGoogleNewsSitemapXml(baseUrl: string, articles: NewsArticle[]): string {
+  const todayIso = new Date().toISOString();
+  const twoDaysAgo = Date.now() - 48 * 60 * 60 * 1000;
+  
+  // Articles eligible for Google News (published in past 48h; fallback to recent 100 if none)
+  let eligibleArticles = articles.filter(a => a.pubDate && new Date(a.pubDate).getTime() >= twoDaysAgo);
+  if (eligibleArticles.length === 0) {
+    eligibleArticles = articles.slice(0, 100);
+  }
+
+  const newsUrlsXml = eligibleArticles.map(art => {
+    let pubDateFormatted: string;
+    try {
+      pubDateFormatted = art.pubDate ? new Date(art.pubDate).toISOString() : todayIso;
+    } catch {
+      pubDateFormatted = todayIso;
+    }
+    const articleUrl = `${baseUrl}/?article=${encodeURIComponent(art.id)}`;
+    const keywords = [art.category, ...(art.tags || []), ...(art.seoKeywords || [])].filter(Boolean).slice(0, 5).join(', ');
+
+    let imageBlock = '';
+    if (art.imageUrl) {
+      imageBlock = `
+    <image:image>
+      <image:loc>${escapeXml(art.imageUrl)}</image:loc>
+      <image:title>${escapeXml(art.title)}</image:title>
+    </image:image>`;
+    }
+
+    return `  <url>
+    <loc>${escapeXml(articleUrl)}</loc>
+    <lastmod>${pubDateFormatted}</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.95</priority>
+    <news:news>
+      <news:publication>
+        <news:name>NewsPulse Gazette</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${pubDateFormatted}</news:publication_date>
+      <news:title>${escapeXml(art.title)}</news:title>${keywords ? `
+      <news:keywords>${escapeXml(keywords)}</news:keywords>` : ''}
+    </news:news>${imageBlock}
+  </url>`;
+  }).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${newsUrlsXml}
+</urlset>`.trim();
+}
+
+// 3. Dedicated Video XML Sitemap (Google Video Search Compliant)
+function generateVideoSitemapXml(baseUrl: string, videos: ViralVideo[]): string {
+  const videoUrlsXml = videos.map(v => {
+    const safeTitle = (v.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const safeDesc = (v.metaDescription || v.description || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const tagsXml = (v.tags || []).slice(0, 8).map(t => `<video:tag><![CDATA[${t.replace('#', '')}]]></video:tag>`).join('\n        ');
+
+    return `  <url>
+    <loc>${baseUrl}/#videos?video=${encodeURIComponent(v.id)}</loc>
+    <video:video>
+      <video:thumbnail_loc>${escapeXml(v.thumbnailUrl)}</video:thumbnail_loc>
+      <video:title>${safeTitle}</video:title>
+      <video:description>${safeDesc}</video:description>
+      <video:player_loc allow_embed="yes" autoplay="ap=1">${escapeXml(v.embedUrl)}</video:player_loc>
+      <video:publication_date>${new Date(v.pubDate).toISOString()}</video:publication_date>
+      <video:category>${escapeXml(v.category)}</video:category>
+      <video:view_count>${v.viewsCount || 10000}</video:view_count>
+      <video:family_friendly>yes</video:family_friendly>
+      <video:live>no</video:live>
+      ${tagsXml}
+    </video:video>
+  </url>`;
+  }).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+${videoUrlsXml}
+</urlset>`.trim();
+}
+
+// 4. Master Sitemap Index XML (Bundles Main, Google News, and Video Sitemaps)
+function generateSitemapIndexXml(baseUrl: string): string {
+  const todayIso = new Date().toISOString();
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>${baseUrl}/sitemap.xml</loc>
+    <lastmod>${todayIso}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${baseUrl}/news-sitemap.xml</loc>
+    <lastmod>${todayIso}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${baseUrl}/video-sitemap.xml</loc>
+    <lastmod>${todayIso}</lastmod>
+  </sitemap>
+</sitemapindex>`.trim();
+}
+
+// Write the generated sitemaps to physical disk files in public/ and dist/
+function updateSitemapDiskFile(
+  articles: NewsArticle[], 
+  videos: ViralVideo[] = cachedViralVideos, 
+  trigger: 'daily_scheduled_cron' | 'scrape_auto' | 'manual_admin' | 'server_init' = 'scrape_auto'
+) {
   try {
     const defaultBaseUrl = 'https://newspulse.gazette.com';
-    const sitemapContent = generateSitemapXml(defaultBaseUrl, articles);
+    const mainSitemapContent = generateSitemapXml(defaultBaseUrl, articles);
+    const newsSitemapContent = generateGoogleNewsSitemapXml(defaultBaseUrl, articles);
+    const videoSitemapContent = generateVideoSitemapXml(defaultBaseUrl, videos);
+    const sitemapIndexContent = generateSitemapIndexXml(defaultBaseUrl);
     
-    // Write to public/sitemap.xml
     const publicPath = path.join(process.cwd(), 'public');
     if (!fs.existsSync(publicPath)) {
       fs.mkdirSync(publicPath, { recursive: true });
     }
-    fs.writeFileSync(path.join(publicPath, 'sitemap.xml'), sitemapContent, 'utf-8');
 
-    // Also sync to dist/sitemap.xml if dist folder is present
+    // 1. Write to public/ directory
+    fs.writeFileSync(path.join(publicPath, 'sitemap.xml'), mainSitemapContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'news-sitemap.xml'), newsSitemapContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'video-sitemap.xml'), videoSitemapContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'sitemap_index.xml'), sitemapIndexContent, 'utf-8');
+
+    // 2. Also sync to dist/ directory if present
     const distPath = path.join(process.cwd(), 'dist');
     if (fs.existsSync(distPath)) {
-      fs.writeFileSync(path.join(distPath, 'sitemap.xml'), sitemapContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'sitemap.xml'), mainSitemapContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'news-sitemap.xml'), newsSitemapContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'video-sitemap.xml'), videoSitemapContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'sitemap_index.xml'), sitemapIndexContent, 'utf-8');
     }
 
     sitemapLastGeneratedAt = new Date();
-    console.log(`[Sitemap Automation] sitemap.xml automatically refreshed on disk (${articles.length} posts indexed, ${articles.filter(a => a.pubDate && new Date(a.pubDate).getTime() >= Date.now() - 48*3600*1000).length} in Google News 48h index).`);
+    nextScheduledDailyRunAt = getNextUtcMidnight();
+
+    const twoDaysAgo = Date.now() - 48 * 60 * 60 * 1000;
+    const googleNewsCount = articles.filter(a => a.pubDate && new Date(a.pubDate).getTime() >= twoDaysAgo).length;
+
+    // Log to history
+    sitemapGenerationHistory.unshift({
+      timestamp: sitemapLastGeneratedAt.toISOString(),
+      trigger,
+      articlesCount: articles.length,
+      videosCount: videos.length,
+      googleNewsCount
+    });
+
+    if (sitemapGenerationHistory.length > 30) {
+      sitemapGenerationHistory.pop();
+    }
+
+    console.log(`[Sitemap Automation] 🗺️ All sitemaps (sitemap.xml, news-sitemap.xml, video-sitemap.xml, sitemap_index.xml) refreshed on disk [Trigger: ${trigger}] (${articles.length} news articles, ${videos.length} videos, ${googleNewsCount} in Google News 48h index). Next scheduled run: ${nextScheduledDailyRunAt.toISOString()}`);
   } catch (err: any) {
-    console.error(`[Sitemap Automation] Error writing sitemap disk file:`, err.message || err);
+    console.error(`[Sitemap Automation] Error writing sitemap disk files:`, err.message || err);
   }
 }
+
 
 // Helper to save articles as Excel spreadsheet (.xlsx)
 function saveExcelFile(articles: NewsArticle[]) {
@@ -2916,7 +3109,7 @@ async function scrapeAllSources(): Promise<NewsArticle[]> {
 }
 
 // Initial Scrape & Sitemap Generation
-updateSitemapDiskFile(cachedArticles);
+updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'server_init');
 scrapeAllSources().then(() => {
   // Run background enrichment pass for stored articles
   enrichExistingArticlesWithSourceImages();
@@ -2928,12 +3121,27 @@ setInterval(() => {
   scrapeAllSources();
 }, REFRESH_INTERVAL_MS);
 
-// Daily Automation (Every 24 Hours): Update sitemap.xml to recalculate lastmod & Google News 48h index
-const DAILY_SITEMAP_INTERVAL_MS = 24 * 60 * 60 * 1000;
-setInterval(() => {
-  console.log('[Daily Automation] Executing daily 24h sitemap.xml synchronization & index rebuild...');
-  updateSitemapDiskFile(cachedArticles);
-}, DAILY_SITEMAP_INTERVAL_MS);
+// Daily Automation (Every 24 Hours): Schedule daily midnight UTC index rebuild and recurring 24-hour job
+function initDailySitemapScheduler() {
+  const now = new Date();
+  const nextMidnight = getNextUtcMidnight();
+  const msUntilMidnight = Math.max(1000, nextMidnight.getTime() - now.getTime());
+  
+  console.log(`[Daily Sitemap Automation] ⏱️ Next scheduled daily midnight sitemap rebuild in ${Math.round(msUntilMidnight / 60000)} minutes (${nextMidnight.toISOString()}).`);
+  
+  setTimeout(() => {
+    console.log(`[Daily Sitemap Automation] 📅 Executing scheduled Daily Midnight Sitemap & Google News Index Generation at ${new Date().toISOString()}...`);
+    updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'daily_scheduled_cron');
+    
+    // Reschedule recurring 24h cron
+    setInterval(() => {
+      console.log(`[Daily Sitemap Automation] 📅 Executing 24h Recurring Daily Sitemap & Google News Index Generation at ${new Date().toISOString()}...`);
+      updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'daily_scheduled_cron');
+    }, 24 * 60 * 60 * 1000);
+  }, msUntilMidnight);
+}
+
+initDailySitemapScheduler();
 
 // Helper for Stats
 function calculateStats(articles: NewsArticle[]) {
@@ -4501,13 +4709,20 @@ Allow: /
 User-agent: Googlebot-News
 Allow: /
 
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-Video
+Allow: /
+
+Sitemap: ${baseUrl}/sitemap_index.xml
 Sitemap: ${baseUrl}/sitemap.xml
 Sitemap: ${baseUrl}/news-sitemap.xml
-Sitemap: ${baseUrl}/api/videos/sitemap.xml
+Sitemap: ${baseUrl}/video-sitemap.xml
 `);
 });
 
-// GET /sitemap.xml - Dynamic XML Sitemap for SEO & Search Crawlers (Updated real-time as posts are added)
+// GET /sitemap.xml - Dynamic XML Sitemap for SEO & Search Crawlers (Comprehensive with Google News & Images)
 app.get('/sitemap.xml', (req, res) => {
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=3600');
@@ -4516,16 +4731,34 @@ app.get('/sitemap.xml', (req, res) => {
   res.send(sitemapXml);
 });
 
-// GET /news-sitemap.xml - Dedicated Google News XML Sitemap (Updated real-time as posts are added)
+// GET /news-sitemap.xml - Dedicated Google News XML Sitemap (Filtered strictly for last 48 hours)
 app.get('/news-sitemap.xml', (req, res) => {
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=900, s-maxage=1800');
   const baseUrl = `${req.protocol}://${req.get('host')}`;
-  const sitemapXml = generateSitemapXml(baseUrl, cachedArticles);
+  const sitemapXml = generateGoogleNewsSitemapXml(baseUrl, cachedArticles);
   res.send(sitemapXml);
 });
 
-// GET /api/sitemap/status - Endpoint to inspect sitemap indexing statistics and automated refresh status
+// GET /video-sitemap.xml & /videos-sitemap.xml - Dedicated Video XML Sitemap (Google Video search compliant)
+app.get(['/video-sitemap.xml', '/videos-sitemap.xml'], (req, res) => {
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=3600');
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  const sitemapXml = generateVideoSitemapXml(baseUrl, cachedViralVideos);
+  res.send(sitemapXml);
+});
+
+// GET /sitemap_index.xml - Master Sitemap Index bundling Main, Google News, and Video Sitemaps
+app.get('/sitemap_index.xml', (req, res) => {
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=3600');
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  const sitemapXml = generateSitemapIndexXml(baseUrl);
+  res.send(sitemapXml);
+});
+
+// GET /api/sitemap/status - Endpoint to inspect sitemap indexing statistics and automated daily refresh status
 app.get('/api/sitemap/status', (req, res) => {
   const publicSitemap = path.join(process.cwd(), 'public', 'sitemap.xml');
   let fileSizeBytes = 0;
@@ -4544,30 +4777,54 @@ app.get('/api/sitemap/status', (req, res) => {
     success: true,
     sitemapUrl: '/sitemap.xml',
     newsSitemapUrl: '/news-sitemap.xml',
+    videoSitemapUrl: '/video-sitemap.xml',
+    sitemapIndexUrl: '/sitemap_index.xml',
     totalArticlesIndexed: cachedArticles.length,
+    totalVideosIndexed: cachedViralVideos.length,
     googleNewsArticles48h: recentGoogleNewsCount,
     lastGeneratedAt: sitemapLastGeneratedAt.toISOString(),
+    nextScheduledDailyRunAt: nextScheduledDailyRunAt.toISOString(),
+    dailyAutomationActive: true,
     diskFileLastModified: fileModified,
     diskFileSizeBytes: fileSizeBytes,
-    updateFrequency: 'Real-time on every post addition/scrape + Daily 24h cron synchronization',
+    updateFrequency: 'Real-time on every feed refresh + Scheduled Daily UTC Midnight Cron Sync',
     supportedProtocols: [
       'Sitemaps.org 0.9 Core Protocol',
       'Google News XML Sitemap Protocol (xmlns:news)',
-      'Google Image Sitemap Protocol (xmlns:image)'
-    ]
+      'Google Image Sitemap Protocol (xmlns:image)',
+      'Google Video Sitemap Protocol (xmlns:video)',
+      'Sitemaps.org Sitemap Index Protocol (<sitemapindex>)'
+    ],
+    recentGenerationLogs: sitemapGenerationHistory.slice(0, 10)
   });
 });
 
 // POST /api/sitemap/regenerate - Trigger on-demand sitemap refresh
 app.post('/api/sitemap/regenerate', (req, res) => {
-  updateSitemapDiskFile(cachedArticles);
+  updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'manual_admin');
   res.json({
     success: true,
-    message: 'Sitemap successfully regenerated on disk and cache.',
+    message: 'Sitemaps (sitemap.xml, news-sitemap.xml, video-sitemap.xml, sitemap_index.xml) successfully regenerated on disk and memory cache.',
     totalArticlesIndexed: cachedArticles.length,
-    generatedAt: sitemapLastGeneratedAt.toISOString()
+    totalVideosIndexed: cachedViralVideos.length,
+    generatedAt: sitemapLastGeneratedAt.toISOString(),
+    nextScheduledDailyRunAt: nextScheduledDailyRunAt.toISOString()
   });
 });
+
+// GET /api/sitemap/daily-job - Trigger endpoint for external daily cron schedulers / webhooks
+app.get('/api/sitemap/daily-job', (req, res) => {
+  updateSitemapDiskFile(cachedArticles, cachedViralVideos, 'daily_scheduled_cron');
+  res.json({
+    success: true,
+    job: 'daily_sitemap_synchronization',
+    totalArticlesIndexed: cachedArticles.length,
+    totalVideosIndexed: cachedViralVideos.length,
+    generatedAt: sitemapLastGeneratedAt.toISOString(),
+    nextScheduledDailyRunAt: nextScheduledDailyRunAt.toISOString()
+  });
+});
+
 
 // GET /feed.xml - Dynamic RSS 2.0 Feed for search engines & news readers
 app.get('/feed.xml', (req, res) => {
@@ -4603,36 +4860,6 @@ app.get('/feed.xml', (req, res) => {
 // ============================================================================
 // --- VIRAL VIDEOS SCRAPING, PERSISTENCE & VIDEO SEO SITEMAP ENGINE ---
 // ============================================================================
-
-export type VideoPlatform = 'youtube' | 'tiktok' | 'reddit' | 'vimeo' | 'twitter' | 'web';
-export type VideoCategory = 'Viral' | 'Tech' | 'Science' | 'Entertainment' | 'Humor' | 'Gaming' | 'News' | 'Sports';
-
-export interface ViralVideo {
-  id: string;
-  title: string;
-  description: string;
-  videoUrl: string;
-  embedUrl: string;
-  thumbnailUrl: string;
-  source: string;
-  author?: string;
-  platform: VideoPlatform;
-  viewsCount: number;
-  likesCount: number;
-  duration: string; // e.g. "03:45"
-  pubDate: string; // ISO string
-  category: VideoCategory;
-  tags: string[];
-  seoKeywords: string[];
-  slug: string;
-  metaDescription: string;
-  sentiment?: 'Urgent' | 'Positive' | 'Neutral' | 'Analysis' | 'Warning';
-  isViralTrend: boolean;
-  viralScore: number; // 1 to 100
-  aiTakeaway?: string;
-  hindiTitle?: string;
-  hindiDescription?: string;
-}
 
 const VIRAL_VIDEOS_DB_FILE = path.join(process.cwd(), 'scraped_viral_videos_db.json');
 
@@ -5088,8 +5315,6 @@ const INITIAL_SEED_VIDEOS: ViralVideo[] = [
     hindiDescription: 'इंजीनियरिंग और विज्ञान का शानदार और मनोरंजक प्रयोग।'
   }
 ];
-
-let cachedViralVideos: ViralVideo[] = [];
 
 // Initialize Viral Videos Storage with Atomic Write, Seed Calibration, and Dual Persistence
 function loadStoredViralVideos(): ViralVideo[] {

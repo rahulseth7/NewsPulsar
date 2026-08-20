@@ -280,5 +280,32 @@ export interface ViralVideoResponse {
 
 export type PageView = 'home' | 'about' | 'advertise' | 'contact' | 'privacy' | 'dashboard' | 'database' | 'videos';
 
+export interface SitemapGenerationLog {
+  timestamp: string;
+  trigger: 'daily_scheduled_cron' | 'scrape_auto' | 'manual_admin' | 'server_init';
+  articlesCount: number;
+  videosCount: number;
+  googleNewsCount: number;
+}
+
+export interface SitemapStatusInfo {
+  success: boolean;
+  sitemapUrl: string;
+  newsSitemapUrl: string;
+  videoSitemapUrl: string;
+  sitemapIndexUrl: string;
+  totalArticlesIndexed: number;
+  totalVideosIndexed: number;
+  googleNewsArticles48h: number;
+  lastGeneratedAt: string;
+  nextScheduledDailyRunAt: string;
+  dailyAutomationActive: boolean;
+  diskFileLastModified: string;
+  diskFileSizeBytes: number;
+  updateFrequency: string;
+  supportedProtocols: string[];
+  recentGenerationLogs?: SitemapGenerationLog[];
+}
+
 
 

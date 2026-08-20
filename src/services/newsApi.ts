@@ -2402,5 +2402,41 @@ export async function batchTranslateArticlesToHindi(
   return {};
 }
 
+// Fetch Sitemap & Google News automated indexing diagnostics
+export async function fetchSitemapStatus(): Promise<import('../types').SitemapStatusInfo | null> {
+  try {
+    const res = await fetch('/api/sitemap/status');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        return data;
+      }
+    }
+  } catch (err) {
+    console.warn('[newsApi] Error fetching /api/sitemap/status:', err);
+  }
+  return null;
+}
+
+// Trigger on-demand sitemap refresh across disk and memory
+export async function regenerateSitemapNow(): Promise<{
+  success: boolean;
+  message: string;
+  totalArticlesIndexed: number;
+  totalVideosIndexed: number;
+  generatedAt: string;
+  nextScheduledDailyRunAt: string;
+} | null> {
+  try {
+    const res = await fetch('/api/sitemap/regenerate', { method: 'POST' });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('[newsApi] Error triggering /api/sitemap/regenerate:', err);
+  }
+  return null;
+}
+
 
 

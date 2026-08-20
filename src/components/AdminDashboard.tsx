@@ -38,10 +38,14 @@ import {
   Loader2,
   Layers,
   Bot,
-  HelpCircle
+  HelpCircle,
+  ExternalLink,
+  Copy,
+  Check,
+  Compass
 } from 'lucide-react';
-import { NewsArticle, IpAnalyticsData, NewsCategory, DatabaseStorageInfo, AutoTagSuggestion, BatchAutoTagResult } from '../types';
-import { fetchDatabaseInfo, syncDatabaseStorage, createDatabaseBackup, autoTagArticle, autoTagCustomText, batchAutoTagArticles } from '../services/newsApi';
+import { NewsArticle, IpAnalyticsData, NewsCategory, DatabaseStorageInfo, AutoTagSuggestion, BatchAutoTagResult, SitemapStatusInfo } from '../types';
+import { fetchDatabaseInfo, syncDatabaseStorage, createDatabaseBackup, autoTagArticle, autoTagCustomText, batchAutoTagArticles, fetchSitemapStatus, regenerateSitemapNow } from '../services/newsApi';
 import { TrendingTopicsVisualizer } from './TrendingTopicsVisualizer';
 import { AutoTagInspectorModal } from './AutoTagInspectorModal';
 
@@ -133,6 +137,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [loadingDb, setLoadingDb] = useState<boolean>(false);
   const [isSyncingDb, setIsSyncingDb] = useState<boolean>(false);
   const [isBackingUpDb, setIsBackingUpDb] = useState<boolean>(false);
+  
+  // Sitemap & Search Engine Indexer State
+  const [sitemapInfo, setSitemapInfo] = useState<SitemapStatusInfo | null>(null);
+  const [isRegeneratingSitemap, setIsRegeneratingSitemap] = useState<boolean>(false);
+  const [copiedUrlKey, setCopiedUrlKey] = useState<string | null>(null);
 
   // Posts State
   const [localArticles, setLocalArticles] = useState<NewsArticle[]>(articles);
@@ -222,8 +231,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const loadDatabaseDetails = async () => {
     setLoadingDb(true);
     try {
-      const data = await fetchDatabaseInfo();
+      const [data, sData] = await Promise.all([
+        fetchDatabaseInfo(),
+        fetchSitemapStatus()
+      ]);
       setDbInfo(data);
+      if (sData) setSitemapInfo(sData);
     } catch (e) {
       console.error('Failed to load DB details:', e);
     } finally {
@@ -261,6 +274,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     } finally {
       setIsBackingUpDb(false);
     }
+  };
+
+  const handleRegenerateSitemap = async () => {
+    setIsRegeneratingSitemap(true);
+    try {
+      const res = await regenerateSitemapNow();
+      if (res && res.success) {
+        showNotification(`Sitemaps successfully refreshed on disk! (${res.totalArticlesIndexed} posts, ${res.totalVideosIndexed} videos indexed)`);
+        const updated = await fetchSitemapStatus();
+        if (updated) setSitemapInfo(updated);
+      } else {
+        showNotification('Failed to refresh sitemaps.');
+      }
+    } catch (err) {
+      console.error('Error refreshing sitemaps:', err);
+      showNotification('Error refreshing sitemaps.');
+    } finally {
+      setIsRegeneratingSitemap(false);
+    }
+  };
+
+  const handleCopySitemapUrl = (urlPath: string, key: string) => {
+    const fullUrl = `${window.location.origin}${urlPath}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopiedUrlKey(key);
+      showNotification(`Copied URL: ${fullUrl}`);
+      setTimeout(() => setCopiedUrlKey(null), 2500);
+    });
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -1718,6 +1759,305 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
 
               </div>
+
+              {/* AUTOMATED DAILY SITEMAP & GOOGLE SEARCH ENGINE INDEXER */}
+              <div className="bg-[#f0eae0] p-5 sm:p-6 border-2 border-stone-900 shadow-sm space-y-5">
+                
+                {/* Header with Status Badge */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b-2 border-stone-900 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-amber-100 border-2 border-stone-900 text-amber-950">
+                      <Compass className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-base font-black uppercase text-stone-950">
+                          Automated Daily Sitemap & Google Search Indexer
+                        </h4>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-200 text-emerald-950 border border-emerald-800 text-[11px] font-sans font-bold uppercase">
+                          <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                          Daily 24h & Midnight Cron Active
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-700 font-sans mt-0.5">
+                        Generates XML sitemaps daily with Google News (xmlns:news), Image (xmlns:image), and Video (xmlns:video) metadata compliance.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Manual On-Demand Trigger Button */}
+                  <button
+                    onClick={handleRegenerateSitemap}
+                    disabled={isRegeneratingSitemap}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-amber-900 text-amber-50 hover:bg-amber-800 text-xs font-sans font-bold uppercase transition-all border border-amber-950 cursor-pointer disabled:opacity-50 shadow-sm shrink-0"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isRegeneratingSitemap ? 'animate-spin' : ''}`} />
+                    <span>{isRegeneratingSitemap ? 'Rebuilding Sitemaps...' : '⚡ Generate Daily Sitemap Now'}</span>
+                  </button>
+                </div>
+
+                {/* Sitemaps Diagnostics Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-sans">
+                  
+                  <div className="p-3.5 bg-[#faf6ed] border border-stone-800">
+                    <div className="text-[11px] font-bold text-stone-600 uppercase tracking-wider">
+                      Master Index
+                    </div>
+                    <div className="text-xl font-bold font-mono text-stone-950 mt-1 truncate">
+                      /sitemap_index.xml
+                    </div>
+                    <div className="text-[11px] text-emerald-800 font-bold mt-1">
+                      Bundles All 3 Sub-Sitemaps
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-[#faf6ed] border border-stone-800">
+                    <div className="text-[11px] font-bold text-stone-600 uppercase tracking-wider">
+                      Main XML Sitemap
+                    </div>
+                    <div className="text-2xl font-black font-serif text-stone-950 mt-1">
+                      {sitemapInfo?.totalArticlesIndexed ?? localArticles.length}
+                    </div>
+                    <div className="text-[11px] text-stone-600 mt-0.5">
+                      Articles & Pages with Images
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-[#faf6ed] border border-stone-800">
+                    <div className="text-[11px] font-bold text-stone-600 uppercase tracking-wider">
+                      Google News 48h Index
+                    </div>
+                    <div className="text-2xl font-black font-serif text-stone-950 mt-1 text-amber-900">
+                      {sitemapInfo?.googleNewsArticles48h ?? 0}
+                    </div>
+                    <div className="text-[11px] text-stone-600 mt-0.5">
+                      Recent stories (last 48 hours)
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 bg-[#faf6ed] border border-stone-800">
+                    <div className="text-[11px] font-bold text-stone-600 uppercase tracking-wider">
+                      Google Video Sitemap
+                    </div>
+                    <div className="text-2xl font-black font-serif text-stone-950 mt-1 text-blue-900">
+                      {sitemapInfo?.totalVideosIndexed ?? 0}
+                    </div>
+                    <div className="text-[11px] text-stone-600 mt-0.5">
+                      Indexed Viral & Trending Videos
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Automation Schedule & Last Run Info */}
+                <div className="p-3.5 bg-stone-100 border border-stone-800 text-xs font-sans flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-stone-900">Last Generated:</span>
+                      <span className="font-mono text-stone-800">
+                        {sitemapInfo?.lastGeneratedAt ? new Date(sitemapInfo.lastGeneratedAt).toLocaleString() : 'Just now'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-stone-900">Next Scheduled Daily Cron:</span>
+                      <span className="font-mono text-stone-800">
+                        {sitemapInfo?.nextScheduledDailyRunAt ? new Date(sitemapInfo.nextScheduledDailyRunAt).toLocaleString() : 'Daily Midnight (UTC)'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-stone-600 italic">
+                    🔄 Frequency: Real-time on every feed refresh + Automatic Daily 24h Synchronizer
+                  </div>
+                </div>
+
+                {/* Sitemaps Direct Links & Copy URLs Table */}
+                <div className="space-y-2 font-sans">
+                  <div className="text-xs font-bold uppercase tracking-wider text-stone-800">
+                    Live Search Engine Sitemaps & Feeds:
+                  </div>
+
+                  <div className="divide-y divide-stone-300 border border-stone-800 bg-[#faf6ed] overflow-hidden text-xs">
+                    
+                    {/* Master Index */}
+                    <div className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-stone-100 transition-colors">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-stone-950 text-sm">/sitemap_index.xml</span>
+                          <span className="px-1.5 py-0.2 bg-amber-200 text-amber-950 font-bold text-[10px] uppercase">Recommended for GSC</span>
+                        </div>
+                        <p className="text-[11px] text-stone-600 mt-0.5">
+                          Master Sitemap Index referencing main sitemap, Google News sitemap, and Google Video sitemap.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handleCopySitemapUrl('/sitemap_index.xml', 'index')}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-200 hover:bg-stone-300 border border-stone-700 font-bold text-[11px] text-stone-900 cursor-pointer"
+                          title="Copy Full URL"
+                        >
+                          {copiedUrlKey === 'index' ? <Check className="w-3 h-3 text-emerald-800" /> : <Copy className="w-3 h-3 text-stone-700" />}
+                          <span>{copiedUrlKey === 'index' ? 'Copied' : 'Copy URL'}</span>
+                        </button>
+                        <a
+                          href="/sitemap_index.xml"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-stone-100 border border-stone-900 font-bold text-[11px] cursor-pointer"
+                        >
+                          <span>Open XML</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Standard / Main Sitemap */}
+                    <div className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-stone-100 transition-colors">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-stone-950 text-sm">/sitemap.xml</span>
+                          <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-900 font-bold text-[10px] uppercase">All Articles & Static Pages</span>
+                        </div>
+                        <p className="text-[11px] text-stone-600 mt-0.5">
+                          Comprehensive sitemap with image metadata tags (xmlns:image) for all indexed news articles.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handleCopySitemapUrl('/sitemap.xml', 'main')}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-200 hover:bg-stone-300 border border-stone-700 font-bold text-[11px] text-stone-900 cursor-pointer"
+                          title="Copy Full URL"
+                        >
+                          {copiedUrlKey === 'main' ? <Check className="w-3 h-3 text-emerald-800" /> : <Copy className="w-3 h-3 text-stone-700" />}
+                          <span>{copiedUrlKey === 'main' ? 'Copied' : 'Copy URL'}</span>
+                        </button>
+                        <a
+                          href="/sitemap.xml"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-stone-100 border border-stone-900 font-bold text-[11px] cursor-pointer"
+                        >
+                          <span>Open XML</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Google News Sitemap */}
+                    <div className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-stone-100 transition-colors">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-stone-950 text-sm">/news-sitemap.xml</span>
+                          <span className="px-1.5 py-0.2 bg-blue-100 text-blue-900 font-bold text-[10px] uppercase">Google News Only (48h)</span>
+                        </div>
+                        <p className="text-[11px] text-stone-600 mt-0.5">
+                          Specialized Google News XML sitemap schema containing only stories published within the last 48 hours.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handleCopySitemapUrl('/news-sitemap.xml', 'news')}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-200 hover:bg-stone-300 border border-stone-700 font-bold text-[11px] text-stone-900 cursor-pointer"
+                          title="Copy Full URL"
+                        >
+                          {copiedUrlKey === 'news' ? <Check className="w-3 h-3 text-emerald-800" /> : <Copy className="w-3 h-3 text-stone-700" />}
+                          <span>{copiedUrlKey === 'news' ? 'Copied' : 'Copy URL'}</span>
+                        </button>
+                        <a
+                          href="/news-sitemap.xml"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-stone-100 border border-stone-900 font-bold text-[11px] cursor-pointer"
+                        >
+                          <span>Open XML</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Video Sitemap */}
+                    <div className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-stone-100 transition-colors">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-stone-950 text-sm">/video-sitemap.xml</span>
+                          <span className="px-1.5 py-0.2 bg-purple-100 text-purple-900 font-bold text-[10px] uppercase">Google Video Search</span>
+                        </div>
+                        <p className="text-[11px] text-stone-600 mt-0.5">
+                          Video XML sitemap with player embed links, publication dates, and tags for Google Video indexation.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handleCopySitemapUrl('/video-sitemap.xml', 'video')}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-200 hover:bg-stone-300 border border-stone-700 font-bold text-[11px] text-stone-900 cursor-pointer"
+                          title="Copy Full URL"
+                        >
+                          {copiedUrlKey === 'video' ? <Check className="w-3 h-3 text-emerald-800" /> : <Copy className="w-3 h-3 text-stone-700" />}
+                          <span>{copiedUrlKey === 'video' ? 'Copied' : 'Copy URL'}</span>
+                        </button>
+                        <a
+                          href="/video-sitemap.xml"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-stone-100 border border-stone-900 font-bold text-[11px] cursor-pointer"
+                        >
+                          <span>Open XML</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Robots.txt */}
+                    <div className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-stone-100 transition-colors">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-stone-950 text-sm">/robots.txt</span>
+                          <span className="px-1.5 py-0.2 bg-stone-200 text-stone-800 font-bold text-[10px] uppercase">Crawler Directives</span>
+                        </div>
+                        <p className="text-[11px] text-stone-600 mt-0.5">
+                          Directs Googlebot, Googlebot-News, Googlebot-Video, and Mediapartners-Google to all sitemaps automatically.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => handleCopySitemapUrl('/robots.txt', 'robots')}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-200 hover:bg-stone-300 border border-stone-700 font-bold text-[11px] text-stone-900 cursor-pointer"
+                          title="Copy Full URL"
+                        >
+                          {copiedUrlKey === 'robots' ? <Check className="w-3 h-3 text-emerald-800" /> : <Copy className="w-3 h-3 text-stone-700" />}
+                          <span>{copiedUrlKey === 'robots' ? 'Copied' : 'Copy URL'}</span>
+                        </button>
+                        <a
+                          href="/robots.txt"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-900 hover:bg-stone-800 text-stone-100 border border-stone-900 font-bold text-[11px] cursor-pointer"
+                        >
+                          <span>Open TXT</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Google Search Console & Verification Tip Box */}
+                <div className="p-3.5 bg-amber-50 border border-amber-800/60 font-sans text-xs space-y-1.5">
+                  <div className="flex items-center gap-2 font-bold text-amber-950">
+                    <ShieldCheck className="w-4 h-4 text-emerald-800" />
+                    <span>Google Search Console Verification & Daily Indexing Guide:</span>
+                  </div>
+                  <p className="text-stone-700 leading-relaxed">
+                    Your site includes the verified Google HTML verification tag (<code className="bg-amber-100 px-1 py-0.5 border border-amber-300 text-amber-950 font-mono text-[11px]">JSiPykw-JX8NW9HaALbegeF3EqRI3RQNXhxmWq8tR_0</code>) and verification file (<code className="bg-amber-100 px-1 py-0.5 border border-amber-300 text-amber-950 font-mono text-[11px]">googled43dd531c722dedd.html</code>).
+                  </p>
+                  <p className="text-stone-700 leading-relaxed">
+                    To maximize fast indexing: In <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="font-bold underline text-amber-950 hover:text-stone-900">Google Search Console</a>, navigate to <strong>Sitemaps</strong> and submit <strong className="font-mono text-stone-900">sitemap_index.xml</strong> or <strong className="font-mono text-stone-900">sitemap.xml</strong>. Google will automatically poll the daily updated index.
+                  </p>
+                </div>
+
+              </div>
+
 
             </div>
           )}
