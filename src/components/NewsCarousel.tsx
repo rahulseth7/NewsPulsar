@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { NewsArticle, Language } from '../types';
 import { getArticleImageUrl } from '../utils/imageUtils';
+import { getCleanArticleLink } from '../utils/linkUtils';
 import { CATEGORY_HINDI_MAP } from '../utils/hindiTranslator';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, ExternalLink } from 'lucide-react';
 
 interface NewsCarouselProps {
   articles: NewsArticle[];
@@ -70,11 +71,14 @@ export const NewsCarousel: React.FC<NewsCarouselProps> = ({ articles, onOpenArti
             const displayCategory = isHindi
               ? (CATEGORY_HINDI_MAP[article.category] || article.category)
               : article.category;
+            const cleanLink = getCleanArticleLink(article);
 
             return (
-              <div
+              <a
                 key={article.id}
-                onClick={() => onOpenArticle(article)}
+                href={cleanLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-3 bg-white p-2.5 border-2 border-black hover:bg-[#ffe600]/30 hover:border-[#ff2a85] neo-shadow-sm transition-all cursor-pointer group min-w-0"
               >
                 {/* Thumbnail */}
@@ -101,9 +105,10 @@ export const NewsCarousel: React.FC<NewsCarouselProps> = ({ articles, onOpenArti
                     <span className="text-[9px] font-mono text-zinc-600 truncate">
                       {article.source}
                     </span>
+                    <ExternalLink className="w-2.5 h-2.5 text-zinc-400 group-hover:text-black ml-auto shrink-0" />
                   </div>
                 </div>
-              </div>
+              </a>
             );
           })}
         </div>

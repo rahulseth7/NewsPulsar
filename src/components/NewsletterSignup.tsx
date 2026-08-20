@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, CheckCircle2, Sparkles, Send, Bell, ChevronDown, ChevronUp, Clock, ShieldCheck, Newspaper, RefreshCw, X } from 'lucide-react';
+import { Mail, CheckCircle2, Sparkles, Send, Bell, ChevronDown, ChevronUp, Clock, ShieldCheck, Newspaper, RefreshCw, X, ExternalLink } from 'lucide-react';
 import { NewsArticle } from '../types';
+import { getCleanArticleLink } from '../utils/linkUtils';
 
 export interface NewsletterSignupProps {
   variant?: 'footer' | 'sidebar' | 'card' | 'inline';
@@ -276,21 +277,22 @@ export const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
               <div className="py-2 text-center text-[10px] text-zinc-500 font-mono">Loading wire top 5...</div>
             ) : (
               <ol className="list-decimal list-inside space-y-1 text-[11px] font-medium text-zinc-800">
-                {previewArticles.slice(0, 5).map((art, idx) => (
-                  <li key={art.id || idx} className="truncate">
-                    {onOpenArticle ? (
-                      <button
-                        onClick={() => onOpenArticle(art)}
+                {previewArticles.slice(0, 5).map((art, idx) => {
+                  const cleanLink = getCleanArticleLink(art);
+                  return (
+                    <li key={art.id || idx} className="truncate">
+                      <a
+                        href={cleanLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="hover:underline text-left text-zinc-900 font-bold"
                         title={art.title}
                       >
                         {art.title}
-                      </button>
-                    ) : (
-                      <span title={art.title}>{art.title}</span>
-                    )}
-                  </li>
-                ))}
+                      </a>
+                    </li>
+                  );
+                })}
               </ol>
             )}
           </div>
@@ -513,39 +515,44 @@ export const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
               </div>
             ) : previewArticles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                {previewArticles.slice(0, 5).map((article, idx) => (
-                  <div
-                    key={article.id || idx}
-                    className="bg-[#faf7ee] border-2 border-black p-3 flex flex-col justify-between space-y-2 hover:bg-[#fff9d2] transition-colors"
-                  >
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-[10px] font-mono">
-                        <span className="bg-black text-[#ccff00] px-1 font-black">#0{idx + 1}</span>
-                        <span className="text-zinc-600 font-bold uppercase">{article.source}</span>
-                      </div>
-                      <h5
-                        className="text-xs font-black text-black leading-snug line-clamp-3 cursor-pointer hover:underline"
-                        onClick={() => onOpenArticle?.(article)}
-                      >
-                        {article.title}
-                      </h5>
-                    </div>
-
-                    <div className="pt-2 border-t border-zinc-300 text-[10px] font-mono flex items-center justify-between text-zinc-600">
-                      <span className="bg-[#ffe600] px-1 border border-black text-black font-bold">
-                        {article.category}
-                      </span>
-                      {onOpenArticle && (
-                        <button
-                          onClick={() => onOpenArticle(article)}
-                          className="text-[#ff2a85] font-black hover:underline cursor-pointer"
+                {previewArticles.slice(0, 5).map((article, idx) => {
+                  const cleanLink = getCleanArticleLink(article);
+                  return (
+                    <div
+                      key={article.id || idx}
+                      className="bg-[#faf7ee] border-2 border-black p-3 flex flex-col justify-between space-y-2 hover:bg-[#fff9d2] transition-colors"
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-[10px] font-mono">
+                          <span className="bg-black text-[#ccff00] px-1 font-black">#0{idx + 1}</span>
+                          <span className="text-zinc-600 font-bold uppercase">{article.source}</span>
+                        </div>
+                        <a
+                          href={cleanLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-black text-black leading-snug line-clamp-3 hover:underline block"
                         >
-                          Read ➔
-                        </button>
-                      )}
+                          {article.title}
+                        </a>
+                      </div>
+
+                      <div className="pt-2 border-t border-zinc-300 text-[10px] font-mono flex items-center justify-between text-zinc-600">
+                        <span className="bg-[#ffe600] px-1 border border-black text-black font-bold">
+                          {article.category}
+                        </span>
+                        <a
+                          href={cleanLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#ff2a85] font-black hover:underline inline-flex items-center gap-0.5"
+                        >
+                          <span>Read ➔</span>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-xs text-zinc-600 text-center py-4">

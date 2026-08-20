@@ -38,8 +38,10 @@ export const Ticker: React.FC<TickerProps> = ({ breakingArticles, onSelectArticl
             <span>{isHindi ? 'ताज़ा ख़बर' : 'BREAKING'}</span>
           </span>
 
-          <div
-            onClick={() => onSelectArticle(activeArticle)}
+          <a
+            href={getCleanArticleLink(activeArticle)}
+            target="_blank"
+            rel="noopener noreferrer"
             className="group flex items-center gap-2 cursor-pointer truncate flex-1 transition-colors min-w-0"
           >
             <span className="font-bold text-zinc-100 group-hover:text-[#ccff00] truncate text-xs sm:text-[13px]">
@@ -48,7 +50,7 @@ export const Ticker: React.FC<TickerProps> = ({ breakingArticles, onSelectArticl
             <span className="text-zinc-400 text-[11px] font-mono hidden md:inline">
               ({activeArticle.source})
             </span>
-          </div>
+          </a>
 
           <a
             href={getCleanArticleLink(activeArticle)}

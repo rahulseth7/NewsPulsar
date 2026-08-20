@@ -26,7 +26,6 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DatabasePage } from './pages/DatabasePage';
 import { ViralVideosPage } from './pages/ViralVideosPage';
-import { DatabaseTelemetryBar } from './components/DatabaseTelemetryBar';
 import { RefreshCw, LayoutGrid, List, SlidersHorizontal, BookmarkCheck, AlertCircle, Sparkles, Command, Keyboard } from 'lucide-react';
 
 export default function App() {
@@ -727,15 +726,6 @@ export default function App() {
 
             {/* Center Main Content Area */}
             <main className="flex-1 min-w-0 max-w-7xl w-full mx-auto space-y-6">
-              
-              {/* Real-time Zero-Loss Database Telemetry Banner */}
-              <DatabaseTelemetryBar
-                totalArticles={data?.articles?.length || 0}
-                lastScrapedAt={data?.lastRefreshedAt}
-                onOpenDatabase={() => handleNavigatePage('database')}
-                onTriggerScrape={handleRefresh}
-                isScraping={isRefreshing}
-              />
 
               {/* Featured News Hero Carousel */}
               {data?.articles && data.articles.length > 0 && (selectedCategory === 'All' || !selectedCategory) ? (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Newspaper, ShieldCheck, DollarSign, Rss, FileCode, Lock, Mail, Database, Download, BarChart3, ExternalLink } from 'lucide-react';
+import { Newspaper, ShieldCheck, DollarSign, Rss, FileCode, Lock, Mail } from 'lucide-react';
 import { PolicyTab } from './PolicyModal';
 import { PageView, NewsArticle } from '../types';
 import { NewsletterSignup } from './NewsletterSignup';
@@ -39,7 +39,7 @@ export const Footer: React.FC<FooterProps> = ({
 
       {/* Upper Footer Columns */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           
           {/* Col 1: About */}
           <div className="bg-white border-2 border-black p-4 neo-shadow space-y-3">
@@ -190,98 +190,6 @@ export const Footer: React.FC<FooterProps> = ({
                 </a>
               </li>
             </ul>
-          </div>
-
-          {/* Col 4: Data Exports */}
-          <div className="bg-white border-2 border-black p-4 neo-shadow space-y-3">
-            <div className="flex items-center gap-2 pb-2 border-b-2 border-black">
-              <Database className="w-4 h-4 text-black shrink-0" />
-              <h4 className="font-neo font-black text-xs uppercase tracking-wider text-black">
-                DATA ARCHIVE
-              </h4>
-            </div>
-
-            <p className="text-xs text-zinc-700 leading-relaxed font-bold">
-              Export real-time wire data for offline research and indexing:
-            </p>
-
-            <div className="flex flex-col gap-1.5 text-xs font-neo font-black">
-              {onNavigatePage && (
-                <button
-                  onClick={() => handleNav('videos')}
-                  className="flex items-center justify-between px-3 py-1.5 bg-[#ff2a85] hover:bg-[#e01e74] text-white border-2 border-black neo-shadow-sm transition-all cursor-pointer"
-                  title="Open Viral Videos & Internet Clips Hub"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <span>🎬 VIRAL VIDEOS HUB</span>
-                  </span>
-                  <span className="text-[10px] font-mono bg-black text-[#ccff00] px-1 border border-black font-bold">
-                    TRENDING
-                  </span>
-                </button>
-              )}
-              {onNavigatePage && (
-                <button
-                  onClick={() => handleNav('database')}
-                  className="flex items-center justify-between px-3 py-1.5 bg-[#ccff00] hover:bg-[#b8e600] text-black border-2 border-black neo-shadow-sm transition-all cursor-pointer"
-                  title="Open Scraped News Database Explorer"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Database className="w-3.5 h-3.5 text-black" />
-                    <span>SCRAPED DATABASE</span>
-                  </span>
-                  <span className="text-[10px] font-mono bg-black text-[#ccff00] px-1 border border-black font-bold">
-                    {totalArticles}
-                  </span>
-                </button>
-              )}
-              {onOpenDashboard && (
-                <button
-                  onClick={onOpenDashboard}
-                  className="flex items-center justify-between px-3 py-1.5 bg-[#ff2a85] hover:bg-[#e02070] text-white border-2 border-black neo-shadow-sm transition-all cursor-pointer"
-                  title="Open Storage & Visitor Analytics Dashboard"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <BarChart3 className="w-3.5 h-3.5 text-white" />
-                    <span>STORAGE & ANALYTICS</span>
-                  </span>
-                  <span className="text-[10px] font-mono bg-white text-black px-1 border border-black font-bold">ADMIN</span>
-                </button>
-              )}
-              <a
-                href="/api/news/export/json"
-                download
-                className="flex items-center justify-between px-3 py-1.5 bg-[#00f0ff] hover:bg-[#00d0e0] text-black border-2 border-black neo-shadow-sm transition-all"
-              >
-                <span className="flex items-center gap-1.5">
-                  <Download className="w-3.5 h-3.5 text-black" />
-                  <span>Download JSON</span>
-                </span>
-                <span className="text-[10px] font-mono bg-white px-1 border border-black">.json</span>
-              </a>
-              <a
-                href="/api/news/export/excel"
-                download
-                className="flex items-center justify-between px-3 py-1.5 bg-[#ccff00] hover:bg-[#b8e600] text-black border-2 border-black neo-shadow-sm transition-all"
-              >
-                <span className="flex items-center gap-1.5">
-                  <Download className="w-3.5 h-3.5 text-black" />
-                  <span>Download Excel</span>
-                </span>
-                <span className="text-[10px] font-mono bg-white px-1 border border-black">.xlsx</span>
-              </a>
-              <a
-                href="/api/news/export/csv"
-                download
-                className="flex items-center justify-between px-3 py-1.5 bg-[#ffe600] hover:bg-[#edd400] text-black border-2 border-black neo-shadow-sm transition-all"
-              >
-                <span className="flex items-center gap-1.5">
-                  <Download className="w-3.5 h-3.5 text-black" />
-                  <span>Download CSV</span>
-                </span>
-                <span className="text-[10px] font-mono bg-white px-1 border border-black">.csv</span>
-              </a>
-            </div>
           </div>
 
         </div>
