@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/index" },
+    { "source": "/news-sitemap.xml", "destination": "/api/index" },
+    { "source": "/video-sitemap.xml", "destination": "/api/index" },
+    { "source": "/videos-sitemap.xml", "destination": "/api/index" },
+    { "source": "/sitemap_index.xml", "destination": "/api/index" },
+    { "source": "/feed.xml", "destination": "/api/index" },
+    { "source": "/robots.txt", "destination": "/api/index" },
+    { "source": "/ads.txt", "destination": "/api/index" },
+    { "source": "/googled43dd531c722dedd.html", "destination": "/api/index" },
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/((?!assets/|favicon|.*\\..*).*)", "destination": "/index.html" }
+  ]
+}

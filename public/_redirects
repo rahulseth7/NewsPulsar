@@ -1,1 +1,11 @@
-/*    /index.html   200
+/sitemap.xml                /sitemap.xml                200
+/news-sitemap.xml           /news-sitemap.xml           200
+/video-sitemap.xml          /video-sitemap.xml          200
+/videos-sitemap.xml         /video-sitemap.xml          200
+/sitemap_index.xml          /sitemap_index.xml          200
+/robots.txt                 /robots.txt                 200
+/feed.xml                   /feed.xml                   200
+/ads.txt                    /ads.txt                    200
+/googled43dd531c722dedd.html /googled43dd531c722dedd.html 200
+/api/*                      /.netlify/functions/api/:splat 200
+/*                          /index.html                 200

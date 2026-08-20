@@ -1727,18 +1727,71 @@ function generateSitemapIndexXml(baseUrl: string): string {
 </sitemapindex>`.trim();
 }
 
-// Write the generated sitemaps to physical disk files in public/ and dist/
+// Write the generated sitemaps and SEO crawler assets to physical disk files in public/ and dist/
 function updateSitemapDiskFile(
   articles: NewsArticle[], 
   videos: ViralVideo[] = cachedViralVideos, 
   trigger: 'daily_scheduled_cron' | 'scrape_auto' | 'manual_admin' | 'server_init' = 'scrape_auto'
 ) {
   try {
-    const defaultBaseUrl = 'https://newspulse.gazette.com';
+    const defaultBaseUrl = process.env.SITE_URL || 'https://newspulsar.site';
     const mainSitemapContent = generateSitemapXml(defaultBaseUrl, articles);
     const newsSitemapContent = generateGoogleNewsSitemapXml(defaultBaseUrl, articles);
     const videoSitemapContent = generateVideoSitemapXml(defaultBaseUrl, videos);
     const sitemapIndexContent = generateSitemapIndexXml(defaultBaseUrl);
+    const robotsTxtContent = `User-agent: *
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Google-Display-Ads-Bot
+Allow: /
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-Video
+Allow: /
+
+Sitemap: ${defaultBaseUrl}/sitemap_index.xml
+Sitemap: ${defaultBaseUrl}/sitemap.xml
+Sitemap: ${defaultBaseUrl}/news-sitemap.xml
+Sitemap: ${defaultBaseUrl}/video-sitemap.xml
+`;
+    
+    // RSS 2.0 Feed
+    const rssItemsXml = articles.slice(0, 50).map(art => `
+    <item>
+      <title><![CDATA[${art.title}]]></title>
+      <link>${art.link}</link>
+      <guid isPermaLink="false">${art.id}</guid>
+      <pubDate>${new Date(art.pubDate).toUTCString()}</pubDate>
+      <description><![CDATA[${art.aiSummary?.whyItMatters || art.description}]]></description>
+      <category>${art.category}</category>
+    </item>`).join('');
+
+    const rssFeedContent = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>NewsPulsar - Global News &amp; AI Analysis</title>
+    <link>${defaultBaseUrl}</link>
+    <description>Live automated news aggregator, Google News feed and Gemini AI summarizer</description>
+    <language>en-us</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <atom:link href="${defaultBaseUrl}/feed.xml" rel="self" type="application/rss+xml" />
+    ${rssItemsXml}
+  </channel>
+</rss>`;
+
+    const adsTxtContent = 'google.com, pub-6411773855584982, DIRECT, f08c47fec0942fa0\n';
+    const googleVerifyContent = 'google-site-verification: googled43dd531c722dedd.html\n';
     
     const publicPath = path.join(process.cwd(), 'public');
     if (!fs.existsSync(publicPath)) {
@@ -1750,6 +1803,10 @@ function updateSitemapDiskFile(
     fs.writeFileSync(path.join(publicPath, 'news-sitemap.xml'), newsSitemapContent, 'utf-8');
     fs.writeFileSync(path.join(publicPath, 'video-sitemap.xml'), videoSitemapContent, 'utf-8');
     fs.writeFileSync(path.join(publicPath, 'sitemap_index.xml'), sitemapIndexContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'robots.txt'), robotsTxtContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'feed.xml'), rssFeedContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'ads.txt'), adsTxtContent, 'utf-8');
+    fs.writeFileSync(path.join(publicPath, 'googled43dd531c722dedd.html'), googleVerifyContent, 'utf-8');
 
     // 2. Also sync to dist/ directory if present
     const distPath = path.join(process.cwd(), 'dist');
@@ -1758,6 +1815,10 @@ function updateSitemapDiskFile(
       fs.writeFileSync(path.join(distPath, 'news-sitemap.xml'), newsSitemapContent, 'utf-8');
       fs.writeFileSync(path.join(distPath, 'video-sitemap.xml'), videoSitemapContent, 'utf-8');
       fs.writeFileSync(path.join(distPath, 'sitemap_index.xml'), sitemapIndexContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'robots.txt'), robotsTxtContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'feed.xml'), rssFeedContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'ads.txt'), adsTxtContent, 'utf-8');
+      fs.writeFileSync(path.join(distPath, 'googled43dd531c722dedd.html'), googleVerifyContent, 'utf-8');
     }
 
     sitemapLastGeneratedAt = new Date();
@@ -1779,7 +1840,7 @@ function updateSitemapDiskFile(
       sitemapGenerationHistory.pop();
     }
 
-    console.log(`[Sitemap Automation] 🗺️ All sitemaps (sitemap.xml, news-sitemap.xml, video-sitemap.xml, sitemap_index.xml) refreshed on disk [Trigger: ${trigger}] (${articles.length} news articles, ${videos.length} videos, ${googleNewsCount} in Google News 48h index). Next scheduled run: ${nextScheduledDailyRunAt.toISOString()}`);
+    console.log(`[Sitemap Automation] 🗺️ All sitemaps & crawler assets (sitemap.xml, news-sitemap.xml, video-sitemap.xml, sitemap_index.xml, robots.txt, feed.xml) refreshed on disk [Trigger: ${trigger}] (${articles.length} news articles, ${videos.length} videos, ${googleNewsCount} in Google News 48h index). Next scheduled run: ${nextScheduledDailyRunAt.toISOString()}`);
   } catch (err: any) {
     console.error(`[Sitemap Automation] Error writing sitemap disk files:`, err.message || err);
   }
@@ -6218,7 +6279,7 @@ async function startServer() {
     });
   }
 
-  if (!process.env.NETLIFY && !process.env.LAMBDA_TASK_ROOT) {
+  if (!process.env.NETLIFY && !process.env.LAMBDA_TASK_ROOT && !process.env.VERCEL) {
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`[News Pulse Server] Server running on http://0.0.0.0:${PORT}`);
     });

@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Google-Display-Ads-Bot
+Allow: /
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-Video
+Allow: /
+
+Sitemap: https://newspulsar.site/sitemap_index.xml
+Sitemap: https://newspulsar.site/sitemap.xml
+Sitemap: https://newspulsar.site/news-sitemap.xml
+Sitemap: https://newspulsar.site/video-sitemap.xml
