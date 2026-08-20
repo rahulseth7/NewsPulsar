@@ -136,7 +136,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
             </div>
             <div className="text-xs font-mono font-black uppercase text-zinc-600">Direct Email Wire</div>
             <div className="text-sm font-mono font-black text-black break-all">
-              fciuttarakhand@gmail.com
+              rahul.seth7@gmail.com
             </div>
             <button
               onClick={handleCopyEmail}

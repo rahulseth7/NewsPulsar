@@ -278,7 +278,7 @@ export interface ViralVideoResponse {
   totalPages?: number;
 }
 
-export type PageView = 'home' | 'about' | 'advertise' | 'contact' | 'privacy' | 'dashboard' | 'database' | 'videos';
+export type PageView = 'home' | 'about' | 'advertise' | 'contact' | 'privacy' | 'dashboard' | 'database' | 'videos' | 'article';
 
 export interface SitemapGenerationLog {
   timestamp: string;

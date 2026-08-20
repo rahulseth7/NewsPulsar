@@ -434,6 +434,21 @@ export function resolveCleanArticleLink(
 }
 
 /**
+ * Internal URL helper to open the rephrased article on NewsPulse in a dedicated window/tab
+ * with full rephrased text and original source attribution.
+ */
+export function getArticleReaderUrl(article: { id?: string; slug?: string; title?: string }): string {
+  if (!article) return '/';
+  if (article.id) {
+    return `/article?id=${encodeURIComponent(article.id)}`;
+  }
+  if (article.slug) {
+    return `/article?id=${encodeURIComponent(article.slug)}`;
+  }
+  return '/';
+}
+
+/**
  * Runtime link helper for UI components (ArticleCard, ArticleModal, NewsCarousel)
  */
 export function getCleanArticleLink(article: {
